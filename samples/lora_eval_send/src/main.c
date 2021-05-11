@@ -151,7 +151,7 @@ void main(void)
 			return;
 		}
 
-		LOG_INF("Data sent!");
+		LOG_INF("Data senttt!");
 		lses_notify();
 		k_sleep(K_MSEC(2000));
 	}
