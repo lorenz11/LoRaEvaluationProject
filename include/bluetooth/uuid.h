@@ -322,6 +322,7 @@ struct bt_uuid_128 {
 	BT_UUID_DECLARE_16(BT_UUID_HRS_VAL)
 
 
+
 /** @def BT_UUID_LSES_VAL
  *  @brief Lora Send Eval Service UUID value
  */
@@ -331,6 +332,17 @@ struct bt_uuid_128 {
  */
 #define BT_UUID_LSES \
 	BT_UUID_DECLARE_16(BT_UUID_LSES_VAL)
+
+/** @def BT_UUID_LRES_VAL
+ *  @brief Lora Receive Eval Service UUID value
+ */
+#define BT_UUID_LRES_VAL 0x1811
+/** @def BT_UUID_LRES
+ *  @brief Lora Receive Eval Service
+ */
+#define BT_UUID_LRES \
+	BT_UUID_DECLARE_16(BT_UUID_LRES_VAL)
+
 
 
 /** @def BT_UUID_BAS_VAL
@@ -805,8 +817,10 @@ struct bt_uuid_128 {
 
 
 
+
+
 /** @def BT_UUID_LSES_STAT_VAL
- *  @brief HRS Characteristic Status Interval UUID value
+ *  @brief LSES Characteristic Status Interval UUID value
  */
 #define BT_UUID_LSES_STAT_VAL 0x2a3a
 /** @def BT_UUID_LSES_STAT
@@ -824,6 +838,29 @@ struct bt_uuid_128 {
  */
 #define BT_UUID_LSES_CHANGE_CONFIG \
 	BT_UUID_DECLARE_16(BT_UUID_LSES_CHANGE_CONFIG_VAL)
+
+
+/** @def BT_UUID_LRES_STAT_VAL
+ *  @brief LSES Characteristic Status Interval UUID value
+ */
+#define BT_UUID_LRES_STAT_VAL 0x2a3d
+/** @def BT_UUID_LRES_STAT
+ *  @brief LRES Characteristic Status Interval
+ */
+#define BT_UUID_LRES_STAT \
+	BT_UUID_DECLARE_16(BT_UUID_LRES_STAT_VAL)
+
+/** @def BT_UUID_LRES_CHANGE_CONFIG_VAL
+ *  @brief LRES Change Config UUID value
+ */
+#define BT_UUID_LRES_CHANGE_CONFIG_VAL 0x2a3e
+/** @def BT_UUID_LRES_CHANGE_CONFIG
+ *  @brief LRES change config
+ */
+#define BT_UUID_LRES_CHANGE_CONFIG \
+	BT_UUID_DECLARE_16(BT_UUID_LRES_CHANGE_CONFIG_VAL)
+
+
 
 
 

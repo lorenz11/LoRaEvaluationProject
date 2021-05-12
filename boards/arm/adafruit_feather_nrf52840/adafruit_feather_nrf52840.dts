@@ -89,7 +89,7 @@
 	sck-pin = <14>;
 	mosi-pin = <13>;
 	miso-pin = <15>;
-	cs-gpios = <&gpio1 9 GPIO_ACTIVE_LOW>;					// D13		-> CS
+	cs-gpios = <&gpio1 9 GPIO_ACTIVE_LOW>;								// D13		-> CS
 
 	lora: sx1276@0 {
 		compatible = "semtech,sx1276";
@@ -97,10 +97,10 @@
 		label = "sx1276";
 		reset-gpios = <&gpio1 8 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;		// D5		-> E -> RST
 		dio-gpios = <&gpio0 8 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>,		// D12		-> ()-> IRQ
-			<&gpio0 6 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>,		// D11		-> A -> DIO1
-			<&gpio0 27 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>,		// D10		-> B -> DIO2
-			<&gpio0 26 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>,		// D9		-> C -> DIO3
-			<&gpio0 7 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>;		// D6		-> D -> DIO4
+			<&gpio0 6 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>,				// D11		-> A -> DIO1
+			<&gpio0 27 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>,			// D10		-> B -> DIO2
+			<&gpio0 26 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>,			// D9		-> C -> DIO3
+			<&gpio0 7 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>;				// D6		-> D -> DIO4
 		spi-max-frequency = <1000000>;
 		power-amplifier-output = "pa-boost";
 	};

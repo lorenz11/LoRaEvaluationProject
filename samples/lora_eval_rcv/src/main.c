@@ -44,9 +44,7 @@ LOG_MODULE_REGISTER(lora_receive);
 static const struct bt_data ad[] = {
 	BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
 	BT_DATA_BYTES(BT_DATA_UUID16_ALL,
-		      BT_UUID_16_ENCODE(BT_UUID_HRS_VAL),
-		      BT_UUID_16_ENCODE(BT_UUID_BAS_VAL),
-		      BT_UUID_16_ENCODE(BT_UUID_DIS_VAL))
+		      BT_UUID_16_ENCODE(BT_UUID_LRES_VAL))
 };
 
 static void connected(struct bt_conn *conn, uint8_t err)
@@ -96,7 +94,7 @@ static struct bt_conn_auth_cb auth_cb_display = {
 	.cancel = auth_cancel,
 };
 
-static void hrs_notify(void)
+static void lres_notify(void)
 {
 	static uint8_t rec = 1U;
 	bt_hrs_notify(rec);
@@ -126,8 +124,6 @@ void main(void)
 	struct lora_modem_config config;
 	int ret, len;
 	uint8_t data[MAX_DATA_LEN] = {0};
-	
-	
 	
 	int16_t rssi;
 	int8_t snr;
@@ -161,7 +157,10 @@ void main(void)
 			LOG_ERR("LoRa receive failed");
 			return;
 		}
-		hrs_notify();
+		int16_t ndata[MAX_DATA_LEN] = {0};
+		ndata[0] = rssi;
+		ndata[1] = snr;
+		lres_notify();
 		printk("round %d\n", i);
 		i += 1;
 		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
