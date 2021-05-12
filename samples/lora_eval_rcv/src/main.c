@@ -93,7 +93,7 @@ static struct bt_conn_auth_cb auth_cb_display = {
 	.cancel = auth_cancel,
 };
 
-static void lres_notify(int16_t data)
+static void lres_notify(const void *data)
 {
 	//static uint8_t rec = 3U;
 	bt_lres_notify(data);
@@ -143,7 +143,7 @@ void main(void)
 
 	ret = lora_config(lora_dev, &config);
 	if (ret < 0) {
-		LOG_ERR("LoRa config failed");
+		LOG_ERR("Lora config failed");
 		return;
 	}
 
@@ -156,9 +156,11 @@ void main(void)
 			LOG_ERR("LoRa receive failed");
 			return;
 		}
-		int16_t ndata[MAX_DATA_LEN] = {0};
+		uint8_t ndata[2] = {0};
+		rssi = (uint8_t) -rssi; // to fit into an unsigned int
+		rssi = (uint8_t) 254;
 		ndata[0] = rssi;
-		ndata[1] = (int16_t) snr;
+		ndata[1] = snr;
 		lres_notify(ndata);
 		printk("round %d\n", i);
 		i += 1;
