@@ -93,10 +93,10 @@ static struct bt_conn_auth_cb auth_cb_display = {
 	.cancel = auth_cancel,
 };
 
-static void lres_notify(void)
+static void lres_notify(int16_t data)
 {
-	static uint8_t rec = 3U;
-	bt_lres_notify(rec);
+	//static uint8_t rec = 3U;
+	bt_lres_notify(data);
 }
 
 
@@ -158,8 +158,8 @@ void main(void)
 		}
 		int16_t ndata[MAX_DATA_LEN] = {0};
 		ndata[0] = rssi;
-		ndata[1] = snr;
-		lres_notify();
+		ndata[1] = (int16_t) snr;
+		lres_notify(ndata);
 		printk("round %d\n", i);
 		i += 1;
 		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",

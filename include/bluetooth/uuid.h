@@ -841,7 +841,7 @@ struct bt_uuid_128 {
 
 
 /** @def BT_UUID_LRES_STAT_VAL
- *  @brief LSES Characteristic Status Interval UUID value
+ *  @brief LRES Characteristic Status Interval UUID value
  */
 #define BT_UUID_LRES_STAT_VAL 0x2a3d
 /** @def BT_UUID_LRES_STAT
