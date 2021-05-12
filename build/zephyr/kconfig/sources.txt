@@ -1132,6 +1132,7 @@
 /home/lorenz/zephyrproject/zephyr/subsys/bluetooth/services/Kconfig.bas
 /home/lorenz/zephyrproject/zephyr/subsys/bluetooth/services/Kconfig.dis
 /home/lorenz/zephyrproject/zephyr/subsys/bluetooth/services/Kconfig.hrs
+/home/lorenz/zephyrproject/zephyr/subsys/bluetooth/services/Kconfig.lres
 /home/lorenz/zephyrproject/zephyr/subsys/bluetooth/services/Kconfig.lses
 /home/lorenz/zephyrproject/zephyr/subsys/bluetooth/services/Kconfig.tps
 /home/lorenz/zephyrproject/zephyr/subsys/bluetooth/services/ots/Kconfig

@@ -22,8 +22,7 @@
 #include <bluetooth/conn.h>
 #include <bluetooth/uuid.h>
 #include <bluetooth/gatt.h>
-#include <bluetooth/services/bas.h>
-#include <bluetooth/services/hrs.h>
+#include <bluetooth/services/lres.h>
 
 
 #define DEFAULT_RADIO_NODE DT_ALIAS(lora0)
@@ -96,8 +95,8 @@ static struct bt_conn_auth_cb auth_cb_display = {
 
 static void lres_notify(void)
 {
-	static uint8_t rec = 1U;
-	bt_hrs_notify(rec);
+	static uint8_t rec = 3U;
+	bt_lres_notify(rec);
 }
 
 
