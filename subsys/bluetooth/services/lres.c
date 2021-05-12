@@ -100,7 +100,7 @@ static int lres_init(const struct device *dev)
 int bt_lres_notify(uint16_t *data)
 {
 	int rc;
-	static uint16_t d[2] = data;
+	static uint16_t d[2] = dataa;
 
 	//d[0] = 0x06; /* uint8, sensor contact */
 	//d[1] = data;
