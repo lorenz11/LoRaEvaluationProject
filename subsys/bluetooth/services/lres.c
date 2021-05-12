@@ -97,13 +97,13 @@ static int lres_init(const struct device *dev)
 	return 0;
 }
 
-int bt_lres_notify(uint16_t data)
+int bt_lres_notify(uint16_t *data)
 {
 	int rc;
-	static uint8_t d[2];
+	static uint16_t d[2] = data;
 
-	d[0] = 0x06; /* uint8, sensor contact */
-	d[1] = data;
+	//d[0] = 0x06; /* uint8, sensor contact */
+	//d[1] = data;
 
 	rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &d, sizeof(d));
 
