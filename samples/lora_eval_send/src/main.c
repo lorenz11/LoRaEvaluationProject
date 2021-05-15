@@ -144,7 +144,7 @@ void main(void)
 		return;
 	}
 
-	while (1) {
+	/*while (1) {
 		ret = lora_send(lora_dev, data, MAX_DATA_LEN);
 		if (ret < 0) {
 			LOG_ERR("LoRa send failed");
@@ -154,5 +154,5 @@ void main(void)
 		LOG_INF("Data senttt!");
 		lses_notify();
 		k_sleep(K_MSEC(2000));
-	}
+	}*/
 }

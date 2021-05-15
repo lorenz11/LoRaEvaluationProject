@@ -829,6 +829,7 @@ struct bt_uuid_128 {
 #define BT_UUID_LSES_STAT \
 	BT_UUID_DECLARE_16(BT_UUID_LSES_STAT_VAL)
 
+
 /** @def BT_UUID_LSES_CHANGE_CONFIG_VAL
  *  @brief LSES Change Config UUID value
  */
@@ -838,6 +839,19 @@ struct bt_uuid_128 {
  */
 #define BT_UUID_LSES_CHANGE_CONFIG \
 	BT_UUID_DECLARE_16(BT_UUID_LSES_CHANGE_CONFIG_VAL)
+
+
+/** @def BT_UUID_LSES_SEND_COMMAND_VAL
+ *  @brief LSES Send Command UUID value
+ */
+#define BT_UUID_LSES_SEND_COMMAND_VAL 0x2a3c
+/** @def BT_UUID_LSES_SEND_COMMAND
+ *  @brief LSES send command
+ */
+#define BT_UUID_LSES_SEND_COMMAND \
+	BT_UUID_DECLARE_16(BT_UUID_LSES_SEND_COMMAND_VAL)
+
+
 
 
 /** @def BT_UUID_LRES_STAT_VAL
