@@ -30,7 +30,7 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 	     "No default LoRa radio specified in DT");
 #define DEFAULT_RADIO DT_LABEL(DEFAULT_RADIO_NODE)
 
-#define MAX_DATA_LEN 30
+#define MAX_DATA_LEN 20
 
 #define LOG_LEVEL CONFIG_LOG_DEFAULT_LEVEL
 #include <logging/log.h>
@@ -95,7 +95,7 @@ static struct bt_conn_auth_cb auth_cb_display = {
 
 static void lres_notify(const void *data, uint8_t type_of_notification)
 {
-	bt_lres_stat_notify(data, type_of_notification);
+	bt_lres_notify(data, type_of_notification);
 }
 
 /*static void lres_msg_notify(const void *data)
@@ -128,7 +128,6 @@ void main(void)
 	struct lora_modem_config config;
 	int ret, len;
 	uint8_t data[MAX_DATA_LEN] = {0};
-	char 
 	
 	int16_t rssi;
 	int8_t snr;

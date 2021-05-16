@@ -24,7 +24,7 @@ extern "C" {
  *
  *  @return Zero in case of success and error code in case of error.
  */
-int bt_lres_notify(const void *data);
+int bt_lres_notify(const void *data, uint8_t type_of_notification);
 
 #ifdef __cplusplus
 }

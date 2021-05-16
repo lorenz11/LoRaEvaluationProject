@@ -17,6 +17,8 @@
 #include <bluetooth/uuid.h>
 #include <bluetooth/gatt.h>
 
+#define MAX_DATA_LEN 20
+
 #define LOG_LEVEL CONFIG_BT_LRES_LOG_LEVEL
 #include <logging/log.h>
 LOG_MODULE_REGISTER(lres);
@@ -102,21 +104,23 @@ int bt_lres_notify(const void *data, uint8_t type_of_notification)
 	int rc;
 
 	if(type_of_notification == 0) {
+		printk("at stats\n");
 		uint8_t *pu = (uint8_t *) data;
 
-	static uint8_t stats[2];
+		static uint8_t stats[3];
 
-	
-	stats[0] = *pu;
-	pu++;
-	stats[1] = *pu;
+		stats[0] = -1;
+		stats[1] = *pu;
+		pu++;
+		stats[2] = *pu;
 
-	rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &stats, sizeof(stats));
+		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &stats, sizeof(stats));
 	} else {
-		char *pc = (char *) buf;
+		printk("at mssg\n");
+		char *pc = (char *) data;
 		char data[MAX_DATA_LEN];
 	
-		for(uint16_t i = 0; i < len; i++) {
+		for(uint16_t i = 0; i < MAX_DATA_LEN; i++) {
 			data[i] = *pc;
 			pc++;
 		}
