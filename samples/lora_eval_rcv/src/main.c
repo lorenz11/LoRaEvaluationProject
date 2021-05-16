@@ -96,7 +96,7 @@ static struct bt_conn_auth_cb auth_cb_display = {
 static void lres_notify(const void *data)
 {
 	//static uint8_t rec = 3U;
-	bt_lres_notify(data);p
+	bt_lres_notify(data);
 }
 
 
