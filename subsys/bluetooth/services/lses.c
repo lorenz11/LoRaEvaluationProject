@@ -17,6 +17,8 @@
 #include <bluetooth/uuid.h>
 #include <bluetooth/gatt.h>
 
+#define MAX_DATA_LEN 30
+
 #define LOG_LEVEL CONFIG_BT_LSES_LOG_LEVEL
 #include <logging/log.h>
 LOG_MODULE_REGISTER(lses);
@@ -80,6 +82,14 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
+	char *pc = (char *) buf;
+	char data[MAX_DATA_LEN];
+	printk("buffer length: d%", len);
+	for(uint16_t i = 0; i < len; i++) {
+		data[i] = *pc;
+		pc++;
+	}
+	printk("msg: s%", data);
 	return 0;
 }
 
