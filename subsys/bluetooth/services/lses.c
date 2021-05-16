@@ -84,12 +84,28 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 {
 	char *pc = (char *) buf;
 	char data[MAX_DATA_LEN];
-	printk("buffer length: %d", len);
+	
 	for(uint16_t i = 0; i < len; i++) {
 		data[i] = *pc;
 		pc++;
 	}
 	printk("msg: %s", data);
+
+	const struct device *lora_dev;
+	struct lora_modem_config config;
+	int ret;
+
+	lora_dev = device_get_binding(DEFAULT_RADIO);
+	if (!lora_dev) {
+		LOG_ERR("%s Device not found", DEFAULT_RADIO);
+	}
+
+	ret = lora_send(lora_dev, data, MAX_DATA_LEN);
+	if (ret < 0) {
+		LOG_ERR("LoRa send failed");
+		return;
+	
+	}
 	return 0;
 }
 
