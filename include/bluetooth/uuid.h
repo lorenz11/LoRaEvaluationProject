@@ -864,10 +864,20 @@ struct bt_uuid_128 {
 #define BT_UUID_LRES_STAT \
 	BT_UUID_DECLARE_16(BT_UUID_LRES_STAT_VAL)
 
+/** @def BT_UUID_LRES_MSG_VAL
+ *  @brief LRES Characteristic Msg Interval UUID value
+ */
+#define BT_UUID_LRES_MSG_VAL 0x2a3e
+/** @def BT_UUID_LRES_MSG
+ *  @brief LRES Characteristic Msg Interval
+ */
+#define BT_UUID_LRES_MSG \
+	BT_UUID_DECLARE_16(BT_UUID_LRES_MSG_VAL)
+
 /** @def BT_UUID_LRES_CHANGE_CONFIG_VAL
  *  @brief LRES Change Config UUID value
  */
-#define BT_UUID_LRES_CHANGE_CONFIG_VAL 0x2a3e
+#define BT_UUID_LRES_CHANGE_CONFIG_VAL 0x2a3f
 /** @def BT_UUID_LRES_CHANGE_CONFIG
  *  @brief LRES change config
  */

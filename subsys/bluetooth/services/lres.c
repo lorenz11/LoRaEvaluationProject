@@ -97,10 +97,12 @@ static int lres_init(const struct device *dev)
 	return 0;
 }
 
-int bt_lres_notify(const void *data)
+int bt_lres_notify(const void *data, uint8_t type_of_notification)
 {
 	int rc;
-	uint8_t *pu = (uint8_t *) data;
+
+	if(type_of_notification == 0) {
+		uint8_t *pu = (uint8_t *) data;
 
 	static uint8_t stats[2];
 
@@ -110,8 +112,37 @@ int bt_lres_notify(const void *data)
 	stats[1] = *pu;
 
 	rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &stats, sizeof(stats));
+	} else {
+		char *pc = (char *) buf;
+		char data[MAX_DATA_LEN];
+	
+		for(uint16_t i = 0; i < len; i++) {
+			data[i] = *pc;
+			pc++;
+		}
+
+		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &data, sizeof(data));
+	}
+	
 
 	return rc == -ENOTCONN ? 0 : rc;
 }
+
+/*int bt_lres_msg_notify(const void *data)
+{
+	int rc;
+
+	char *pc = (char *) buf;
+	char data[MAX_DATA_LEN];
+	
+	for(uint16_t i = 0; i < len; i++) {
+		data[i] = *pc;
+		pc++;
+	}
+
+	rc = bt_gatt_notify(NULL, &lres_svc.attrs[2], &data, sizeof(data));
+
+	return rc == -ENOTCONN ? 0 : rc;
+}*/
 
 SYS_INIT(lres_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);

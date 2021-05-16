@@ -30,7 +30,7 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 	     "No default LoRa radio specified in DT");
 #define DEFAULT_RADIO DT_LABEL(DEFAULT_RADIO_NODE)
 
-#define MAX_DATA_LEN 255
+#define MAX_DATA_LEN 30
 
 #define LOG_LEVEL CONFIG_LOG_DEFAULT_LEVEL
 #include <logging/log.h>
@@ -93,11 +93,16 @@ static struct bt_conn_auth_cb auth_cb_display = {
 	.cancel = auth_cancel,
 };
 
-static void lres_notify(const void *data)
+static void lres_notify(const void *data, uint8_t type_of_notification)
 {
-	//static uint8_t rec = 3U;
-	bt_lres_notify(data);
+	bt_lres_stat_notify(data, type_of_notification);
 }
+
+/*static void lres_msg_notify(const void *data)
+{
+	bt_lres_msg_notify(data);
+}*/
+
 
 
 
@@ -105,7 +110,7 @@ static void lres_notify(const void *data)
 
 void main(void)
 {
-    /*int err;
+    int err;
 
 	err = bt_enable(NULL);
 	if (err) {
@@ -116,13 +121,14 @@ void main(void)
 	bt_ready();
 
 	bt_conn_cb_register(&conn_callbacks);
-	bt_conn_auth_cb_register(&auth_cb_display);*/
+	bt_conn_auth_cb_register(&auth_cb_display);
 
 
 	const struct device *lora_dev;
 	struct lora_modem_config config;
 	int ret, len;
 	uint8_t data[MAX_DATA_LEN] = {0};
+	char 
 	
 	int16_t rssi;
 	int8_t snr;
@@ -160,7 +166,8 @@ void main(void)
 		rssi = (uint8_t) -rssi; // to fit into an unsigned int
 		ndata[0] = rssi;
 		ndata[1] = snr;
-		lres_notify(ndata);
+		lres_notify(ndata, 0);
+		lres_notify(data, 1);
 		printk("round %d\n", i);
 		i += 1;
 		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
