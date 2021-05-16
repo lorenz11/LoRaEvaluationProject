@@ -84,12 +84,12 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 {
 	char *pc = (char *) buf;
 	char data[MAX_DATA_LEN];
-	printk("buffer length: d%", len);
+	printk("buffer length: %d", len);
 	for(uint16_t i = 0; i < len; i++) {
 		data[i] = *pc;
 		pc++;
 	}
-	printk("msg: s%", data);
+	printk("msg: %s", data);
 	return 0;
 }
 
@@ -115,17 +115,17 @@ static int lses_init(const struct device *dev)
 	return 0;
 }
 
-int bt_lses_notify(uint16_t data)
+/*int bt_lses_notify(uint16_t data)
 {
 	int rc;
 	static uint8_t d[2];
 
-	d[0] = 0x06; /* uint8, sensor contact */
+	d[0] = 0x06;  uint8, sensor contact 
 	d[1] = data;
 
 	rc = bt_gatt_notify(NULL, &lses_svc.attrs[1], &d, sizeof(d));
 
 	return rc == -ENOTCONN ? 0 : rc;
-}
+}*/
 
 SYS_INIT(lses_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
