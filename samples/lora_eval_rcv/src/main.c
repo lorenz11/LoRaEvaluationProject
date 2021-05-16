@@ -105,7 +105,7 @@ static void lres_notify(const void *data)
 
 void main(void)
 {
-    int err;
+    /*int err;
 
 	err = bt_enable(NULL);
 	if (err) {
@@ -116,7 +116,7 @@ void main(void)
 	bt_ready();
 
 	bt_conn_cb_register(&conn_callbacks);
-	bt_conn_auth_cb_register(&auth_cb_display);
+	bt_conn_auth_cb_register(&auth_cb_display);*/
 
 
 	const struct device *lora_dev;
@@ -158,7 +158,6 @@ void main(void)
 		}
 		uint8_t ndata[2] = {0};
 		rssi = (uint8_t) -rssi; // to fit into an unsigned int
-		rssi = (uint8_t) 254;
 		ndata[0] = rssi;
 		ndata[1] = snr;
 		lres_notify(ndata);

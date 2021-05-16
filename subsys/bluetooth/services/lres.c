@@ -102,13 +102,12 @@ int bt_lres_notify(const void *data)
 	int rc;
 	uint8_t *pu = (uint8_t *) data;
 
-	static uint8_t stats[3];
+	static uint8_t stats[2];
 
 	
 	stats[0] = *pu;
 	pu++;
 	stats[1] = *pu;
-	stats[2] = 127;
 
 	rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &stats, sizeof(stats));
 
