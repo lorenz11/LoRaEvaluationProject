@@ -55,6 +55,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	} else {
 		config.frequency = 871000000;
 	}
+	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	if(*pu == 0) {
@@ -64,6 +65,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	} else {
 		config.bandwidth = BW_500_KHZ;
 	}
+	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	if(*pu == 0) {
@@ -81,6 +83,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	}else {
 		config.datarate = SF_12;
 	}
+	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	config.preamble_len = 8;
@@ -94,6 +97,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	} else {
 		config.coding_rate = CR_4_8;
 	}
+	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	if(*pu == 0) {
