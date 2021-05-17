@@ -43,32 +43,84 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
-	uint8_t *pu = (uint8_t *) buf;
-	uint32_t frequ = 0;
-	frequ += (*pu) * 100000000;
-	pu++;
-	frequ += (*pu) * 10000000;
-	pu++;
-	frequ += (*pu) * 1000000;
-
- 
-
 	const struct device *lora_dev;
 	struct lora_modem_config config;
 	int ret;
 
-	lora_dev = device_get_binding(DEFAULT_RADIO);
+	uint8_t *pu = (uint8_t *) buf;
+	if(*pu == 0) {
+		config.frequency = 865000000;
+	} else if (*pu == 1) {
+		config.frequency = 868000000;
+	} else {
+		config.frequency = 871000000;
+	}
+	pu++;
+
+	if(*pu == 0) {
+		config.bandwidth = BW_125_KHZ;
+	} else if (*pu == 1) {
+		config.bandwidth = BW_250_KHZ;
+	} else {
+		config.bandwidth = BW_500_KHZ;
+	}
+	pu++;
+
+	if(*pu == 0) {
+		config.datarate = SF_6;
+	} else if (*pu == 1) {
+		config.datarate = SF_7;
+	} else if (*pu == 2) {
+		config.datarate = SF_8;
+	}else if (*pu == 3) {
+		config.datarate = SF_9;
+	}else if (*pu == 4) {
+		config.datarate = SF_10;
+	}else if (*pu == 5) {
+		config.datarate = SF_11;
+	}else {
+		config.datarate = SF_12;
+	}
+	pu++;
+
+	config.preamble_len = 8;
+
+	if(*pu == 0) {
+		config.coding_rate = CR_4_5;
+	} else if (*pu == 1) {
+		config.coding_rate = CR_4_6;
+	} else if (*pu == 2) {
+		config.coding_rate = CR_4_7;
+	} else {
+		config.coding_rate = CR_4_8;
+	}
+	pu++;
+
+	if(*pu == 0) {
+		config.tx_power = 4;
+	} else if (*pu == 1) {
+		config.tx_power = 5;
+	} else if (*pu == 2) {
+		config.tx_power = 6;
+	}else if (*pu == 3) {
+		config.tx_power = 7;
+	}else if (*pu == 4) {
+		config.tx_power = 8;
+	}else if (*pu == 5) {
+		config.tx_power = 9;
+	}else if (*pu == 6) {
+		config.tx_power = 10;
+	}else if (*pu == 7) {
+		config.tx_power = 11;
+	}else {
+		config.tx_power = 12;
+	}
+	config.tx = true;
+
+ 	lora_dev = device_get_binding(DEFAULT_RADIO);
 	if (!lora_dev) {
 		LOG_ERR("%s Device not found", DEFAULT_RADIO);
 	}
-
-	config.frequency = frequ;
-	config.bandwidth = BW_125_KHZ;
-	config.datarate = SF_10;
-	config.preamble_len = 8;
-	config.coding_rate = CR_4_5;
-	config.tx_power = 4;
-	config.tx = true;
 
 	ret = lora_config(lora_dev, &config);
 	if (ret < 0) {

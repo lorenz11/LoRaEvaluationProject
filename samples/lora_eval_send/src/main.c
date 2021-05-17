@@ -94,11 +94,12 @@ static struct bt_conn_auth_cb auth_cb_display = {
 	.cancel = auth_cancel,
 };
 
-static void lses_notify(void)
+// for future notifications
+/*static void lses_notify(void)
 {
 	static uint8_t rec = 1U;
 	bt_lses_notify(rec);
-}
+}*/
 
 
 

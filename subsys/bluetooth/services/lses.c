@@ -182,16 +182,10 @@ static int lses_init(const struct device *dev)
 	return 0;
 }
 
+// for future notifications
 /*int bt_lses_notify(uint16_t data)
 {
-	int rc;
-	static uint8_t d[2];
-
-	d[0] = 0x06;  uint8, sensor contact 
-	d[1] = data;
-
 	rc = bt_gatt_notify(NULL, &lses_svc.attrs[1], &d, sizeof(d));
-
 	return rc == -ENOTCONN ? 0 : rc;
 }*/
 
