@@ -160,10 +160,11 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 
 	if(loop == 1) {
 		while (1) {
-		ret = lora_send(lora_dev, data, MAX_DATA_LEN);
-		if (ret < 0) {
-			LOG_ERR("LoRa send failed");
-			return;
+			ret = lora_send(lora_dev, data, MAX_DATA_LEN);
+			if (ret < 0) {
+				LOG_ERR("LoRa send failed");
+				return;
+			}
 		}
 
 		LOG_INF("Data senttt!");
