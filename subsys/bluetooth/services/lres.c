@@ -159,20 +159,21 @@ int bt_lres_notify(const void *data, uint8_t type_of_notification)
 {
 	int rc;
 
-	if(type_of_notification == 0) {
+	if(type_of_notification == 0) {		// RSSI/SNR notification
 		printk("at stats\n");
 		uint8_t *pu = (uint8_t *) data;
 
 		static uint8_t stats[3];
 
+		// put -1 at index 0 to distinguish from msg notification
 		stats[0] = -1;
 		stats[1] = *pu;
 		pu++;
 		stats[2] = *pu;
 
 		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &stats, sizeof(stats));
-	} else {
-		printk("at mssg\n");
+	} else {							// msg notification
+		printk("at msg\n");
 		char *pc = (char *) data;
 		char data[MAX_DATA_LEN];
 	

@@ -147,14 +147,15 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		pc++;
 	}
 
-	char data[len + 1];
+	printk("length: %d\n", len);
+	char data[len];
 	
 	for(uint16_t i = 0; i < len; i++) {
 		data[i] = *pc;
 		pc++;
 	}
 	data[len] = '.';
-	printk("msg: %s", data);
+	printk("msg: %s\n", data);
 
 	const struct device *lora_dev;
 	int ret;
