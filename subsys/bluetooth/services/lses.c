@@ -42,6 +42,7 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 	LOG_INF("LSES notifications %s", notif_enabled ? "enabled" : "disabled");
 }
 
+// implemented at bottom of file (declared here for use in nexxt function)
 int bt_lses_notify(int8_t type_of_notification);
 
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
