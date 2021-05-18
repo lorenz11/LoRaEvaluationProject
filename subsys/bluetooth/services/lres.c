@@ -188,21 +188,4 @@ int bt_lres_notify(const void *data, uint8_t type_of_notification)
 	return rc == -ENOTCONN ? 0 : rc;
 }
 
-/*int bt_lres_msg_notify(const void *data)
-{
-	int rc;
-
-	char *pc = (char *) buf;
-	char data[MAX_DATA_LEN];
-	
-	for(uint16_t i = 0; i < len; i++) {
-		data[i] = *pc;
-		pc++;
-	}
-
-	rc = bt_gatt_notify(NULL, &lres_svc.attrs[2], &data, sizeof(data));
-
-	return rc == -ENOTCONN ? 0 : rc;
-}*/
-
 SYS_INIT(lres_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);

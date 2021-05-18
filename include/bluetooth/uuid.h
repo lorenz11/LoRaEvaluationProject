@@ -819,6 +819,10 @@ struct bt_uuid_128 {
 
 
 
+//////////////////////////////////SENDER UUIDs///////////////////////////////////////
+
+// notification
+// for notifying phone on anything
 /** @def BT_UUID_LSES_STAT_VAL
  *  @brief LSES Characteristic Status Interval UUID value
  */
@@ -829,7 +833,8 @@ struct bt_uuid_128 {
 #define BT_UUID_LSES_STAT \
 	BT_UUID_DECLARE_16(BT_UUID_LSES_STAT_VAL)
 
-
+// writing
+// for writing config to board
 /** @def BT_UUID_LSES_CHANGE_CONFIG_VAL
  *  @brief LSES Change Config UUID value
  */
@@ -840,7 +845,8 @@ struct bt_uuid_128 {
 #define BT_UUID_LSES_CHANGE_CONFIG \
 	BT_UUID_DECLARE_16(BT_UUID_LSES_CHANGE_CONFIG_VAL)
 
-
+// writing
+// for writing msg content to board
 /** @def BT_UUID_LSES_SEND_COMMAND_VAL
  *  @brief LSES Send Command UUID value
  */
@@ -851,29 +857,35 @@ struct bt_uuid_128 {
 #define BT_UUID_LSES_SEND_COMMAND \
 	BT_UUID_DECLARE_16(BT_UUID_LSES_SEND_COMMAND_VAL)
 
+// writing
+// for general writing msg to board
+/** @def BT_UUID_LSES_ANYTHING_VAL
+ *  @brief LSES anything UUID value
+ */
+#define BT_UUID_LSES_ANYTHING_VAL 0x2a3d
+/** @def BT_UUID_LSES_ANYTHING
+ *  @brief LSES characteristic for anything
+ */
+#define BT_UUID_LSES_ANYTHING \
+	BT_UUID_DECLARE_16(BT_UUID_LSES_ANYTHING_VAL)
 
 
+//////////////////////////////////RECEIVER UUIDs///////////////////////////////////////
 
+// notification
+// for (RSSI, SNR) or message depending on <type_of_notification> in bt_lres_notify
 /** @def BT_UUID_LRES_STAT_VAL
  *  @brief LRES Characteristic Status Interval UUID value
  */
-#define BT_UUID_LRES_STAT_VAL 0x2a3d
+#define BT_UUID_LRES_STAT_VAL 0x2a3e
 /** @def BT_UUID_LRES_STAT
  *  @brief LRES Characteristic Status Interval
  */
 #define BT_UUID_LRES_STAT \
 	BT_UUID_DECLARE_16(BT_UUID_LRES_STAT_VAL)
 
-/** @def BT_UUID_LRES_MSG_VAL
- *  @brief LRES Characteristic Msg Interval UUID value
- */
-#define BT_UUID_LRES_MSG_VAL 0x2a3e
-/** @def BT_UUID_LRES_MSG
- *  @brief LRES Characteristic Msg Interval
- */
-#define BT_UUID_LRES_MSG \
-	BT_UUID_DECLARE_16(BT_UUID_LRES_MSG_VAL)
-
+// writing
+// for writing config to board
 /** @def BT_UUID_LRES_CHANGE_CONFIG_VAL
  *  @brief LRES Change Config UUID value
  */
@@ -883,6 +895,18 @@ struct bt_uuid_128 {
  */
 #define BT_UUID_LRES_CHANGE_CONFIG \
 	BT_UUID_DECLARE_16(BT_UUID_LRES_CHANGE_CONFIG_VAL)
+
+// still free to use
+/** @def BT_UUID_LRES_MSG_VAL
+ *  @brief LRES Characteristic Msg Interval UUID value
+ */
+#define BT_UUID_LRES_MSG_VAL 0x2a40
+/** @def BT_UUID_LRES_MSG
+ *  @brief LRES Characteristic Msg Interval
+ */
+#define BT_UUID_LRES_MSG \
+	BT_UUID_DECLARE_16(BT_UUID_LRES_MSG_VAL)
+
 
 
 

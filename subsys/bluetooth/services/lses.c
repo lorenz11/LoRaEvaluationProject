@@ -30,6 +30,9 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 
 static uint8_t lses_blsc;
 
+// to control the sending LoRa messages loop
+static uint8_t loop = 0;
+
 static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 {
 	ARG_UNUSED(attr);
@@ -134,10 +137,11 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
-	uint8_t loop = 0;
+	uint8_t single_msg = 0;
 
 	char *pc = (char *) buf;
 	if(*pc == 33) {
+		single_msg = 1;
 		loop = 1;
 		pc++;
 	}
@@ -158,8 +162,8 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		LOG_ERR("%s Device not found", DEFAULT_RADIO);
 	}
 
-	if(loop == 1) {
-		while (1) {
+	if(single_msg == 1) {
+		while (loop) {
 			ret = lora_send(lora_dev, data, MAX_DATA_LEN);
 			if (ret < 0) {
 				LOG_ERR("LoRa send failed");
@@ -178,6 +182,18 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	return 0;
 }
 
+static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
+{
+	printk("command received\n");
+	char *pc = (char *) buf;
+	if(*pc == 'a') {
+		loop = 0;
+	}
+	
+	return 0;
+}
+
 /* Lora Eval Service Declaration */
 BT_GATT_SERVICE_DEFINE(lses_svc,
 	BT_GATT_PRIMARY_SERVICE(BT_UUID_LSES),
@@ -189,6 +205,8 @@ BT_GATT_SERVICE_DEFINE(lses_svc,
 			       BT_GATT_PERM_WRITE, NULL, change_config_cb, NULL),
 	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_SEND_COMMAND, BT_GATT_CHRC_WRITE,
 			       BT_GATT_PERM_WRITE, NULL, send_command_cb, NULL),
+	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_ANYTHING, BT_GATT_CHRC_WRITE,
+			       BT_GATT_PERM_WRITE, NULL, anything_cb, NULL),
 );
 
 static int lses_init(const struct device *dev)
