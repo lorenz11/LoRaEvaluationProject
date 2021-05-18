@@ -139,6 +139,7 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 {
 	uint8_t single_msg = 0;
 
+	// buf has '!' at index 0 if messages are supposed to be sent in a loop
 	char *pc = (char *) buf;
 	if(*pc == 33) {
 		single_msg = 1;
@@ -146,12 +147,13 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		pc++;
 	}
 
-	char data[MAX_DATA_LEN];
+	char data[len + 1];
 	
 	for(uint16_t i = 0; i < len; i++) {
 		data[i] = *pc;
 		pc++;
 	}
+	data[len] = '.';
 	printk("msg: %s", data);
 
 	const struct device *lora_dev;
@@ -163,14 +165,16 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	}
 
 	if(single_msg == 1) {
-		while (loop) {
+		uint16_t i = 0;
+		while (loop && (i < 100)) {
 			ret = lora_send(lora_dev, data, MAX_DATA_LEN);
 			if (ret < 0) {
 				LOG_ERR("LoRa send failed");
 				return 0;
 			}
-			LOG_INF("Data sentt!");
+			LOG_INF("Data sent!");
 			k_sleep(K_MSEC(2000));
+			i++;
 		}
 	} else {
 		ret = lora_send(lora_dev, data, MAX_DATA_LEN);
