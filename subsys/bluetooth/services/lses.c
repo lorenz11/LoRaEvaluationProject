@@ -42,6 +42,7 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 	LOG_INF("LSES notifications %s", notif_enabled ? "enabled" : "disabled");
 }
 
+int bt_lses_notify(int8_t type_of_notification);
 
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
@@ -228,11 +229,12 @@ static int lses_init(const struct device *dev)
 
 int bt_lses_notify(int8_t type_of_notification)
 {
+	int rc;
 	static int8_t notifier[1];
 	notifier[0] = type_of_notification;
 
 	rc = bt_gatt_notify(NULL, &lses_svc.attrs[1], &notifier, sizeof(notifier));
 	return rc == -ENOTCONN ? 0 : rc;
-}*/
+}
 
 SYS_INIT(lses_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
