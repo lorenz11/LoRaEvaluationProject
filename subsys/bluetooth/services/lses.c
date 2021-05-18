@@ -137,7 +137,7 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	uint8_t loop = 0;
 
 	char *pc = (char *) buf;
-	if(pc == 33) {
+	if(*pc == 33) {
 		loop = 1;
 		pc++;
 	}
@@ -163,17 +163,17 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 			ret = lora_send(lora_dev, data, MAX_DATA_LEN);
 			if (ret < 0) {
 				LOG_ERR("LoRa send failed");
-				return;
+				return 0;
 			}
+			LOG_INF("Data sentt!");
+			k_sleep(K_MSEC(2000));
 		}
-
-		LOG_INF("Data senttt!");
-		k_sleep(K_MSEC(2000));
 	} else {
 		ret = lora_send(lora_dev, data, MAX_DATA_LEN);
 		if (ret < 0) {
-		LOG_ERR("LoRa send failed");
-		return 0;
+			LOG_ERR("LoRa send failed");
+			return 0;
+		}
 	}
 	return 0;
 }
