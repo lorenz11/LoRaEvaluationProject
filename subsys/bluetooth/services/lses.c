@@ -147,6 +147,7 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		pc++;
 	}
 
+	// extract LoRa message
 	printk("length: %d\n", len);
 	char data[len];
 	
@@ -160,6 +161,7 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	const struct device *lora_dev;
 	int ret;
 
+	// send message (single or in loop depending on <single_msg>)
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 	if (!lora_dev) {
 		LOG_ERR("%s Device not found", DEFAULT_RADIO);

@@ -40,7 +40,6 @@ char data[MAX_DATA_LEN] = {'h', 'e', 'y'};
 
 
 
-
 static const struct bt_data ad[] = {
 	BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
 	BT_DATA_BYTES(BT_DATA_UUID16_ALL,
@@ -104,7 +103,6 @@ static struct bt_conn_auth_cb auth_cb_display = {
 
 
 
-
 void main(void)
 {
     int err;
@@ -144,16 +142,4 @@ void main(void)
 		LOG_ERR("LoRa config failed");
 		return;
 	}
-
-	/*while (1) {
-		ret = lora_send(lora_dev, data, MAX_DATA_LEN);
-		if (ret < 0) {
-			LOG_ERR("LoRa send failed");
-			return;
-		}
-
-		LOG_INF("Data senttt!");
-		lses_notify();
-		k_sleep(K_MSEC(2000));
-	}*/
 }

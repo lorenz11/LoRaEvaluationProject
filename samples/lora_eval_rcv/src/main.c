@@ -39,7 +39,6 @@ LOG_MODULE_REGISTER(lora_receive);
 
 
 
-
 static const struct bt_data ad[] = {
 	BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
 	BT_DATA_BYTES(BT_DATA_UUID16_ALL,
@@ -102,8 +101,6 @@ static void lres_notify(const void *data, uint8_t type_of_notification)
 {
 	bt_lres_msg_notify(data);
 }*/
-
-
 
 
 
