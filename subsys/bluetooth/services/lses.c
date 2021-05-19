@@ -17,8 +17,6 @@
 #include <bluetooth/uuid.h>
 #include <bluetooth/gatt.h>
 
-#include <sysutil.h>
-
 #define MAX_DATA_LEN 30
 
 #define LOG_LEVEL CONFIG_BT_LSES_LOG_LEVEL
@@ -34,7 +32,6 @@ static uint8_t lses_blsc;
 
 // to control the sending LoRa messages loop
 static uint8_t loop = 0;
-int looping;
 
 static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 {
@@ -201,7 +198,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 	printk("command received\n");
 	char *pc = (char *) buf;
 	if(*pc == 'a') {
-		looping = 5;
+		loop = 0;
 	}
 	
 	return 0;

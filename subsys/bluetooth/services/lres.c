@@ -134,7 +134,8 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 		LOG_ERR("LoRa config failed");
 	}
 
-	bt_lres_notify(-2);
+	int8_t bt_data[1] = {-2};
+	bt_lres_notify(bt_data, 2);
 	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	return 0;
 }
@@ -187,6 +188,11 @@ int bt_lres_notify(const void *data, uint8_t type_of_notification)
 		}
 
 		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &data, sizeof(data));
+	} else {
+		static int8_t notifier[1];
+		notifier[0] = -2;
+
+		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &notifier, sizeof(notifier));
 	}
 	
 
