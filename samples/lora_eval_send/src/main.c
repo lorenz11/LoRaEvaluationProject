@@ -24,6 +24,8 @@
 #include <bluetooth/gatt.h>
 #include <bluetooth/services/lses.h>
 
+#include <sysutil.h>
+
 
 #define DEFAULT_RADIO_NODE DT_ALIAS(lora0)
 BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
@@ -37,6 +39,8 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 LOG_MODULE_REGISTER(lora_send);
 
 char data[MAX_DATA_LEN] = {'h', 'e', 'y'};
+
+int looping = 0;
 
 
 
@@ -141,5 +145,20 @@ void main(void)
 	if (ret < 0) {
 		LOG_ERR("LoRa config failed");
 		return;
+	}
+
+	while (1) {
+		if (looping == 0 || looping == 5) {
+			printk("looping value: %d\n", looping)
+			ret = lora_send(lora_dev, data, MAX_DATA_LEN);
+			if (ret < 0) {
+				LOG_ERR("LoRa send failed");
+				return;
+			}
+			LOG_INF("Data sent!");
+		}
+
+		/* Send data at 1s interval */
+		k_sleep(K_MSEC(1000));
 	}
 }
