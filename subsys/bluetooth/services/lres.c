@@ -30,6 +30,7 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 
 static uint8_t lres_blsc;
 
+// when descriptor changed at phone (for enableing notifications)
 static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 {
 	ARG_UNUSED(attr);
@@ -42,7 +43,7 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 // implemented at bottom of file (declared here for use in nexxt function)
 int bt_lres_notify(const void *data, uint8_t type_of_notification);
 
-
+// gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic)
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
@@ -140,7 +141,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	return 0;
 }
 
-/* Lora Eval Service Declaration */
+// Lora Eval Service Declaration: service, descriptor, 1 notification characteristic, 1 write characteristic
 BT_GATT_SERVICE_DEFINE(lres_svc,
 	BT_GATT_PRIMARY_SERVICE(BT_UUID_LRES),
 	BT_GATT_CHARACTERISTIC(BT_UUID_LRES_STAT, BT_GATT_CHRC_NOTIFY,
@@ -160,6 +161,7 @@ static int lres_init(const struct device *dev)
 	return 0;
 }
 
+// notify phone about anything
 int bt_lres_notify(const void *data, uint8_t type_of_notification)
 {
 	int rc;

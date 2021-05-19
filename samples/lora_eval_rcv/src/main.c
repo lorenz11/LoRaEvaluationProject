@@ -38,13 +38,14 @@ LOG_MODULE_REGISTER(lora_receive);
 
 
 
-
+// ble service to be advertised
 static const struct bt_data ad[] = {
 	BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
 	BT_DATA_BYTES(BT_DATA_UUID16_ALL,
 		      BT_UUID_16_ENCODE(BT_UUID_LRES_VAL))
 };
 
+// triggered when connection established
 static void connected(struct bt_conn *conn, uint8_t err)
 {
 	if (err) {
@@ -54,6 +55,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
 	}
 }
 
+// triggered when disconnected from phone
 static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
 	printk("Disconnected (reason 0x%02x)\n", reason);
@@ -64,6 +66,7 @@ static struct bt_conn_cb conn_callbacks = {
 	.disconnected = disconnected,
 };
 
+//start advertising
 static void bt_ready(void)
 {
 	int err;
@@ -102,6 +105,7 @@ static void lres_notify(const void *data, uint8_t type_of_notification)
 
 void main(void)
 {
+	// for ble connection
     int err;
 
 	err = bt_enable(NULL);
@@ -115,7 +119,7 @@ void main(void)
 	bt_conn_cb_register(&conn_callbacks);
 	bt_conn_auth_cb_register(&auth_cb_display);
 
-
+	// for LoRa communication
 	const struct device *lora_dev;
 	struct lora_modem_config config;
 	int ret, len;
@@ -154,9 +158,11 @@ void main(void)
 			return;
 		}
 		uint8_t ndata[2] = {0};
-		rssi = (uint8_t) -rssi; // to fit into an unsigned int
+		rssi = (uint8_t) -rssi; // negated to fit into an unsigned int (original value is negative)
 		ndata[0] = rssi;
 		ndata[1] = snr;
+
+		// notfiy phone with sent LoRa message and other data
 		lres_notify(ndata, 0);
 		lres_notify(data, 1);
 		printk("round %d\n", i);

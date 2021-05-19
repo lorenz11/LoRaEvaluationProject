@@ -33,6 +33,7 @@ static uint8_t lses_blsc;
 // to control the sending LoRa messages loop
 static uint8_t loop = 0;
 
+// when descriptor changed at phone (for enableing notifications)
 static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 {
 	ARG_UNUSED(attr);
@@ -45,6 +46,7 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 // implemented at bottom of file (declared here for use in nexxt function)
 int bt_lses_notify(int8_t type_of_notification);
 
+// gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic)
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
@@ -137,6 +139,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	return 0;
 }
 
+// gets a byte array containing the msg a LoRa transmission is supposed to contain
 static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
@@ -192,6 +195,7 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	return 0;
 }
 
+// callback for characteristic possibly used in the future
 static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
@@ -204,7 +208,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 	return 0;
 }
 
-/* Lora Eval Service Declaration */
+// Lora Eval Service Declaration: service, descriptor, 1 notification characteristic, 3 write characteristics
 BT_GATT_SERVICE_DEFINE(lses_svc,
 	BT_GATT_PRIMARY_SERVICE(BT_UUID_LSES),
 	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_STAT, BT_GATT_CHRC_NOTIFY,
@@ -228,6 +232,7 @@ static int lses_init(const struct device *dev)
 	return 0;
 }
 
+// notify phone about anything
 int bt_lses_notify(int8_t type_of_notification)
 {
 	int rc;
