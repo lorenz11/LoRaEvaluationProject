@@ -97,11 +97,6 @@ static void lres_notify(const void *data, uint8_t type_of_notification)
 	bt_lres_notify(data, type_of_notification);
 }
 
-/*static void lres_msg_notify(const void *data)
-{
-	bt_lres_msg_notify(data);
-}*/
-
 
 
 

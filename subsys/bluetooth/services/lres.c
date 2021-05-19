@@ -39,6 +39,9 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 	LOG_INF("LRES notifications %s", notif_enabled ? "enabled" : "disabled");
 }
 
+// implemented at bottom of file (declared here for use in nexxt function)
+int bt_lres_notify(const void *data, uint8_t type_of_notification);
+
 
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
@@ -131,6 +134,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 		LOG_ERR("LoRa config failed");
 	}
 
+	bt_lses_notify(-2);
 	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	return 0;
 }
@@ -172,7 +176,7 @@ int bt_lres_notify(const void *data, uint8_t type_of_notification)
 		stats[2] = *pu;
 
 		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &stats, sizeof(stats));
-	} else {							// msg notification
+	} else if(type_of_notification == 1){							// msg notification
 		printk("at msg\n");
 		char *pc = (char *) data;
 		char data[MAX_DATA_LEN];
