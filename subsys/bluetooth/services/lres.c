@@ -134,7 +134,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 		LOG_ERR("LoRa config failed");
 	}
 
-	bt_lses_notify(-2);
+	bt_lres_notify(-2);
 	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	return 0;
 }
