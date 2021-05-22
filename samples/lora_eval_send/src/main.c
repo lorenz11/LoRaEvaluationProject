@@ -110,6 +110,11 @@ static struct bt_conn_auth_cb auth_cb_display = {
 void main(void)
 {
 	// for ble connection
+	char str[] = "789";
+	int16_t i = atoi(str);
+	i += 20;
+	printk("number: %d\n", i);
+
     int err;
 
 	err = bt_enable(NULL);

@@ -32,6 +32,9 @@ static uint8_t lses_blsc;
 
 // to control the sending LoRa messages loop
 static uint8_t loop = 0;
+static uint8_t number_of_messages = 0;
+static uint8_t time_between = 0;
+
 
 // when descriptor changed at phone (for enableing notifications)
 static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
@@ -203,6 +206,8 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 	char *pc = (char *) buf;
 	if(*pc == 'a') {
 		loop = 0;
+		pc++;
+		
 	}
 	
 	return 0;
