@@ -11,6 +11,8 @@
 
 #include <drivers/lora.h>
 
+#include <stdlib.h>
+
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/conn.h>
@@ -178,7 +180,7 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 
 	if(single_msg == 1) {
 		uint16_t i = 0;
-		while (loop && (i < 100)) {
+		while (loop && (i < number_of_messages)) {
 			ret = lora_send(lora_dev, data, MAX_DATA_LEN);
 			if (ret < 0) {
 				LOG_ERR("LoRa send failed");
@@ -204,10 +206,13 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 {
 	printk("command received\n");
 	char *pc = (char *) buf;
+	char str[] = {0};
 	if(*pc == 'a') {
 		loop = 0;
 		pc++;
-		
+		int16_t i = atoi(pc);
+		number_of_messages = i;
+		printk("number: %d\n", i);		
 	}
 	
 	return 0;

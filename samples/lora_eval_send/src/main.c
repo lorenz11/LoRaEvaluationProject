@@ -37,8 +37,6 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 #include <logging/log.h>
 LOG_MODULE_REGISTER(lora_send);
 
-char data[MAX_DATA_LEN] = {'h', 'e', 'y'};
-
 
 // ble service to be advertised
 static const struct bt_data ad[] = {
@@ -109,12 +107,6 @@ static struct bt_conn_auth_cb auth_cb_display = {
 
 void main(void)
 {
-	// for ble connection
-	char str[] = "789";
-	int16_t i = atoi(str);
-	i += 20;
-	printk("number: %d\n", i);
-
     int err;
 
 	err = bt_enable(NULL);
