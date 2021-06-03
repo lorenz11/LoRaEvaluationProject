@@ -896,16 +896,16 @@ struct bt_uuid_128 {
 #define BT_UUID_LRES_CHANGE_CONFIG \
 	BT_UUID_DECLARE_16(BT_UUID_LRES_CHANGE_CONFIG_VAL)
 
-// still free to use
-/** @def BT_UUID_LRES_MSG_VAL
- *  @brief LRES Characteristic Msg Interval UUID value
+// for experiment settings
+/** @def BT_UUID_LRES_EXP_VAL
+ *  @brief LRES Characteristic Exp UUID value
  */
-#define BT_UUID_LRES_MSG_VAL 0x2a40
-/** @def BT_UUID_LRES_MSG
- *  @brief LRES Characteristic Msg Interval
+#define BT_UUID_LRES_EXP_VAL 0x2a40
+/** @def BT_UUID_LRES_EXP
+ *  @brief LRES Characteristic Exp Interval
  */
-#define BT_UUID_LRES_MSG \
-	BT_UUID_DECLARE_16(BT_UUID_LRES_MSG_VAL)
+#define BT_UUID_LRES_EXP \
+	BT_UUID_DECLARE_16(BT_UUID_LRES_EXP_VAL)
 
 
 

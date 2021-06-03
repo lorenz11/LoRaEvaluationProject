@@ -40,7 +40,7 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 	LOG_INF("LRES notifications %s", notif_enabled ? "enabled" : "disabled");
 }
 
-// implemented at bottom of file (declared here for use in nexxt function)
+// implemented at bottom of file (declared here for use in next function)
 int bt_lres_notify(const void *data, uint8_t type_of_notification);
 
 // gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic)
@@ -141,6 +141,17 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	return 0;
 }
 
+static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
+{
+	printk("length: %u\n", len)
+	uint8_t *pu = (uint8_t *) buf;
+	for(int16_t i = 0; i < len; i++) {
+		printk("data: %d\n", *pu);
+		pu++;
+	}
+}
+
 // Lora Eval Service Declaration: service, descriptor, 1 notification characteristic, 1 write characteristic
 BT_GATT_SERVICE_DEFINE(lres_svc,
 	BT_GATT_PRIMARY_SERVICE(BT_UUID_LRES),
@@ -150,6 +161,8 @@ BT_GATT_SERVICE_DEFINE(lres_svc,
 		    BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
 	BT_GATT_CHARACTERISTIC(BT_UUID_LRES_CHANGE_CONFIG, BT_GATT_CHRC_WRITE,
 			       BT_GATT_PERM_WRITE, NULL, change_config_cb, NULL),
+	BT_GATT_CHARACTERISTIC(BT_UUID_LRES_EXP, BT_GATT_CHRC_WRITE,
+			       BT_GATT_PERM_WRITE, NULL, exp_settings_cb, NULL),
 );
 
 static int lres_init(const struct device *dev)
