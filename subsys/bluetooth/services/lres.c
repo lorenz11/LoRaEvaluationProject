@@ -55,22 +55,26 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 
 	uint8_t *pu = (uint8_t *) buf;
 	if(*pu == 0) {
-		config.frequency = 865000000;
+		config.frequency = 868100000;
 	} else if (*pu == 1) {
-		config.frequency = 868000000;
-	} else {
-		config.frequency = 871000000;
+		config.frequency = 868300000;
+	} else if (*pu == 2) {
+		config.frequency = 868500000;
+	}else if (*pu == 3) {
+		config.frequency = 867100000;
+	}else if (*pu == 4) {
+		config.frequency = 867300000;
+	}else if (*pu == 5) {
+		config.frequency = 867500000;
+	}else if (*pu == 6) {
+		config.frequency = 867700000;
+	}else if (*pu == 7) {
+		config.frequency = 869500000;
 	}
 	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
-	if(*pu == 0) {
-		config.bandwidth = BW_125_KHZ;
-	} else if (*pu == 1) {
-		config.bandwidth = BW_250_KHZ;
-	} else {
-		config.bandwidth = BW_500_KHZ;
-	}
+	config.bandwidth = *pu;
 	printk("here too?\n");
 	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
@@ -107,25 +111,8 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
-	if(*pu == 0) {
-		config.tx_power = 4;
-	} else if (*pu == 1) {
-		config.tx_power = 5;
-	} else if (*pu == 2) {
-		config.tx_power = 6;
-	}else if (*pu == 3) {
-		config.tx_power = 7;
-	}else if (*pu == 4) {
-		config.tx_power = 8;
-	}else if (*pu == 5) {
-		config.tx_power = 9;
-	}else if (*pu == 6) {
-		config.tx_power = 10;
-	}else if (*pu == 7) {
-		config.tx_power = 11;
-	}else {
-		config.tx_power = 12;
-	}
+	config.tx_power = *pu + 5;
+
 	config.tx = true;
 
  	lora_dev = device_get_binding(DEFAULT_RADIO);
