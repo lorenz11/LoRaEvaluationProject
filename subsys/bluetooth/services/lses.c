@@ -59,7 +59,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	int ret;
 
 	uint8_t *pu = (uint8_t *) buf;
-	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
+	int frequencies[8] =  {868000000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
 	
 	config.frequency = frequencies[*pu];
 	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
