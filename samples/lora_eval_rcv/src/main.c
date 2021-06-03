@@ -134,11 +134,11 @@ void main(void)
 		return;
 	}
 
-	config.frequency = 868000000;
-	config.bandwidth = BW_125_KHZ;
-	config.datarate = SF_10;
+	config.frequency = 868100000;
+	config.bandwidth = 1;
+	config.datarate = 9;
 	config.preamble_len = 8;
-	config.coding_rate = CR_4_5;
+	config.coding_rate = 2;
 	config.tx_power = 5;
 	config.tx = false;
 
