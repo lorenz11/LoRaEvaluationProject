@@ -152,6 +152,7 @@ void main(void)
 
 	int16_t rssi;
 	int8_t snr;
+	int len;
 	while(1) {
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 					&rssi, &snr);
