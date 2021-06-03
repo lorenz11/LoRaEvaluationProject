@@ -154,6 +154,31 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	}
 	uint16_t i = atoi(pu);
 	printk("numberrr: %d\n", i);	
+
+
+
+
+
+
+	char data[MAX_DATA_LEN] = {'h', 'e', 'y'};
+
+	const struct device *lora_dev;
+	int ret;
+
+	lora_dev = device_get_binding(DEFAULT_RADIO);
+	if (!lora_dev) {
+		LOG_ERR("%s Device not found", DEFAULT_RADIO);
+	}
+
+	ret = lora_send(lora_dev, data, MAX_DATA_LEN);
+	if (ret < 0) {
+		LOG_ERR("LoRa send failed");
+			return 0;
+	}
+
+
+
+
 	return 0;
 }
 
