@@ -148,7 +148,6 @@ void main(void)
 		return;
 	}
 
-	int i = 0;
 	while (1) {
 		/* Block until data arrives */
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
@@ -165,8 +164,7 @@ void main(void)
 		// notfiy phone with sent LoRa message and other data
 		lres_notify(ndata, 0);
 		lres_notify(data, 1);
-		printk("round %d\n", i);
-		i += 1;
+		
 		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 			log_strdup(data), rssi, snr);
 	}

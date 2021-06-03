@@ -34,6 +34,11 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 #define MAX_DATA_LEN 10
 
 #define LOG_LEVEL CONFIG_LOG_DEFAULT_LEVEL
+
+// for thread listening for incoming LoRa experiment commands
+#define MY_STACK_SIZE 500
+#define MY_PRIORITY 5
+
 #include <logging/log.h>
 LOG_MODULE_REGISTER(lora_send);
 
@@ -144,4 +149,20 @@ void main(void)
 		LOG_ERR("LoRa config failed");
 		return;
 	}
+
+	int16_t rssi;
+	int8_t snr;
+	while(1) {
+		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
+					&rssi, &snr);
+			if (len < 0) {
+				LOG_ERR("LoRa receive failed");
+				return;
+			}
+	
+		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
+				log_strdup(data), rssi, snr);
+	}
+
+
 }
