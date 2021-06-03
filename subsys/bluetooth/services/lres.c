@@ -76,7 +76,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 
 	config.tx_power = *pu + 5;
 
-	config.tx = true;
+	config.tx = false;
 
  	lora_dev = device_get_binding(DEFAULT_RADIO);
 	if (!lora_dev) {
