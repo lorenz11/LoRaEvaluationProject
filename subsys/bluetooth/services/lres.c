@@ -11,6 +11,8 @@
 
 #include <drivers/lora.h>
 
+#include <stdlib.h>
+
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/conn.h>
@@ -144,12 +146,15 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
-	printk("length: %u\n", len)
+	printk("length: %u\n", len);
 	uint8_t *pu = (uint8_t *) buf;
-	for(int16_t i = 0; i < len; i++) {
+	for(int16_t i = 0; i < len - 4; i++) {
 		printk("data: %d\n", *pu);
 		pu++;
 	}
+	uint16_t i = atoi(pu);
+	printk("numberrr: %d\n", i);	
+	return 0;
 }
 
 // Lora Eval Service Declaration: service, descriptor, 1 notification characteristic, 1 write characteristic
