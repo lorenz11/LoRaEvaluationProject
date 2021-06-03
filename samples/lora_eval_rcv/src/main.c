@@ -136,7 +136,7 @@ void main(void)
 
 	config.frequency = 868100000;
 	config.bandwidth = 1;
-	config.datarate = 9;
+	config.datarate = 10;
 	config.preamble_len = 8;
 	config.coding_rate = 2;
 	config.tx_power = 5;
