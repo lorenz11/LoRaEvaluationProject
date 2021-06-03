@@ -69,13 +69,13 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
-	config.datarate = *pu + 7
+	config.datarate = *pu + 7;
 	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	config.preamble_len = 8;
 
-	config.coding_rate = *pu + 1
+	config.coding_rate = *pu + 1;
 	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
