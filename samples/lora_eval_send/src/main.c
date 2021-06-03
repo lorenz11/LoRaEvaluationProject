@@ -154,7 +154,8 @@ void main(void)
 	int16_t rssi;
 	int8_t snr;
 	int len;
-	uint8_t data[MAX_DATA_LEN] = {0};
+	//uint8_t data[MAX_DATA_LEN] = {0};
+	char data[MAX_DATA_LEN] = {'h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd'};
 
 
 	while (1) {
@@ -168,7 +169,7 @@ void main(void)
 		LOG_INF("Data sent!");
 
 		/* Send data at 1s interval */
-		k_sleep(K_MSEC(2000));
+		k_sleep(K_MSEC(5000));
 	}
 
 	/*while(1) {
