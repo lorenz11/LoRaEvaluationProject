@@ -150,6 +150,7 @@ void main(void)
 		return;
 	}
 
+	printk("before stuff\n");
 	int16_t rssi;
 	int8_t snr;
 	int len;
