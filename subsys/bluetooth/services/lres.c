@@ -71,6 +71,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	} else {
 		config.bandwidth = BW_500_KHZ;
 	}
+	printk("here too?\n");
 	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
@@ -169,6 +170,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	if (!lora_dev) {
 		LOG_ERR("%s Device not found", DEFAULT_RADIO);
 	}
+	printk("hellllloooooo\n");
 
 	ret = lora_send(lora_dev, data, MAX_DATA_LEN);
 	if (ret < 0) {

@@ -140,7 +140,7 @@ void main(void)
 	config.preamble_len = 8;
 	config.coding_rate = CR_4_5;
 	config.tx_power = 4;
-	config.tx = false;
+	config.tx = true;
 
 	ret = lora_config(lora_dev, &config);
 	if (ret < 0) {
