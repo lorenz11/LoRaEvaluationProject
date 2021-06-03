@@ -80,7 +80,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	config.tx = false;
 	*/
 
-	config.frequency = 868000000;
+	config.frequency = 868100000;
 	config.bandwidth = BW_125_KHZ;
 	config.datarate = SF_10;
 	config.preamble_len = 8;
