@@ -112,7 +112,7 @@ static struct bt_conn_auth_cb auth_cb_display = {
 
 void main(void)
 {
-    int err;
+    /*int err;
 
 	err = bt_enable(NULL);
 	if (err) {
@@ -123,7 +123,7 @@ void main(void)
 	bt_ready();
 
 	bt_conn_cb_register(&conn_callbacks);
-	bt_conn_auth_cb_register(&auth_cb_display);
+	bt_conn_auth_cb_register(&auth_cb_display);*/
 
 	// for LoRa communication
 	const struct device *lora_dev;
@@ -136,7 +136,7 @@ void main(void)
 		return;
 	}
 
-	config.frequency = 868300000;
+	config.frequency = 868000000;
 	config.bandwidth = BW_125_KHZ;
 	config.datarate = SF_10;
 	config.preamble_len = 8;
@@ -155,7 +155,23 @@ void main(void)
 	int8_t snr;
 	int len;
 	uint8_t data[MAX_DATA_LEN] = {0};
-	while(1) {
+
+
+	while (1) {
+		ret = lora_send(lora_dev, data, MAX_DATA_LEN);
+		if (ret < 0) {
+			LOG_ERR("LoRa send failed");
+			return;
+		}
+
+		printk("printk sent\n");
+		LOG_INF("Data sent!");
+
+		/* Send data at 1s interval */
+		k_sleep(K_MSEC(2000));
+	}
+
+	/*while(1) {
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 					&rssi, &snr);
 			if (len < 0) {
@@ -165,7 +181,7 @@ void main(void)
 	
 		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 				log_strdup(data), rssi, snr);
-	}
+	}*/
 
 
 }

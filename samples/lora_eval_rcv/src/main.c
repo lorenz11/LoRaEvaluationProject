@@ -106,7 +106,7 @@ static void lres_notify(const void *data, uint8_t type_of_notification)
 void main(void)
 {
 	// for ble connection
-    int err;
+    /*int err;
 
 	err = bt_enable(NULL);
 	if (err) {
@@ -117,7 +117,7 @@ void main(void)
 	bt_ready();
 
 	bt_conn_cb_register(&conn_callbacks);
-	bt_conn_auth_cb_register(&auth_cb_display);
+	bt_conn_auth_cb_register(&auth_cb_display);*/
 
 	// for LoRa communication
 	const struct device *lora_dev;
@@ -134,13 +134,13 @@ void main(void)
 		return;
 	}
 
-	config.frequency = 868300000;
+	config.frequency = 868000000;
 	config.bandwidth = BW_125_KHZ;
 	config.datarate = SF_10;
 	config.preamble_len = 8;
 	config.coding_rate = CR_4_5;
 	config.tx_power = 5;
-	config.tx = true;
+	config.tx = false;
 
 	ret = lora_config(lora_dev, &config);
 	if (ret < 0) {
