@@ -141,7 +141,7 @@ void main(void)
 	config.datarate = SF_10;
 	config.preamble_len = 8;
 	config.coding_rate = CR_4_5;
-	config.tx_power = 4;
+	config.tx_power = 5;
 	config.tx = true;
 
 	ret = lora_config(lora_dev, &config);
