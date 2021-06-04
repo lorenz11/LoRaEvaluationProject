@@ -112,7 +112,7 @@ static struct bt_conn_auth_cb auth_cb_display = {
 
 void main(void)
 {
-    int err;
+    /*int err;
 
 	err = bt_enable(NULL);
 	if (err) {
@@ -123,12 +123,16 @@ void main(void)
 	bt_ready();
 
 	bt_conn_cb_register(&conn_callbacks);
-	bt_conn_auth_cb_register(&auth_cb_display);
+	bt_conn_auth_cb_register(&auth_cb_display);*/
 
 	// for LoRa communication
 	const struct device *lora_dev;
 	struct lora_modem_config config;
-	int ret;
+	int ret, len;
+	uint8_t data[MAX_DATA_LEN] = {0};
+	
+	int16_t rssi;
+	int8_t snr;
 
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 	if (!lora_dev) {
@@ -149,13 +153,6 @@ void main(void)
 		LOG_ERR("LoRa config failed");
 		return;
 	}
-
-	printk("before stuff\n");
-	int16_t rssi;
-	int8_t snr;
-	int len;
-	uint8_t data[MAX_DATA_LEN] = {0};
-
 
 	while(1) {
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
