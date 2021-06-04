@@ -53,10 +53,11 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	struct lora_modem_config config;
 	int ret;
 
-	/*
-	uint8_t *pu = (uint8_t *) buf;
-	int frequencies[8] =  {868000000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
 	
+	uint8_t *pu = (uint8_t *) buf;
+	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
+	printk("hjkhjkh %d\n", frequencies[*pu]);
+
 	config.frequency = frequencies[*pu];
 	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
@@ -78,15 +79,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	config.tx_power = *pu + 5;
 
 	config.tx = false;
-	*/
 
-	config.frequency = 868100000;
-	config.bandwidth = BW_125_KHZ;
-	config.datarate = SF_10;
-	config.preamble_len = 8;
-	config.coding_rate = CR_4_5;
-	config.tx_power = 4;
-	config.tx = false;
 
  	lora_dev = device_get_binding(DEFAULT_RADIO);
 	if (!lora_dev) {
