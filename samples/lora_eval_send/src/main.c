@@ -25,13 +25,12 @@
 #include <bluetooth/services/lses.h>
 
 
-
 #define DEFAULT_RADIO_NODE DT_ALIAS(lora0)
 BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 	     "No default LoRa radio specified in DT");
 #define DEFAULT_RADIO DT_LABEL(DEFAULT_RADIO_NODE)
 
-#define MAX_DATA_LEN 10
+#define MAX_DATA_LEN 20
 
 #define LOG_LEVEL CONFIG_LOG_DEFAULT_LEVEL
 
@@ -40,7 +39,7 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 #define MY_PRIORITY 5
 
 #include <logging/log.h>
-LOG_MODULE_REGISTER(lora_send);
+LOG_MODULE_REGISTER(lora_receive);			// needs to register lora_receive?
 
 
 // ble service to be advertised
@@ -146,7 +145,7 @@ void main(void)
 	config.preamble_len = 8;
 	config.coding_rate = 1;
 	config.tx_power = 5;
-	config.tx = true;
+	config.tx = false;			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	ret = lora_config(lora_dev, &config);
 	if (ret < 0) {
@@ -162,6 +161,7 @@ void main(void)
 				return;
 			}
 	
+		printk("happening\n");
 		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 				log_strdup(data), rssi, snr);
 	}

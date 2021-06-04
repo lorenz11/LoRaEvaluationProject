@@ -140,7 +140,7 @@ void main(void)
 	config.preamble_len = 8;
 	config.coding_rate = 1;
 	config.tx_power = 5;
-	config.tx = false;
+	config.tx = true;
 
 	ret = lora_config(lora_dev, &config);
 	if (ret < 0) {
@@ -149,13 +149,14 @@ void main(void)
 	}
 	char data[MAX_DATA_LEN] = {'h', 'e', 'y'};
 
-while (1) {
+	while (1) {
 	ret = lora_send(lora_dev, data, MAX_DATA_LEN);
 		if (ret < 0) {
 			LOG_ERR("LoRa send failed");
 			return 0;
 		}
-}
+		k_sleep(K_MSEC(4000));
+	}
 
 	while (1) {
 		/* Block until data arrives */
