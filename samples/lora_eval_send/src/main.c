@@ -137,7 +137,7 @@ void main(void)
 	}
 
 	config.frequency = 868100000;
-	config.bandwidth = 1;
+	config.bandwidth = 0;
 	config.datarate = 10;
 	config.preamble_len = 8;
 	config.coding_rate = 2;
@@ -157,7 +157,7 @@ void main(void)
 	uint8_t data[MAX_DATA_LEN] = {0};
 
 
-	/*while(1) {
+	while(1) {
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 					&rssi, &snr);
 			if (len < 0) {
@@ -167,7 +167,7 @@ void main(void)
 	
 		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 				log_strdup(data), rssi, snr);
-	}*/
+	}
 
 
 }

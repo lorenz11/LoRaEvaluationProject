@@ -56,24 +56,19 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	
 	uint8_t *pu = (uint8_t *) buf;
 	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
-	printk("hjkhjkh %d\n", frequencies[*pu]);
 
 	config.frequency = frequencies[*pu];
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	config.bandwidth = *pu;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	config.datarate = *pu + 7;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	config.preamble_len = 8;
 
 	config.coding_rate = *pu + 1;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	config.tx_power = *pu + 5;
@@ -93,7 +88,6 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 
 	int8_t bt_data[1] = {-2};
 	bt_lres_notify(bt_data, 2);
-	//printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	return 0;
 }
 
@@ -189,7 +183,7 @@ int bt_lres_notify(const void *data, uint8_t type_of_notification)
 		}
 
 		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &data, sizeof(data));
-	} else {
+	} else {		// notify about config changed
 		static int8_t notifier[1];
 		notifier[0] = -2;
 

@@ -58,34 +58,26 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	struct lora_modem_config config;
 	int ret;
 
-	
 	uint8_t *pu = (uint8_t *) buf;
 	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
-	printk("hjkhjkh %d\n", frequencies[*pu]);
 
 	config.frequency = frequencies[*pu];
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	config.bandwidth = *pu;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	config.datarate = *pu + 7;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	config.preamble_len = 8;
 
 	config.coding_rate = *pu + 1;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	config.tx_power = *pu + 5;
 
 	config.tx = true;
-	
-
 
  	lora_dev = device_get_binding(DEFAULT_RADIO);
 	if (!lora_dev) {
@@ -98,7 +90,6 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	}
 
 	bt_lses_notify(-2);
-	//printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	return 0;
 }
 
@@ -164,7 +155,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 {
 	printk("command received\n");
 	char *pc = (char *) buf;
-	if(*pc == 'a') {
+	if(*pc == 'a') {			// set number of loops in explore mode
 		loop = 0;
 		pc++;
 		uint16_t i = atoi(pc);
@@ -199,7 +190,7 @@ static int lses_init(const struct device *dev)
 	return 0;
 }
 
-// notify phone about anything
+// notify phone about anything (currently only distinguishable in type of message (and only used for -2 = config changed))
 int bt_lses_notify(int8_t type_of_notification)
 {
 	int rc;
