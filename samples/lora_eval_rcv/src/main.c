@@ -135,10 +135,10 @@ void main(void)
 	}
 
 	config.frequency = 868100000;
-	config.bandwidth = 1;
+	config.bandwidth = 0;
 	config.datarate = 10;
 	config.preamble_len = 8;
-	config.coding_rate = 2;
+	config.coding_rate = 1;
 	config.tx_power = 5;
 	config.tx = false;
 
@@ -150,12 +150,14 @@ void main(void)
 
 	while (1) {
 		/* Block until data arrives */
+		printk("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 				&rssi, &snr);
 		if (len < 0) {
 			LOG_ERR("LoRa receive failed");
 			return;
 		}
+		printk("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
 		uint8_t ndata[2] = {0};
 		rssi = (uint8_t) -rssi; // negated to fit into an unsigned int (original value is negative)
 		ndata[0] = rssi;

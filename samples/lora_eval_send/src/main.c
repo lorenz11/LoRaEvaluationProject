@@ -140,7 +140,7 @@ void main(void)
 	config.bandwidth = 0;
 	config.datarate = 10;
 	config.preamble_len = 8;
-	config.coding_rate = 2;
+	config.coding_rate = 1;
 	config.tx_power = 5;
 	config.tx = true;
 

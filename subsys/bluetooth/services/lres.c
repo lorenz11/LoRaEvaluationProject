@@ -58,22 +58,27 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
 
 	config.frequency = frequencies[*pu];
+	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	config.bandwidth = *pu;
+	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	config.datarate = *pu + 7;
+	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	config.preamble_len = 8;
 
 	config.coding_rate = *pu + 1;
+	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	config.tx_power = *pu + 5;
+	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 
-	config.tx = false;
+	config.tx = true;
 
 
  	lora_dev = device_get_binding(DEFAULT_RADIO);
@@ -114,10 +119,17 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	const struct device *lora_dev;
 	int ret;
 
+	
+
+
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 	if (!lora_dev) {
 		LOG_ERR("%s Device not found", DEFAULT_RADIO);
 	}
+
+	
+
+
 	printk("hellllloooooo\n");
 
 	ret = lora_send(lora_dev, data, MAX_DATA_LEN);
