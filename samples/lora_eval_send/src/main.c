@@ -111,7 +111,7 @@ static struct bt_conn_auth_cb auth_cb_display = {
 
 void main(void)
 {
-    /*int err;
+    int err;
 
 	err = bt_enable(NULL);
 	if (err) {
@@ -122,7 +122,7 @@ void main(void)
 	bt_ready();
 
 	bt_conn_cb_register(&conn_callbacks);
-	bt_conn_auth_cb_register(&auth_cb_display);*/
+	bt_conn_auth_cb_register(&auth_cb_display);
 
 	// for LoRa communication
 	const struct device *lora_dev;
@@ -145,7 +145,7 @@ void main(void)
 	config.preamble_len = 8;
 	config.coding_rate = 1;
 	config.tx_power = 5;
-	config.tx = false;			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	config.tx = true;		
 
 	ret = lora_config(lora_dev, &config);
 	if (ret < 0) {
@@ -153,7 +153,7 @@ void main(void)
 		return;
 	}
 
-	while(1) {
+	/*while(1) {
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 					&rssi, &snr);
 			if (len < 0) {
@@ -164,7 +164,7 @@ void main(void)
 		printk("happening\n");
 		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 				log_strdup(data), rssi, snr);
-	}
+	}*/
 
 
 }

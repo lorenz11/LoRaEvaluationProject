@@ -138,7 +138,20 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 			return 0;
 	}
 
+	struct lora_modem_config config;
 
+	config.frequency = 868100000;
+	config.bandwidth = 0;
+	config.datarate = 10;
+	config.preamble_len = 8;
+	config.coding_rate = 1;
+	config.tx_power = 5;
+	config.tx = false;
+
+	ret = lora_config(lora_dev, &config);
+	if (ret < 0) {
+		LOG_ERR("LoRa config failed");
+	}
 
 
 	return 0;
