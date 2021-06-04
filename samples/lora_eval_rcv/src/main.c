@@ -149,11 +149,13 @@ void main(void)
 	}
 	char data[MAX_DATA_LEN] = {'h', 'e', 'y'};
 
+while (1) {
 	ret = lora_send(lora_dev, data, MAX_DATA_LEN);
 		if (ret < 0) {
 			LOG_ERR("LoRa send failed");
 			return 0;
 		}
+}
 
 	while (1) {
 		/* Block until data arrives */
