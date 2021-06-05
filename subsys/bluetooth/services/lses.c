@@ -19,7 +19,7 @@
 #include <bluetooth/uuid.h>
 #include <bluetooth/gatt.h>
 
-#define MAX_DATA_LEN 30
+#define MAX_DATA_LEN 20
 
 #define LOG_LEVEL CONFIG_BT_LSES_LOG_LEVEL
 #include <logging/log.h>
@@ -198,6 +198,10 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 		if (len < 0) {
 			LOG_ERR("LoRa receive failed");
 			return 0;
+		}
+
+		for(int16_t i = 0; i < 10; i++) {
+			print("unpacked data: %d\n", data[i]);
 		}
 
 		printk("printedddd: %s\n", log_strdup(data));

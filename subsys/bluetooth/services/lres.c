@@ -114,7 +114,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 
 
 
-	char data[MAX_DATA_LEN] = {'h', 'e', 'y'};
+	uint8_t data[MAX_DATA_LEN] = buf;
 
 	const struct device *lora_dev;
 	int ret;
