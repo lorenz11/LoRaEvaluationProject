@@ -162,6 +162,38 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 		number_of_messages = i;
 		printk("number: %d\n", i);		
 	}
+
+	if(*pc == 'b') {			// set number of loops in explore mode
+		struct lora_modem_config config;
+
+		config.frequency = 868100000;
+		config.bandwidth = 0;
+		config.datarate = 10;
+		config.preamble_len = 8;
+		config.coding_rate = 1;
+		config.tx_power = 5;
+		config.tx = false;
+
+		ret = lora_config(lora_dev, &config);
+		if (ret < 0) {
+			LOG_ERR("LoRa config failed");
+		}
+
+
+		int16_t rssi;
+		int8_t snr;
+		int le;
+		le = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
+					&rssi, &snr);
+			if (len < 0) {
+				LOG_ERR("LoRa receive failed");
+				return 0;
+			}
+
+		printk("printedddd: %s\n", log_strdup(data));
+		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
+				log_strdup(data), rssi, snr);
+	}
 	
 	return 0;
 }

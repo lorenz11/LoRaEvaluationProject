@@ -165,9 +165,10 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		}
 	
 	printk("two seconds... \n");
-	//printk("printedddd: %s\n", log_strdup(data));
-	//LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
-	//		log_strdup(data), rssi, snr);
+	
+	/*printk("printedddd: %s\n", log_strdup(data));
+	LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
+			log_strdup(data), rssi, snr);*/
 
 
 	return 0;
