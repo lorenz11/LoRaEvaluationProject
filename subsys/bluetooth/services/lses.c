@@ -174,6 +174,15 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 		config.tx_power = 5;
 		config.tx = false;
 
+		int ret;
+
+		const struct device *lora_dev;
+
+		lora_dev = device_get_binding(DEFAULT_RADIO);
+		if (!lora_dev) {
+			LOG_ERR("%s Device not found", DEFAULT_RADIO);
+		}
+
 		ret = lora_config(lora_dev, &config);
 		if (ret < 0) {
 			LOG_ERR("LoRa config failed");
@@ -183,6 +192,11 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 		int16_t rssi;
 		int8_t snr;
 		int le;
+
+		uint8_t data[MAX_DATA_LEN] = {0};
+
+
+
 		le = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 					&rssi, &snr);
 			if (len < 0) {
