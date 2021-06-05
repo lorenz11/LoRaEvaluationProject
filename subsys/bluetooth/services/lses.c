@@ -163,9 +163,16 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 		printk("number: %d\n", i);		
 	}
 
-	if(*pc == 'b') {			// set number of loops in explore mode
-		struct lora_modem_config config;
+	if(*pc == 'b') {			
+		const struct device *lora_dev;
+		lora_dev = device_get_binding(DEFAULT_RADIO);
+		if (!lora_dev) {
+			LOG_ERR("%s Device not found", DEFAULT_RADIO);
+		}
 
+
+
+		struct lora_modem_config config;
 		config.frequency = 868100000;
 		config.bandwidth = 0;
 		config.datarate = 10;
@@ -175,38 +182,44 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 		config.tx = false;
 
 		int ret;
-
-		const struct device *lora_dev;
-
-		lora_dev = device_get_binding(DEFAULT_RADIO);
-		if (!lora_dev) {
-			LOG_ERR("%s Device not found", DEFAULT_RADIO);
-		}
-
 		ret = lora_config(lora_dev, &config);
 		if (ret < 0) {
 			LOG_ERR("LoRa config failed");
 		}
 
 
+
 		int16_t rssi;
 		int8_t snr;
 		int le;
-
 		uint8_t data[MAX_DATA_LEN] = {0};
-
-
-
 		le = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 					&rssi, &snr);
-			if (len < 0) {
-				LOG_ERR("LoRa receive failed");
-				return 0;
-			}
+		if (len < 0) {
+			LOG_ERR("LoRa receive failed");
+			return 0;
+		}
 
 		printk("printedddd: %s\n", log_strdup(data));
 		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 				log_strdup(data), rssi, snr);
+
+
+
+		config.tx = true;
+		ret = lora_config(lora_dev, &config);
+		if (ret < 0) {
+			LOG_ERR("LoRa config failed");
+		}
+		k_sleep(K_MSEC(1000));
+		char senddata[MAX_DATA_LEN] = {'h', 'e', 'y'};
+		ret = lora_send(lora_dev, senddata, MAX_DATA_LEN);
+		if (ret < 0) {
+			LOG_ERR("LoRa send failed");
+			return 0;
+		}
+
+
 	}
 	
 	return 0;
