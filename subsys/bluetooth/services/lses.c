@@ -201,7 +201,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 		}
 
 		for(int16_t i = 0; i < 10; i++) {
-			print("unpacked data: %d\n", data[i]);
+			printk("unpacked data: %d\n", data[i]);
 		}
 
 		printk("printedddd: %s\n", log_strdup(data));
