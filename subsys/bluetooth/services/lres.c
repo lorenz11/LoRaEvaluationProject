@@ -100,20 +100,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
-	printk("length: %u\n", len);
 	uint8_t *pu = (uint8_t *) buf;
-	/*for(int16_t i = 0; i < len - 4; i++) {
-		printk("data: %d\n", *pu);
-		pu++;
-	}
-	uint16_t i = atoi(pu);
-	printk("numberrr: %d\n", i);	*/
-
-
-
-
-
-
 	uint8_t data[MAX_DATA_LEN] = {0};
 	for(int16_t i = 0; i < len; i++) {
 		data[i] = *pu;
@@ -121,31 +108,14 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	}
 
 
-	uint8_t *pp = (uint8_t *) buf;
-	for(int16_t i = 0; i < len - 4; i++) {
-		printk("data: %d\n", *pp);
-		pp++;
-	}
-	uint16_t i = atoi(pp);
-	printk("numberrr: %d\n", i);
-
-
 	const struct device *lora_dev;
-	int ret;
-
-	
-
 
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 	if (!lora_dev) {
 		LOG_ERR("%s Device not found", DEFAULT_RADIO);
 	}
 
-	
-
-
-	printk("hellllloooooo\n");
-
+	int ret;
 	ret = lora_send(lora_dev, data, MAX_DATA_LEN);
 	if (ret < 0) {
 		LOG_ERR("LoRa send failed");
