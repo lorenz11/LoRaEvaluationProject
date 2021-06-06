@@ -55,30 +55,28 @@ int bt_lses_notify(int8_t type_of_notification);
 void change_config(uint8_t* pu, bool tx) {
 	const struct device *lora_dev;
 
-	uint16_t len = 5;
-
 	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
 
 	config.frequency = frequencies[*pu];
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+	printk("[NOTIFICATION] data %d\n", *pu);
 	pu++;
 
 	config.bandwidth = *pu;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+	printk("[NOTIFICATION] data %d length\n", *pu);
 	pu++;
 
 	config.datarate = *pu + 7;
-	printk("[NOTIFICATION] dat %d length %u\n", *pu, len);
+	printk("[NOTIFICATION] dat %d length\n", *pu);
 	pu++;
 
 	config.preamble_len = 8;
 
 	config.coding_rate = *pu + 1;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+	printk("[NOTIFICATION] data %d length\n", *pu);
 	pu++;
 
 	config.tx_power = *pu + 5;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+	printk("[NOTIFICATION] data %d length\n", *pu);
 
 	config.tx = tx;
 
@@ -98,40 +96,7 @@ void change_config(uint8_t* pu, bool tx) {
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
-	/*const struct device *lora_dev;
-	struct lora_modem_config config;
-	int ret;*/
-
 	uint8_t *pu = (uint8_t *) buf;
-	/*int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
-
-	config.frequency = frequencies[*pu];
-	pu++;
-
-	config.bandwidth = *pu;
-	pu++;
-
-	config.datarate = *pu + 7;
-	pu++;
-
-	config.preamble_len = 8;
-
-	config.coding_rate = *pu + 1;
-	pu++;
-
-	config.tx_power = *pu + 5;
-
-	config.tx = true;
-
- 	lora_dev = device_get_binding(DEFAULT_RADIO);
-	if (!lora_dev) {
-		LOG_ERR("%s Device not found", DEFAULT_RADIO);
-	}
-
-	ret = lora_config(lora_dev, &config);
-	if (ret < 0) {
-		LOG_ERR("LoRa config failed");
-	}*/
 	change_config(pu, true);
 
 	bt_lses_notify(-2);
@@ -208,67 +173,68 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 		printk("number: %d\n", i);		
 	}
 
-	if(*pc == 'b') {			
+	if(*pc == 'b') {
+		// configure and prepare experiment mode
 		const struct device *lora_dev;
 		lora_dev = device_get_binding(DEFAULT_RADIO);
 		if (!lora_dev) {
 			LOG_ERR("%s Device not found", DEFAULT_RADIO);
 		}
 
+		pc++;
+		change_config(pc, false);
+		bt_lses_notify(-2);
 
+		printk("sender ready\n");
 
-		struct lora_modem_config config;
-		config.frequency = 868100000;
-		config.bandwidth = 0;
-		config.datarate = 10;
-		config.preamble_len = 8;
-		config.coding_rate = 1;
-		config.tx_power = 5;
-		config.tx = false;
-
-		int ret;
-		ret = lora_config(lora_dev, &config);
-		if (ret < 0) {
-			LOG_ERR("LoRa config failed");
-		}
-
-
-
+		// wait for experiment started notification
 		int16_t rssi;
 		int8_t snr;
-		int le;
+		int l;
 		uint8_t data[MAX_DATA_LEN] = {0};
-		le = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
+		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 					&rssi, &snr);
-		if (len < 0) {
+		if (l < 0) {
 			LOG_ERR("LoRa receive failed");
 			return 0;
 		}
 
-		for(int16_t i = 0; i < 10; i++) {
+		printk("l is: %d\n", l);
+		for(int16_t i = 0; i < l; i++) {
 			printk("unpacked data: %d\n", data[i]);
 		}
 
-		printk("printedddd: %s\n", log_strdup(data));
-		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
-				log_strdup(data), rssi, snr);
+		// reconfigure device for sending and send received data as ACK
+		bool experiment_ready = false;
+		while(!experiment_ready) {
+			experiment_ready = true;
+			int ret;
 
+			config.tx = true;
+			ret = lora_config(lora_dev, &config);
+			if (ret < 0) {
+				LOG_ERR("LoRa config failed");
+			}
+			k_sleep(K_MSEC(200));
+			//char senddata[MAX_DATA_LEN] = {'h', 'e', 'y'};
+			ret = lora_send(lora_dev, data, MAX_DATA_LEN);
+			if (ret < 0) {
+				LOG_ERR("LoRa send failed");
+				return 0;
+			}
 
-
-		config.tx = true;
-		ret = lora_config(lora_dev, &config);
-		if (ret < 0) {
-			LOG_ERR("LoRa config failed");
+			config.tx = false;
+			ret = lora_config(lora_dev, &config);
+			if (ret < 0) {
+				LOG_ERR("LoRa config failed");
+			}
+			l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
+					&rssi, &snr);
+			if (l < 0) {
+				LOG_ERR("LoRa receive failed");
+				return 0;
+			}
 		}
-		k_sleep(K_MSEC(1000));
-		char senddata[MAX_DATA_LEN] = {'h', 'e', 'y'};
-		ret = lora_send(lora_dev, senddata, MAX_DATA_LEN);
-		if (ret < 0) {
-			LOG_ERR("LoRa send failed");
-			return 0;
-		}
-
-
 	}
 	
 	return 0;

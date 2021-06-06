@@ -91,47 +91,7 @@ void change_config(uint8_t* pu, bool tx) {
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
-	/*const struct device *lora_dev;
-	struct lora_modem_config config;
-	int ret;*/
-
-	
 	uint8_t *pu = (uint8_t *) buf;
-	/*int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
-
-	config.frequency = frequencies[*pu];
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
-	pu++;
-
-	config.bandwidth = *pu;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
-	pu++;
-
-	config.datarate = *pu + 7;
-	printk("[NOTIFICATION] dat %d length %u\n", *pu, len);
-	pu++;
-
-	config.preamble_len = 8;
-
-	config.coding_rate = *pu + 1;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
-	pu++;
-
-	config.tx_power = *pu + 5;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
-
-	config.tx = false;
-
-
- 	lora_dev = device_get_binding(DEFAULT_RADIO);
-	if (!lora_dev) {
-		LOG_ERR("%s Device not found", DEFAULT_RADIO);
-	}
-
-	ret = lora_config(lora_dev, &config);
-	if (ret < 0) {
-		LOG_ERR("LoRa config failed");
-	}*/
 	change_config(pu, false);
 
 	int8_t bt_data[1] = {-2};
@@ -150,12 +110,16 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		pu++;
 	}
 
-
 	const struct device *lora_dev;
-
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 	if (!lora_dev) {
 		LOG_ERR("%s Device not found", DEFAULT_RADIO);
+	}
+
+	config.tx = true;
+	ret = lora_config(lora_dev, &config);
+	if (ret < 0) {
+		LOG_ERR("LoRa config failed");
 	}
 
 	int ret;
@@ -165,22 +129,12 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 			return 0;
 	}
 
-	struct lora_modem_config config;
-
-	config.frequency = 868100000;
-	config.bandwidth = 0;
-	config.datarate = 10;
-	config.preamble_len = 8;
-	config.coding_rate = 1;
-	config.tx_power = 5;
 	config.tx = false;
-
 	ret = lora_config(lora_dev, &config);
 	if (ret < 0) {
 		LOG_ERR("LoRa config failed");
 	}
-
-
+	
 	int16_t rssi;
 	int8_t snr;
 	int le;
