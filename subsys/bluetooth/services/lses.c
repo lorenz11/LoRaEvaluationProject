@@ -208,7 +208,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 			}
 		}
 		uint16_t d = atoi(delay); 
-		printk("delay: %d\n", i);
+		printk("delay: %d\n", d);
 
 		// reconfigure device for sending and send received data as ACK
 		bool experiment_ready = false;
@@ -239,7 +239,6 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 					&rssi, &snr);
 			if (l < 0) {
 				LOG_ERR("LoRa receive failed");
-				return 0;
 			}
 		}
 
@@ -250,6 +249,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 		exp_data[8] = 'l';
 		exp_data[9] = 'o';
 		config.tx = true;
+		int ret;
 		int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
 		for(uint8_t i = 0; i < 8; i++) {
 			if(((data[4] >> i)  & 0x01) == 1) {					// the 4th byte of the settings byte array represents the frequencies to use
