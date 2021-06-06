@@ -200,9 +200,15 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 		}
 
 		printk("l is: %d\n", l);
+		char delay[l-9];
 		for(int16_t i = 0; i < l; i++) {
 			printk("unpacked data: %d\n", data[i]);
+			if(i > 8) {			// get experiment start delay
+				delay[i-9] = data[i];
+			}
 		}
+		uint16_t i = atoi(delay); 
+		printk("delay: %d\n", i);
 
 		// reconfigure device for sending and send received data as ACK
 		bool experiment_ready = false;

@@ -104,7 +104,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
 	uint8_t *pu = (uint8_t *) buf;
-	uint8_t data[MAX_DATA_LEN] = {0};
+	uint8_t data[len];
 	for(int16_t i = 0; i < len; i++) {
 		data[i] = *pu;
 		pu++;
@@ -117,13 +117,13 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	}
 
 	config.tx = true;
+	int ret;
 	ret = lora_config(lora_dev, &config);
 	if (ret < 0) {
 		LOG_ERR("LoRa config failed");
 	}
 
-	int ret;
-	ret = lora_send(lora_dev, data, MAX_DATA_LEN);
+	ret = lora_send(lora_dev, data, len);
 	if (ret < 0) {
 		LOG_ERR("LoRa send failed");
 			return 0;
