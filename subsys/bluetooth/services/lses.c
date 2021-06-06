@@ -55,6 +55,8 @@ int bt_lses_notify(int8_t type_of_notification);
 void change_config(uint8_t* pu, bool tx) {
 	const struct device *lora_dev;
 
+	uint16_t len = 5;
+
 	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
 
 	config.frequency = frequencies[*pu];
