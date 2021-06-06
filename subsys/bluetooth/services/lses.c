@@ -199,7 +199,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 			return 0;
 		}
 
-		printk("l is: %d\n", l);
+		
 		char delay[l-9];
 		for(int16_t i = 0; i < l; i++) {
 			printk("unpacked data: %d\n", data[i]);
@@ -207,7 +207,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 				delay[i-9] = data[i];
 			}
 		}
-		uint16_t i = atoi(delay); 
+		uint16_t d = atoi(delay); 
 		printk("delay: %d\n", i);
 
 		// reconfigure device for sending and send received data as ACK
@@ -222,23 +222,89 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 				LOG_ERR("LoRa config failed");
 			}
 			k_sleep(K_MSEC(200));
-			//char senddata[MAX_DATA_LEN] = {'h', 'e', 'y'};
 			ret = lora_send(lora_dev, data, MAX_DATA_LEN);
 			if (ret < 0) {
 				LOG_ERR("LoRa send failed");
 				return 0;
 			}
 
+
+
 			config.tx = false;
 			ret = lora_config(lora_dev, &config);
 			if (ret < 0) {
 				LOG_ERR("LoRa config failed");
 			}
-			l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
+			l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(d),
 					&rssi, &snr);
 			if (l < 0) {
 				LOG_ERR("LoRa receive failed");
 				return 0;
+			}
+		}
+
+		char exp_data[18];
+		exp_data[5] = 'h';
+		exp_data[6] = 'e';
+		exp_data[7] = 'l';
+		exp_data[8] = 'l';
+		exp_data[9] = 'o';
+		config.tx = true;
+		int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
+		for(uint8_t i = 0; i < 8; i++) {
+			if(((data[4] >> i)  & 0x01) == 1) {					// the 4th byte of the settings byte array represents the frequencies to use
+				config.frequency = frequencies[i];				// if a bit in that byte is set, the corresponding frequency will be used;
+				exp_data[0] = (char) i + 48;
+			} else {
+				continue;
+			}
+
+			for(uint8_t j = 0; j < 3; j++) {
+				if(((data[5] >> j)  & 0x01) == 1) {
+					config.bandwidth =  j;
+					exp_data[1] = (char) j + 48;
+				} else {
+					continue;
+				}
+				for(uint8_t k = 0; k < 6; k++) {
+					if(((data[6] >> k)  & 0x01) == 1) {
+						config.datarate =  k + 7;
+						exp_data[2] = (char) k + 48;
+					} else {
+						continue;
+					}
+					for(uint8_t l = 0; l < 4; l++) {
+						if(((data[7] >> l)  & 0x01) == 1) {
+							config.coding_rate =  l + 1;
+							exp_data[3] = (char) l + 48;
+						} else {
+							continue;
+						}
+						for(uint8_t m = 0; m < 8; m++) {
+							if(((data[4] >> m)  & 0x01) == 1) {
+								config.tx_power =  m + 1;
+								exp_data[4] = (char) m + 48;
+								ret = lora_config(lora_dev, &config);
+								if (ret < 0) {
+									LOG_ERR("LoRa config failed");
+								}
+								for(uint8_t n = 0; n < data[0]; n++) {						// data[0] contains the number of LoRa transmissions per parameter combination
+									exp_data[10] = (char) n;
+									ret = lora_send(lora_dev, exp_data, 11);
+									if (ret < 0) {
+										LOG_ERR("LoRa send failed");
+										return 0;
+									}
+									k_sleep(K_MSEC(data[1] * 1000));						// data[1] contains the number of seconds between transmissions
+								}
+
+								k_sleep(K_MSEC(5000));										// wait 8 seconds between combinations
+							} else {
+								continue;
+							}
+						}
+					}
+				}
 			}
 		}
 	}
