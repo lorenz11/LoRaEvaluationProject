@@ -31,6 +31,7 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 #define DEFAULT_RADIO DT_LABEL(DEFAULT_RADIO_NODE)
 
 static uint8_t lres_blsc;
+static struct lora_modem_config config;
 
 // when descriptor changed at phone (for enableing notifications)
 static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
@@ -45,16 +46,9 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 // implemented at bottom of file (declared here for use in next function)
 int bt_lres_notify(const void *data, uint8_t type_of_notification);
 
-// gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic)
-static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
-{
+void change_config(uint8_t* pu, bool tx) {
 	const struct device *lora_dev;
-	struct lora_modem_config config;
-	int ret;
 
-	
-	uint8_t *pu = (uint8_t *) buf;
 	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
 
 	config.frequency = frequencies[*pu];
@@ -66,7 +60,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	pu++;
 
 	config.datarate = *pu + 7;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+	printk("[NOTIFICATION] dat %d length %u\n", *pu, len);
 	pu++;
 
 	config.preamble_len = 8;
@@ -78,7 +72,54 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	config.tx_power = *pu + 5;
 	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 
-	config.tx = true;
+	config.tx = tx;
+
+	lora_dev = device_get_binding(DEFAULT_RADIO);
+	if (!lora_dev) {
+		LOG_ERR("%s Device not found", DEFAULT_RADIO);
+	}
+
+	int ret;
+	ret = lora_config(lora_dev, &config);
+	if (ret < 0) {
+		LOG_ERR("LoRa config failed");
+	}
+}
+
+// gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic)
+static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
+{
+	/*const struct device *lora_dev;
+	struct lora_modem_config config;
+	int ret;*/
+
+	
+	uint8_t *pu = (uint8_t *) buf;
+	/*int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
+
+	config.frequency = frequencies[*pu];
+	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+	pu++;
+
+	config.bandwidth = *pu;
+	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+	pu++;
+
+	config.datarate = *pu + 7;
+	printk("[NOTIFICATION] dat %d length %u\n", *pu, len);
+	pu++;
+
+	config.preamble_len = 8;
+
+	config.coding_rate = *pu + 1;
+	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+	pu++;
+
+	config.tx_power = *pu + 5;
+	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+
+	config.tx = false;
 
 
  	lora_dev = device_get_binding(DEFAULT_RADIO);
@@ -89,7 +130,8 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	ret = lora_config(lora_dev, &config);
 	if (ret < 0) {
 		LOG_ERR("LoRa config failed");
-	}
+	}*/
+	change_config(pu, false);
 
 	int8_t bt_data[1] = {-2};
 	bt_lres_notify(bt_data, 2);
