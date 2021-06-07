@@ -153,18 +153,11 @@ void main(void)
 		return;
 	}
 
-	/*while(1) {
-		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
-					&rssi, &snr);
-			if (len < 0) {
-				LOG_ERR("LoRa receive failed");
-				return;
-			}
-	
-		printk("happening\n");
-		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
-				log_strdup(data), rssi, snr);
-	}*/
+	s64_t time_stamp;
+	s64_t milliseconds_spent;
 
+	time_stamp = k_uptime_get();
+	k_sleep(K_SECONDS(2));
+	milliseconds_spent = k_uptime_delta(&time_stamp);
 
 }

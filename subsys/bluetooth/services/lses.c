@@ -187,6 +187,9 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 
 		printk("sender ready\n");
 
+
+
+
 		// wait for experiment started notification
 		int16_t rssi;
 		int8_t snr;
@@ -198,7 +201,6 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 			LOG_ERR("LoRa receive failed");
 			return 0;
 		}
-
 		
 		char delay[l-9];
 		for(int16_t i = 0; i < l; i++) {
@@ -209,6 +211,9 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 		}
 		uint16_t d = atoi(delay); 
 		printk("delay: %d\n", d);
+
+
+
 
 		// reconfigure device for sending and send received data as ACK
 		bool experiment_ready = false;
@@ -242,12 +247,13 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 			}
 		}
 
-		char exp_data[18];
-		exp_data[5] = 'h';
-		exp_data[6] = 'e';
-		exp_data[7] = 'l';
-		exp_data[8] = 'l';
-		exp_data[9] = 'o';
+
+
+
+		// start experiment
+		char exp_data[data[2]]; 	// data[2] contains msg length
+		exp_data[5] = '.';
+	
 		config.tx = true;
 		int ret;
 		int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
@@ -289,7 +295,14 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 									LOG_ERR("LoRa config failed");
 								}
 								for(uint8_t n = 0; n < data[0]; n++) {						// data[0] contains the number of LoRa transmissions per parameter combination
-									exp_data[10] = (char) n;
+									exp_data[6] = (char) n / 100 + 48;						// include numbering into transmission content (as String (3 bytes) not as byte (1 byte))
+									exp_data[7] = (char) n / 10 + 48;						// this line needs to be changed if max number of transmissions per combination is changed (it is 100 now)
+									exp_data[8] = (char) n % 10 + 48;
+
+									for(uint8_t p = 9; p < data[2]; p++) {					// data[2] contains message length (length of the transmitted content)
+										exp_data[p] = 'a';								// fills the message up with a's until desired message length
+									}
+
 									ret = lora_send(lora_dev, exp_data, 11);
 									if (ret < 0) {
 										LOG_ERR("LoRa send failed");
@@ -298,7 +311,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 									k_sleep(K_MSEC(data[1] * 1000));						// data[1] contains the number of seconds between transmissions
 								}
 
-								k_sleep(K_MSEC(5000));										// wait 8 seconds between combinations
+								k_sleep(K_MSEC(5000));										// wait 5 seconds between combinations
 							} else {
 								continue;
 							}
