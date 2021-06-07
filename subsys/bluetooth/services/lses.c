@@ -287,7 +287,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 							continue;
 						}
 						for(uint8_t m = 0; m < 8; m++) {
-							if(((data[4] >> m)  & 0x01) == 1) {
+							if(((data[8] >> m)  & 0x01) == 1) {
 								config.tx_power =  m + 1;
 								exp_data[4] = (char) m + 48;
 								ret = lora_config(lora_dev, &config);

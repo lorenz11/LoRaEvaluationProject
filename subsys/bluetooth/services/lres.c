@@ -184,14 +184,28 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 						continue;
 					}
 					for(uint8_t m = 0; m < 8; m++) {
-						if(((data[4] >> m)  & 0x01) == 1) {
+						if(((data[8] >> m)  & 0x01) == 1) {
 							config.tx_power =  m + 1;
 							ret = lora_config(lora_dev, &config);
 							if (ret < 0) {
 								LOG_ERR("LoRa config failed");
 							}
+
+							int64_t time_stamp;
+							int64_t milliseconds_spent;
+							time_stamp = k_uptime_get();
+							uint16_t iteration_time = data[0] * data[1];
 							for(uint8_t n = 0; n < data[0]; n++) {						// data[0] contains the number of LoRa transmissions per parameter combination
+
+								l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(2),
+										&rssi, &snr);
+
 								
+								if (len < 0) {
+									LOG_ERR("LoRa receive failed");
+								}
+
+
 
 								ret = lora_send(lora_dev, exp_data, 11);
 								if (ret < 0) {
