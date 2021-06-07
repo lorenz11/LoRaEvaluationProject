@@ -159,5 +159,6 @@ void main(void)
 	time_stamp = k_uptime_get();
 	k_sleep(K_SECONDS(2));
 	milliseconds_spent = k_uptime_delta(&time_stamp);
+	printk("time spent: %d\n", milliseconds_spent);
 
 }
