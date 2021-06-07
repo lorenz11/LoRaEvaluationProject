@@ -153,12 +153,12 @@ void main(void)
 		return;
 	}
 
-	s64_t time_stamp;
-	s64_t milliseconds_spent;
+	int64_t time_stamp;
+	int64_t milliseconds_spent;
 
 	time_stamp = k_uptime_get();
-	k_sleep(K_SECONDS(2));
+	k_sleep(K_MSEC(6234));
 	milliseconds_spent = k_uptime_delta(&time_stamp);
-	printk("time spent: %d\n", milliseconds_spent);
+	printk("time spent: %lld\n", milliseconds_spent);
 
 }
