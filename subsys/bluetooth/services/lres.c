@@ -154,6 +154,16 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		}
 	}
 
+	char delay[len-9];
+	for(int16_t i = 0; i < l; i++) {
+		if(i > 8) {			// get experiment start delay
+			delay[i-9] = data[i];
+		}
+	}
+	uint16_t d = atoi(delay); 
+	printk("delay: %d\n", d);
+	k_sleep(K_SECONDS(d))
+
 	
 	config.tx = false;
 	int ret;
@@ -194,25 +204,19 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 							int64_t time_stamp;
 							int64_t milliseconds_spent;
 							time_stamp = k_uptime_get();
-							uint16_t iteration_time = data[0] * data[1];
-							for(uint8_t n = 0; n < data[0]; n++) {						// data[0] contains the number of LoRa transmissions per parameter combination
+							int64_t iteration_time = data[0] * data[1] * 1000;			// data[0] * data[1] = # LoRa transmissions * time between transmissions
+							while(iteration_time > 0) {													// data[0] contains the number of LoRa transmissions per parameter combination
+								milliseconds_spent = k_uptime_delta(&time_stamp);
+								time_stamp = k_uptime_get();
 
-								l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(2),
-										&rssi, &snr);
-
-								
-								if (len < 0) {
+								iteration_time = iteration_time - milliseconds_spent;
+								l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_MSEC(iteration_time),
+										&rssi, &snr);					
+								if (l < 0) {
 									LOG_ERR("LoRa receive failed");
+								} else {
+									lres_notify(data, 1);
 								}
-
-
-
-								ret = lora_send(lora_dev, exp_data, 11);
-								if (ret < 0) {
-									LOG_ERR("LoRa send failed");
-									return 0;
-								}
-								k_sleep(K_MSEC(data[1] * 1000));						// data[1] contains the number of seconds between transmissions
 							}
 
 							k_sleep(K_MSEC(5000));										// wait 5 seconds between combinations
