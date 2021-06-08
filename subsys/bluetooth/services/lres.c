@@ -110,7 +110,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		pu++;
 	}
 
-	printk("data[0]: %d\n", exp_data[0]);
+	printk("1data[0]: %d\n", exp_data[0]);
 	printk("data[1]: %d\n", exp_data[1]);
 
 	const struct device *lora_dev;
@@ -123,7 +123,8 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	int16_t rssi;
 	int8_t snr;
 	int l;
-	uint8_t data[len];
+	const uint16_t temp = 15;
+	uint8_t data[MAX_DATA_LEN] = {0};
 	bool exp_started = false;
 	while(!exp_started) {
 		printk("in loop...\n");
@@ -135,11 +136,16 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 			LOG_ERR("LoRa config failed");
 		}
 
+		printk("22data[0]: %d\n", exp_data[0]);
+		printk("data[1]: %d\n", exp_data[1]);
 		ret = lora_send(lora_dev, exp_data, len);
 		if (ret < 0) {
 			LOG_ERR("LoRa send failed");
 				return 0;
 		}
+
+		printk("33data[0]: %d\n", exp_data[0]);
+		printk("data[1]: %d\n", exp_data[1]);
 
 		// configure as receiver, wait 2 seconds for ACK
 		config.tx = false;
@@ -152,28 +158,71 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(2),
 					&rssi, &snr);
 		if (len < 0) {
-			LOG_ERR("LoRa receive failed");
+			LOG_ERR("LoRa receive failed");		// resend settings
 		} else {
 			exp_started = true;				// check if received data exactly matches sent data
+			printk("44data[0]: %d\n", exp_data[0]);
+			printk("data[1]: %d\n", exp_data[1]);
 		}
 	}
 
-	char delay[len-9];
+	printk("55data[0]: %d\n", exp_data[0]);
+	printk("data[1]: %d\n", exp_data[1]);
+	char delay[1];							// how to get it dynamic?
 	for(int16_t i = 0; i < l; i++) {
 		if(i > 8) {			// get experiment start delay
 			delay[i-9] = exp_data[i];
 		}
 	}
+	printk("66data[0]: %d\n", exp_data[0]);
+	printk("data[1]: %d\n", exp_data[1]);
+
 	uint16_t d = atoi(delay); 
 	printk("delay: %d\n", d);
-	k_sleep(K_SECONDS(d));
-	printk("delay counted down\n");
+	//k_sleep(K_SECONDS(1));		//!!!!!!!!!!!!!!!!!!
+	//printk("delay counted down\n");
 
-	printk("data[0]: %d\n", exp_data[0]);
+	printk("77data[0]: %d\n", exp_data[0]);
 	printk("data[1]: %d\n", exp_data[1]);
 
 
-	uint8_t transmission_data[exp_data[2]];				// exp_data[2] contains msg length
+
+
+
+
+
+
+	/*config.frequency = 868100000;
+	config.bandwidth = 0;
+	config.datarate = 7;
+	config.preamble_len = 8;
+	config.coding_rate = 1;
+	config.tx_power = 5;
+	config.tx = false;
+
+	ret = lora_config(lora_dev, &config);
+	if (ret < 0) {
+		LOG_ERR("Lora config failed");
+	}
+
+
+	uint8_t test_data[MAX_DATA_LEN] ={0};
+	l = lora_recv(lora_dev, test_data, MAX_DATA_LEN, K_FOREVER,
+										&rssi, &snr);					
+	if (l < 0) {
+		LOG_ERR("LoRa receive failed");
+	}
+
+	LOG_INF("Recccceived data: %s (RSSI:%ddBm, SNR:%ddBm)",
+										log_strdup(test_data), rssi, snr);
+	printk("length: %d\n", l);
+
+	k_sleep(K_FOREVER);*/
+
+
+	bool first_iteration = true;
+
+	uint8_t transmission_data[MAX_DATA_LEN] ={0};				// exp_data[2] contains msg length
 	config.tx = false;
 	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
 	for(uint8_t i = 0; i < 8; i++) {
@@ -221,6 +270,11 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 							printk("data[1]: %d\n", exp_data[1]);
 							int64_t iteration_time = exp_data[0] * exp_data[1] * 1000;			// exp_data[0] * exp_data[1] = # LoRa transmissions * time between transmissions
 							
+							if(first_iteration) {
+								iteration_time += 1000 * d;						// count down delay as part of the LoRa receive timing
+								first_iteration = false;
+							}
+
 							printk("in m loop before experiment iteration start\n");
 							printk("int64 test iteration_time: %lld\n", iteration_time);
 							while(iteration_time > 0) {													// exp_data[0] contains the number of LoRa transmissions per parameter combination
@@ -229,6 +283,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 								time_stamp = k_uptime_get();
 
 								iteration_time = iteration_time - milliseconds_spent;
+								printk("remaining iteration_time: %lld\n", iteration_time);
 								l = lora_recv(lora_dev, transmission_data, MAX_DATA_LEN, K_MSEC(iteration_time),
 										&rssi, &snr);					
 								if (l < 0) {
@@ -236,11 +291,14 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 								} else {
 									bt_lres_notify(data, 1);
 									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
-										log_strdup(data), rssi, snr);
+										log_strdup(transmission_data), rssi, snr);
+									printk("length: %d\n", l);
 								}
 							}
 
 							k_sleep(K_MSEC(5000));										// wait 5 seconds between combinations
+							printk("end of iteration\n");
+							k_sleep(K_FOREVER);
 						} else {
 							continue;
 						}
