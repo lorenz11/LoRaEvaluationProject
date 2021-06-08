@@ -171,7 +171,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	for(uint8_t i = 0; i < 8; i++) {
 		if(((data[4] >> i)  & 0x01) == 1) {					// the 4th byte of the settings byte array represents the frequencies to use
 			config.frequency = frequencies[i];				// if a bit in that byte is set, the corresponding frequency will be used;
-			printk("frequency: %d\n", frequencies[i])
+			printk("frequency: %d\n", frequencies[i]);
 		} else {
 			continue;
 		}
@@ -179,24 +179,28 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		for(uint8_t j = 0; j < 3; j++) {
 			if(((data[5] >> j)  & 0x01) == 1) {
 				config.bandwidth =  j;
+				printk("bandwidth: %d\n", j);
 			} else {
 				continue;
 			}
 			for(uint8_t k = 0; k < 6; k++) {
 				if(((data[6] >> k)  & 0x01) == 1) {
 					config.datarate =  k + 7;
+					printk("data rate: %d\n", k+7);
 				} else {
 					continue;
 				}
 				for(uint8_t l = 0; l < 4; l++) {
 					if(((data[7] >> l)  & 0x01) == 1) {
 						config.coding_rate =  l + 1;
+						printk("coding rate: %d\n", l+1);
 					} else {
 						continue;
 					}
 					for(uint8_t m = 0; m < 8; m++) {
 						if(((data[8] >> m)  & 0x01) == 1) {
 							config.tx_power =  m + 1;
+							printk("power: %d\n", m+1);
 							ret = lora_config(lora_dev, &config);
 							if (ret < 0) {
 								LOG_ERR("LoRa config failed");
@@ -206,7 +210,9 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 							int64_t milliseconds_spent;
 							time_stamp = k_uptime_get();
 							int64_t iteration_time = data[0] * data[1] * 1000;			// data[0] * data[1] = # LoRa transmissions * time between transmissions
+							printk("in m loop before experiment iteration start\n");
 							while(iteration_time > 0) {													// data[0] contains the number of LoRa transmissions per parameter combination
+								printk("in m loop after experiment iteration start (in while loop)\n");
 								milliseconds_spent = k_uptime_delta(&time_stamp);
 								time_stamp = k_uptime_get();
 
