@@ -104,9 +104,9 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
 	uint8_t *pu = (uint8_t *) buf;
-	uint8_t data[len];
+	uint8_t settings_data[len];
 	for(int16_t i = 0; i < len; i++) {
-		data[i] = *pu;
+		settings_data[i] = *pu;
 		pu++;
 	}
 
@@ -199,7 +199,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 					}
 					for(uint8_t m = 0; m < 8; m++) {
 						if(((data[8] >> m)  & 0x01) == 1) {
-							config.tx_power =  m + 1;
+							config.tx_power =  m + 5;
 							printk("power: %d\n", m+1);
 							ret = lora_config(lora_dev, &config);
 							if (ret < 0) {
@@ -209,8 +209,12 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 							int64_t time_stamp;
 							int64_t milliseconds_spent;
 							time_stamp = k_uptime_get();
+							printk("data[0]: %d\n", data[0]);
+							printk("data[1]: %d\n", data[1]);
 							int64_t iteration_time = data[0] * data[1] * 1000;			// data[0] * data[1] = # LoRa transmissions * time between transmissions
+							
 							printk("in m loop before experiment iteration start\n");
+							printk("int64 test iteration_time: %lld\n", iteration_time);
 							while(iteration_time > 0) {													// data[0] contains the number of LoRa transmissions per parameter combination
 								printk("in m loop after experiment iteration start (in while loop)\n");
 								milliseconds_spent = k_uptime_delta(&time_stamp);
