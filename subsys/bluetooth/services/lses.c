@@ -251,8 +251,8 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 
 
 		// start experiment
-		char exp_data[data[2]]; 	// data[2] contains msg length
-		exp_data[5] = '.';
+		char transmission_data[data[2]]; 	// data[2] contains msg length
+		transmission_data[5] = '.';
 	
 		config.tx = true;
 		int ret;
@@ -260,7 +260,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 		for(uint8_t i = 0; i < 8; i++) {
 			if(((data[4] >> i)  & 0x01) == 1) {					// the 4th byte of the settings byte array represents the frequencies to use
 				config.frequency = frequencies[i];				// if a bit in that byte is set, the corresponding frequency will be used;
-				exp_data[0] = (char) i + 48;
+				transmission_data[0] = (char) i + 48;
 			} else {
 				continue;
 			}
@@ -268,42 +268,42 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 			for(uint8_t j = 0; j < 3; j++) {
 				if(((data[5] >> j)  & 0x01) == 1) {
 					config.bandwidth =  j;
-					exp_data[1] = (char) j + 48;
+					transmission_data[1] = (char) j + 48;
 				} else {
 					continue;
 				}
 				for(uint8_t k = 0; k < 6; k++) {
 					if(((data[6] >> k)  & 0x01) == 1) {
 						config.datarate =  k + 7;
-						exp_data[2] = (char) k + 48;
+						transmission_data[2] = (char) k + 48;
 					} else {
 						continue;
 					}
 					for(uint8_t l = 0; l < 4; l++) {
 						if(((data[7] >> l)  & 0x01) == 1) {
 							config.coding_rate =  l + 1;
-							exp_data[3] = (char) l + 48;
+							transmission_data[3] = (char) l + 48;
 						} else {
 							continue;
 						}
 						for(uint8_t m = 0; m < 8; m++) {
 							if(((data[8] >> m)  & 0x01) == 1) {
-								config.tx_power =  m + 5;
-								exp_data[4] = (char) m + 48;
+								config.tx_power =  m + 1;
+								transmission_data[4] = (char) m + 48;
 								ret = lora_config(lora_dev, &config);
 								if (ret < 0) {
 									LOG_ERR("LoRa config failed");
 								}
 								for(uint8_t n = 0; n < data[0]; n++) {						// data[0] contains the number of LoRa transmissions per parameter combination
-									exp_data[6] = (char) n / 100 + 48;						// include numbering into transmission content (as String (3 bytes) not as byte (1 byte))
-									exp_data[7] = (char) n / 10 + 48;						// this line needs to be changed if max number of transmissions per combination is changed (it is 100 now)
-									exp_data[8] = (char) n % 10 + 48;
+									transmission_data[6] = (char) n / 100 + 48;						// include numbering into transmission content (as String (3 bytes) not as byte (1 byte))
+									transmission_data[7] = (char) n / 10 + 48;						// this line needs to be changed if max number of transmissions per combination is changed (it is 100 now)
+									transmission_data[8] = (char) n % 10 + 48;
 
 									for(uint8_t p = 9; p < data[2]; p++) {					// data[2] contains message length (length of the transmitted content)
-										exp_data[p] = 'a';								// fills the message up with a's until desired message length
+										transmission_data[p] = 'a';								// fills the message up with a's until desired message length
 									}
 
-									ret = lora_send(lora_dev, exp_data, 11);
+									ret = lora_send(lora_dev, transmission_data, 11);
 									if (ret < 0) {
 										LOG_ERR("LoRa send failed");
 										return 0;
