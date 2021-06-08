@@ -120,7 +120,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	int16_t rssi;
 	int8_t snr;
 	int l;
-	bool exp_started = false
+	bool exp_started = false;
 	while(!exp_started) {
 		printk("in loop...\n");
 		// configure as sender and send experiment settings
@@ -162,15 +162,16 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	}
 	uint16_t d = atoi(delay); 
 	printk("delay: %d\n", d);
-	k_sleep(K_SECONDS(d))
+	k_sleep(K_SECONDS(d));
+	printk("delay counted down\n");
 
 	
 	config.tx = false;
-	int ret;
 	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
 	for(uint8_t i = 0; i < 8; i++) {
 		if(((data[4] >> i)  & 0x01) == 1) {					// the 4th byte of the settings byte array represents the frequencies to use
 			config.frequency = frequencies[i];				// if a bit in that byte is set, the corresponding frequency will be used;
+			printk("frequency: %d\n", frequencies[i])
 		} else {
 			continue;
 		}
@@ -215,7 +216,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 								if (l < 0) {
 									LOG_ERR("LoRa receive failed");
 								} else {
-									lres_notify(data, 1);
+									bt_lres_notify(data, 1);
 								}
 							}
 

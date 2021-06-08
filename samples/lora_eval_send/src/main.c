@@ -127,11 +127,7 @@ void main(void)
 	// for LoRa communication
 	const struct device *lora_dev;
 	struct lora_modem_config config;
-	int ret, len;
-	uint8_t data[MAX_DATA_LEN] = {0};
-	
-	int16_t rssi;
-	int8_t snr;
+	int ret;
 
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 	if (!lora_dev) {
@@ -153,12 +149,12 @@ void main(void)
 		return;
 	}
 
-	int64_t time_stamp;
+	/*int64_t time_stamp;
 	int64_t milliseconds_spent;
 
 	time_stamp = k_uptime_get();
 	k_sleep(K_MSEC(6234));
 	milliseconds_spent = k_uptime_delta(&time_stamp);
-	printk("time spent: %lld\n", milliseconds_spent);
+	printk("time spent: %lld\n", milliseconds_spent);*/
 
 }

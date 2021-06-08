@@ -152,7 +152,7 @@ void main(void)
 
 	while (1) {
 		/* Block until data arrives */
-		printk("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+		printk("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 				&rssi, &snr);
 		if (len < 0) {
