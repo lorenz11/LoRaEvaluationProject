@@ -110,6 +110,9 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		pu++;
 	}
 
+	printk("data[0]: %d\n", exp_data[0]);
+	printk("data[1]: %d\n", exp_data[1]);
+
 	const struct device *lora_dev;
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 	if (!lora_dev) {
@@ -165,6 +168,10 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	printk("delay: %d\n", d);
 	k_sleep(K_SECONDS(d));
 	printk("delay counted down\n");
+
+	printk("data[0]: %d\n", exp_data[0]);
+	printk("data[1]: %d\n", exp_data[1]);
+
 
 	uint8_t transmission_data[exp_data[2]];				// exp_data[2] contains msg length
 	config.tx = false;
