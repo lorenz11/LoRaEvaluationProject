@@ -289,7 +289,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 								if (l < 0) {
 									LOG_ERR("LoRa receive failed");
 								} else {
-									bt_lres_notify(data, 1);
+									bt_lres_notify(transmission_data, 1);
 									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 										log_strdup(transmission_data), rssi, snr);
 									printk("length: %d\n", l);
