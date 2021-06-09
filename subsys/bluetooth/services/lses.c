@@ -299,9 +299,10 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 									transmission_data[7] = (char) n / 10 + 48;						// this line needs to be changed if max number of transmissions per combination is changed (it is 100 now)
 									transmission_data[8] = (char) n % 10 + 48;
 
-									for(uint8_t p = 9; p < data[2]; p++) {					// data[2] contains message length (length of the transmitted content)
+									for(uint8_t p = 9; p < (data[2] - 1); p++) {					// data[2] contains message length (length of the transmitted content)
 										transmission_data[p] = 'a';								// fills the message up with a's until desired message length
 									}
+									transmission_data[data[2] - 1] = '.';
 
 									ret = lora_send(lora_dev, transmission_data, 11);
 									if (ret < 0) {

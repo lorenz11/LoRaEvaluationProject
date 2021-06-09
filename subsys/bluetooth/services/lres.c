@@ -259,7 +259,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 							}
 
 							int64_t time_stamp;
-							int64_t milliseconds_spent;
+							int64_t milliseconds_spent = 0;
 							time_stamp = k_uptime_get();
 							printk("data[0]: %d\n", exp_data[0]);
 							printk("data[1]: %d\n", exp_data[1]);
@@ -277,7 +277,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 								printk("in m loop after experiment iteration start (in while loop)\n");
 								
 
-								iteration_time = iteration_time - milliseconds_spent;
+								
 								printk("remaining iteration_time: %lld\n", iteration_time);
 								l = lora_recv(lora_dev, transmission_data, MAX_DATA_LEN, K_MSEC(iteration_time),
 										&rssi, &snr);
@@ -290,7 +290,8 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 								}
 
 								milliseconds_spent = k_uptime_delta(&time_stamp);
-								time_stamp = k_uptime_get();						
+								time_stamp = k_uptime_get();	
+								iteration_time = iteration_time - milliseconds_spent;					
 								
 								printk("length: %d\n", l);
 								
