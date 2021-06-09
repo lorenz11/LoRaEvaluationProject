@@ -20,7 +20,7 @@
 #include <bluetooth/gatt.h>
 
 #define MAX_DATA_LEN 20
-#define EXP_SETTINGS_LEN 20
+#define MAX_TRANSM_LEN 20
 
 #define LOG_LEVEL CONFIG_BT_LRES_LOG_LEVEL
 #include <logging/log.h>
@@ -152,8 +152,8 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		} else {
 			if(memcmp(exp_data, data, len * sizeof(uint8_t)) == 0) {
 				printk("ACK is okay...............");
+				exp_started = true;				// check if received data exactly matches sent data
 			}
-			exp_started = true;				// check if received data exactly matches sent data
 		}
 	}
 
@@ -168,7 +168,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	
 
 	bool first_iteration = true;								
-	uint8_t transmission_data[MAX_DATA_LEN] ={0};				// exp_data[2] contains msg length
+	uint8_t transmission_data[MAX_TRANSM_LEN] ={0};				// exp_data[2] contains msg length
 	config.tx = false;
 	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
 
