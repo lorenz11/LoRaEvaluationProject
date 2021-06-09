@@ -275,7 +275,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 								first_iteration = false;
 							}
 
-							uint8_t last_data_8 = 0
+							uint8_t last_data_8 = 0;
 							printk("in m loop before experiment iteration start\n");
 							printk("int64 test iteration_time: %lld\n", iteration_time);
 							while(iteration_time > 0) {													// exp_data[0] contains the number of LoRa transmissions per parameter combination

@@ -252,7 +252,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 
 		// start experiment
 		char transmission_data[data[2]]; 	// data[2] contains msg length
-		transmission_data[5] = '.';
+		transmission_data[5] = '_';
 	
 		config.tx = true;
 		int ret;
