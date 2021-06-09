@@ -305,7 +305,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 									}
 									transmission_data[data[2] - 1] = '.';
 
-									ret = lora_send(lora_dev, transmission_data, 11);
+									ret = lora_send(lora_dev, transmission_data, data[2]);
 									if (ret < 0) {
 										LOG_ERR("LoRa send failed");
 										return 0;
