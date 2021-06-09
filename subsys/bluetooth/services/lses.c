@@ -201,25 +201,27 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 			LOG_ERR("LoRa receive failed");
 			return 0;
 		}
-		
-		char delay[l-9];
-		for(int16_t i = 0; i < l; i++) {
-			printk("unpacked data: %d\n", data[i]);
-			if(i > 8) {			// get experiment start delay
-				delay[i-9] = data[i];
-			}
-		}
-		uint16_t d = atoi(delay); 
-		printk("delay: %d\n", d);
 
 
 
 
-		// reconfigure device for sending and send received data as ACK
+		// reconfigure device for sending and send received data as ACK, listen for retransmission until delay counted down
 		bool experiment_ready = false;
 		while(!experiment_ready) {
 			experiment_ready = true;
 			int ret;
+
+
+			char delay[l-9];
+			for(int16_t i = 0; i < l; i++) {
+				printk("unpacked data: %d\n", data[i]);
+				if(i > 8) {			// get experiment start delay
+					delay[i-9] = data[i];
+				}
+			}
+			uint16_t d = atoi(delay); 
+			printk("delay: %d\n", d);
+
 
 			config.tx = true;
 			ret = lora_config(lora_dev, &config);
@@ -227,12 +229,11 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 				LOG_ERR("LoRa config failed");
 			}
 			k_sleep(K_MSEC(200));
-			ret = lora_send(lora_dev, data, MAX_DATA_LEN);
+			ret = lora_send(lora_dev, data, MAX_DATA_LEN);			// send received experiment settings back as ACK
 			if (ret < 0) {
 				LOG_ERR("LoRa send failed");
 				return 0;
 			}
-
 
 
 			config.tx = false;
@@ -240,7 +241,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 			if (ret < 0) {
 				LOG_ERR("LoRa config failed");
 			}
-			l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(d),
+			l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(d),			// listen for retransmission in case ACK was lost
 					&rssi, &snr);
 			if (l < 0) {
 				LOG_ERR("LoRa receive failed");
