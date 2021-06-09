@@ -197,23 +197,24 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 				} else {
 					continue;
 				}
-				for(uint8_t l = 0; l < 4; l++) {
-					printk("coding rate loop iteration %d\n", l);
-					if(((exp_data[7] >> l)  & 0x01) == 1) {
-						config.coding_rate =  l + 1;
-						printk("coding rate: %d\n", l+1);
+				for(uint8_t m = 0; m < 4; m++) {
+					if(((exp_data[7] >> m)  & 0x01) == 1) {
+						config.coding_rate =  m + 1;
+						printk("coding rate: %d\n", m+1);
 					} else {
-						printk("coding rate bit not set for %d\n", l);
+						printk("coding rate bit not set for %d\n", m);
 						continue;
 					}
-					for(uint8_t m = 0; m < 8; m++) {
-						if(((exp_data[8] >> m)  & 0x01) == 1) {
-							config.tx_power =  m + 5;
-							printk("power: %d\n", m+1);
+					for(uint8_t p = 0; p < 8; p++) {
+						if(((exp_data[8] >> p)  & 0x01) == 1) {
+							config.tx_power =  p + 5;
+							printk("power: %d\n", p+1);
 							ret = lora_config(lora_dev, &config);
 							if (ret < 0) {
 								LOG_ERR("LoRa config failed");
 							}
+
+							
 
 							int64_t time_stamp;
 							int64_t milliseconds_spent = 0;
