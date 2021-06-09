@@ -262,6 +262,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 			if(((data[4] >> i)  & 0x01) == 1) {					// the 4th byte of the settings byte array represents the frequencies to use
 				config.frequency = frequencies[i];				// if a bit in that byte is set, the corresponding frequency will be used;
 				transmission_data[0] = (char) i + 48;
+				printk("frequency: %d\n", frequencies[i]);
 			} else {
 				continue;
 			}
@@ -270,6 +271,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 				if(((data[5] >> j)  & 0x01) == 1) {
 					config.bandwidth =  j;
 					transmission_data[1] = (char) j + 48;
+					printk("bandwidth: %d\n", j);
 				} else {
 					continue;
 				}
@@ -277,6 +279,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 					if(((data[6] >> k)  & 0x01) == 1) {
 						config.datarate =  k + 7;
 						transmission_data[2] = (char) k + 48;
+						printk("data rate: %d\n", k+7);
 					} else {
 						continue;
 					}
@@ -284,6 +287,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 						if(((data[7] >> l)  & 0x01) == 1) {
 							config.coding_rate =  l + 1;
 							transmission_data[3] = (char) l + 48;
+							printk("coding rate: %d\n", l+1);
 						} else {
 							continue;
 						}
@@ -291,6 +295,7 @@ static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
 							if(((data[8] >> m)  & 0x01) == 1) {
 								config.tx_power =  m + 1;
 								transmission_data[4] = (char) m + 48;
+								printk("power: %d\n", m+1);
 								ret = lora_config(lora_dev, &config);
 								if (ret < 0) {
 									LOG_ERR("LoRa config failed");

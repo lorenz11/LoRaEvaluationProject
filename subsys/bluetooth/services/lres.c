@@ -151,7 +151,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 			LOG_ERR("no ACK received");	
 		} else {
 			if(memcmp(exp_data, data, len * sizeof(uint8_t)) == 0) {
-				printk("ACK is okay...............");
+				printk("ACK is okay...............\n");
 				exp_started = true;				// check if received data exactly matches sent data
 			}
 		}
@@ -165,6 +165,9 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		}
 	}
 	uint16_t d = atoi(delay); 
+
+
+	printk("exp_data[7] (coding rate byte): %d\n",  exp_data[7]);
 	
 
 	bool first_iteration = true;								
@@ -195,10 +198,12 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 					continue;
 				}
 				for(uint8_t l = 0; l < 4; l++) {
+					printk("coding rate loop iteration %d\n", l);
 					if(((exp_data[7] >> l)  & 0x01) == 1) {
 						config.coding_rate =  l + 1;
 						printk("coding rate: %d\n", l+1);
 					} else {
+						printk("coding rate bit not set for %d\n", l);
 						continue;
 					}
 					for(uint8_t m = 0; m < 8; m++) {
@@ -247,7 +252,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 			}
 		}
 	}
-
+	printk("end of experiment...........\n");
 
 
 
