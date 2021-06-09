@@ -110,9 +110,6 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		pu++;
 	}
 
-	printk("1data[0]: %d\n", exp_data[0]);
-	printk("data[1]: %d\n", exp_data[1]);
-
 	const struct device *lora_dev;
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 	if (!lora_dev) {
@@ -123,7 +120,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	int16_t rssi;
 	int8_t snr;
 	int l;
-	const uint16_t temp = 15;
+
 	uint8_t data[MAX_DATA_LEN] = {0};
 	bool exp_started = false;
 	while(!exp_started) {
@@ -166,26 +163,24 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		}
 	}
 
-	printk("55data[0]: %d\n", exp_data[0]);
-	printk("data[1]: %d\n", exp_data[1]);
-	char delay[1];							// how to get it dynamic?
+
+
+
+	
+	char delay[5];							// how to get it dynamic?
 	for(int16_t i = 0; i < l; i++) {
 		if(i > 8) {			// get experiment start delay
 			delay[i-9] = exp_data[i];
 		}
 	}
-	printk("66data[0]: %d\n", exp_data[0]);
-	printk("data[1]: %d\n", exp_data[1]);
+	
 
 	uint16_t d = atoi(delay); 
 	printk("delay: %d\n", d);
 	//k_sleep(K_SECONDS(1));		//!!!!!!!!!!!!!!!!!!
 	//printk("delay counted down\n");
 
-	printk("77data[0]: %d\n", exp_data[0]);
-	printk("data[1]: %d\n", exp_data[1]);
-
-
+	
 
 
 
@@ -280,8 +275,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 							printk("int64 test iteration_time: %lld\n", iteration_time);
 							while(iteration_time > 0) {													// exp_data[0] contains the number of LoRa transmissions per parameter combination
 								printk("in m loop after experiment iteration start (in while loop)\n");
-								milliseconds_spent = k_uptime_delta(&time_stamp);
-								time_stamp = k_uptime_get();
+								
 
 								iteration_time = iteration_time - milliseconds_spent;
 								printk("remaining iteration_time: %lld\n", iteration_time);
@@ -293,7 +287,10 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 										log_strdup(transmission_data), rssi, snr);
 									last_data_8 = transmission_data[8];
-								}						
+								}
+
+								milliseconds_spent = k_uptime_delta(&time_stamp);
+								time_stamp = k_uptime_get();						
 								
 								printk("length: %d\n", l);
 								
