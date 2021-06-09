@@ -224,6 +224,8 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 							if(first_iteration) {
 								iteration_time += 1000 * d;												// count down delay as part of the LoRa receive timing
 								first_iteration = false;
+							} else {
+								iteration_time += 5000;													// delay between iterations as part of the LoRa receive timing
 							}
 
 							uint8_t last_data_8 = 0;
@@ -243,7 +245,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 								iteration_time = iteration_time - milliseconds_spent;						
 							}
 
-							k_sleep(K_MSEC(5000));														// wait 5 seconds between combinations
+							// k_sleep(K_MSEC(5000));														// wait 5 seconds between combinations
 							printk("end of iteration\n");
 						} else {
 							continue;
