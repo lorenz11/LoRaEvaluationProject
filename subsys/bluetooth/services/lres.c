@@ -275,6 +275,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 								first_iteration = false;
 							}
 
+							uint8_t last_data_8 = 0
 							printk("in m loop before experiment iteration start\n");
 							printk("int64 test iteration_time: %lld\n", iteration_time);
 							while(iteration_time > 0) {													// exp_data[0] contains the number of LoRa transmissions per parameter combination
@@ -285,15 +286,17 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 								iteration_time = iteration_time - milliseconds_spent;
 								printk("remaining iteration_time: %lld\n", iteration_time);
 								l = lora_recv(lora_dev, transmission_data, MAX_DATA_LEN, K_MSEC(iteration_time),
-										&rssi, &snr);					
-								if (l < 0) {
-									LOG_ERR("LoRa receive failed");
-								} else {
+										&rssi, &snr);
+
+								if(last_data_8 != transmission_data[8]) {
 									bt_lres_notify(transmission_data, 1);
 									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 										log_strdup(transmission_data), rssi, snr);
-									printk("length: %d\n", l);
-								}
+									last_data_8 = transmission_data[8];
+								}						
+								
+								printk("length: %d\n", l);
+								
 							}
 
 							k_sleep(K_MSEC(5000));										// wait 5 seconds between combinations
