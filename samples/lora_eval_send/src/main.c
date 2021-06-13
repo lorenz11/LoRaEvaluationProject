@@ -40,8 +40,8 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 #define MY_PRIORITY 5
 K_THREAD_STACK_DEFINE(my_stack_area, MY_STACK_SIZE);
 
-void testThread(void) {
-	printk("Thread executed");
+void testThread(void *a, uint16_t b, void *c) {
+	printk("Thread executed: %d\n", b);
 	return;
 }
 
@@ -49,8 +49,7 @@ void testThread(void) {
 
 
 // for thread listening for incoming LoRa experiment commands
-#define MY_STACK_SIZE 500
-#define MY_PRIORITY 5
+
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(lora_receive);			// needs to register lora_receive?
@@ -168,8 +167,8 @@ void main(void)
 
 	k_tid_t my_tid = k_thread_create(&my_thread_data, my_stack_area,
                                  K_THREAD_STACK_SIZEOF(my_stack_area),
-                                 my_entry_point,
-                                 NULL, NULL, NULL,
+                                 testThread,
+                                 NULL, 5, NULL,
                                  MY_PRIORITY, 0, K_NO_WAIT);
 
 	/*int64_t time_stamp;
