@@ -101,7 +101,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 }
 
 
-#define STACK_SIZE 1024
+/*#define STACK_SIZE 1024
 #define TTT_PRIORITY 5
 K_THREAD_STACK_DEFINE(stack_area, STACK_SIZE);
 
@@ -111,21 +111,42 @@ void testThread1(void *a, void *b, void *c) {
 	printk("sth\n");
 	//printk("Thread executed: %d\n", b);
 	return;
+}*/
+
+
+
+struct device_info {
+    struct k_work work;
+    char name[16]
+} my_device;
+
+#define MY_STACK_SIZE 512
+#define MY_PRIORITY 5
+
+K_THREAD_STACK_DEFINE(my_stack_area, MY_STACK_SIZE);
+
+
+void print_error(struct k_work *item)
+{
+    struct device_info *the_device =
+        CONTAINER_OF(item, struct device_info, work);
+    printk("Got error on device %s\n", the_device->name);
 }
+strcpy(my_device.name, "FOO_dev");
+
 
 static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
 	
-	struct k_thread thread_data;
+	struct k_work_q my_work_q;
+	k_work_q_start(&my_work_q, my_stack_area,
+               K_THREAD_STACK_SIZEOF(my_stack_area), MY_PRIORITY);
 
-	k_tid_t my_tid = k_thread_create(&thread_data, stack_area,
-                                 K_THREAD_STACK_SIZEOF(stack_area),
-                                 testThread1,
-                                 NULL, NULL, NULL,
-                                 TTT_PRIORITY, K_USER, K_NO_WAIT);
 
-	printk("hg\n");
+	k_work_init(&my_device.work, print_error);
+	k_work_submit(&my_device.work);
+
 	return 0;
 }
 
