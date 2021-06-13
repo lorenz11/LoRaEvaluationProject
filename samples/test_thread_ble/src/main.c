@@ -22,7 +22,7 @@
 #include <bluetooth/conn.h>
 #include <bluetooth/uuid.h>
 #include <bluetooth/gatt.h>
-#include <bluetooth/services/lres.h>
+#include <bluetooth/services/tests.h>
 
 
 

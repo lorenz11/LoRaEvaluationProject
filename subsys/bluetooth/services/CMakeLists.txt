@@ -11,6 +11,8 @@ zephyr_sources_ifdef(CONFIG_BT_LSES lses.c)
 
 zephyr_sources_ifdef(CONFIG_BT_LRES lres.c)
 
+zephyr_sources_ifdef(CONFIG_BT_TESTS tests.c)
+
 zephyr_sources_ifdef(CONFIG_BT_TPS tps.c)
 
 add_subdirectory_ifdef(CONFIG_BT_OTS ots)

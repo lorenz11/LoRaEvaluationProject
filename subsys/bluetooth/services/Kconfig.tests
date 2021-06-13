@@ -1,9 +1,9 @@
 # Bluetooth GATT Lora Eval service
 
-menuconfig BT_LSES
+menuconfig BT_TESTS
 	bool "Enable GATT Lora Eval service"
 
-config BT_LSES_LOG_LEVEL
+config BT_TESTS_LOG_LEVEL
 	int "Lora Eval service log level"
 	depends on LOG
 	range 0 4
