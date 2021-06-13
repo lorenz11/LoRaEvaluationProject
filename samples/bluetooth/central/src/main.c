@@ -131,7 +131,7 @@ void main(void)
 		return;
 	}
 
-	printk("Bluetooth initialized\n");
+	printk("Bluetooth initializeddddd\n");
 
 	bt_conn_cb_register(&conn_callbacks);
 

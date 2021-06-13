@@ -6,7 +6,7 @@
 # It is included in the main 'build.ninja'.
 
 # =============================================================================
-# Project: lora_eval_rcv
+# Project: central
 # Configuration: 
 # =============================================================================
 # =============================================================================
@@ -41,44 +41,6 @@ rule CUSTOM_COMMAND
 #############################################
 # Rule for compiling C files.
 
-rule C_COMPILER__zephyr_final
-  depfile = $DEP_FILE
-  deps = gcc
-  command = ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
-  description = Building C object $out
-
-
-#############################################
-# Rule for linking C executable.
-
-rule C_EXECUTABLE_LINKER__zephyr_final
-  command = $PRE_LINK && ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc $FLAGS  $LINK_FLAGS $in  -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD
-  description = Linking C executable $TARGET_FILE
-  restat = $RESTAT
-
-
-#############################################
-# Rule for compiling C files.
-
-rule C_COMPILER__app_smem_unaligned_prebuilt
-  depfile = $DEP_FILE
-  deps = gcc
-  command = ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
-  description = Building C object $out
-
-
-#############################################
-# Rule for linking C executable.
-
-rule C_EXECUTABLE_LINKER__app_smem_unaligned_prebuilt
-  command = $PRE_LINK && ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc $FLAGS  $LINK_FLAGS $in  -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD
-  description = Linking C executable $TARGET_FILE
-  restat = $RESTAT
-
-
-#############################################
-# Rule for compiling C files.
-
 rule C_COMPILER__zephyr
   depfile = $DEP_FILE
   deps = gcc
@@ -108,6 +70,25 @@ rule C_COMPILER__offsets
 #############################################
 # Rule for compiling C files.
 
+rule C_COMPILER__zephyr_final
+  depfile = $DEP_FILE
+  deps = gcc
+  command = ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
+  description = Building C object $out
+
+
+#############################################
+# Rule for linking C executable.
+
+rule C_EXECUTABLE_LINKER__zephyr_final
+  command = $PRE_LINK && ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc $FLAGS  $LINK_FLAGS $in  -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD
+  description = Linking C executable $TARGET_FILE
+  restat = $RESTAT
+
+
+#############################################
+# Rule for compiling C files.
+
 rule C_COMPILER__zephyr_prebuilt
   depfile = $DEP_FILE
   deps = gcc
@@ -121,25 +102,6 @@ rule C_COMPILER__zephyr_prebuilt
 rule C_EXECUTABLE_LINKER__zephyr_prebuilt
   command = $PRE_LINK && ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc $FLAGS  $LINK_FLAGS $in  -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD
   description = Linking C executable $TARGET_FILE
-  restat = $RESTAT
-
-
-#############################################
-# Rule for compiling C files.
-
-rule C_COMPILER__kobj_hash_output_lib
-  depfile = $DEP_FILE
-  deps = gcc
-  command = ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
-  description = Building C object $out
-
-
-#############################################
-# Rule for linking C static library.
-
-rule C_STATIC_LIBRARY_LINKER__kobj_hash_output_lib
-  command = $PRE_LINK && ccache /usr/bin/cmake -E remove $TARGET_FILE && ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-ar qc $TARGET_FILE $LINK_FLAGS $in && ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-ranlib $TARGET_FILE && $POST_BUILD
-  description = Linking C static library $TARGET_FILE
   restat = $RESTAT
 
 
@@ -261,7 +223,7 @@ rule C_STATIC_LIBRARY_LINKER__arch__arm__core__aarch32__cortex_m__mpu
 #############################################
 # Rule for compiling C files.
 
-rule C_COMPILER__lib__libc__newlib
+rule C_COMPILER__lib__libc__minimal
   depfile = $DEP_FILE
   deps = gcc
   command = ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
@@ -271,7 +233,7 @@ rule C_COMPILER__lib__libc__newlib
 #############################################
 # Rule for linking C static library.
 
-rule C_STATIC_LIBRARY_LINKER__lib__libc__newlib
+rule C_STATIC_LIBRARY_LINKER__lib__libc__minimal
   command = $PRE_LINK && ccache /usr/bin/cmake -E remove $TARGET_FILE && ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-ar qc $TARGET_FILE $LINK_FLAGS $in && ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-ranlib $TARGET_FILE && $POST_BUILD
   description = Linking C static library $TARGET_FILE
   restat = $RESTAT
@@ -451,44 +413,6 @@ rule C_STATIC_LIBRARY_LINKER__drivers__gpio
 #############################################
 # Rule for compiling C files.
 
-rule C_COMPILER__drivers__spi
-  depfile = $DEP_FILE
-  deps = gcc
-  command = ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
-  description = Building C object $out
-
-
-#############################################
-# Rule for linking C static library.
-
-rule C_STATIC_LIBRARY_LINKER__drivers__spi
-  command = $PRE_LINK && ccache /usr/bin/cmake -E remove $TARGET_FILE && ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-ar qc $TARGET_FILE $LINK_FLAGS $in && ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-ranlib $TARGET_FILE && $POST_BUILD
-  description = Linking C static library $TARGET_FILE
-  restat = $RESTAT
-
-
-#############################################
-# Rule for compiling C files.
-
-rule C_COMPILER__loramac-node
-  depfile = $DEP_FILE
-  deps = gcc
-  command = ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out   -c $in
-  description = Building C object $out
-
-
-#############################################
-# Rule for linking C static library.
-
-rule C_STATIC_LIBRARY_LINKER__loramac-node
-  command = $PRE_LINK && ccache /usr/bin/cmake -E remove $TARGET_FILE && ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-ar qc $TARGET_FILE $LINK_FLAGS $in && ccache /home/lorenz/zephyr-sdk-0.11.3/arm-zephyr-eabi/bin/arm-zephyr-eabi-ranlib $TARGET_FILE && $POST_BUILD
-  description = Linking C static library $TARGET_FILE
-  restat = $RESTAT
-
-
-#############################################
-# Rule for compiling C files.
-
 rule C_COMPILER__drivers__serial
   depfile = $DEP_FILE
   deps = gcc
@@ -566,7 +490,7 @@ rule C_STATIC_LIBRARY_LINKER__kernel
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = /usr/bin/cmake -S/home/lorenz/zephyrproject/zephyr/samples/lora_eval_rcv -B/home/lorenz/zephyrproject/zephyr/build
+  command = /usr/bin/cmake -S/home/lorenz/zephyrproject/zephyr/samples/bluetooth/central -B/home/lorenz/zephyrproject/zephyr/build
   description = Re-running CMake...
   generator = 1
 

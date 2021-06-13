@@ -57,17 +57,6 @@ _vector_end = .;
     text :
  {
  _image_text_start = .;
- _kobject_text_area_start = .;
- *(".kobject_data.text*")
- _kobject_text_area_end = .;
- _kobject_text_area_used = _kobject_text_area_end - _kobject_text_area_start;
- PROVIDE(z_object_find = .);
- PROVIDE(z_object_wordlist_foreach = .);
- . = MAX(., _kobject_text_area_start + 256);
- ASSERT(
-  256 >= _kobject_text_area_used,
-"The configuration system has incorrectly set 'CONFIG_KOBJECT_TEXT_AREA' to CONFIG_KOBJECT_TEXT_AREA, which is not big enough. You must through Kconfig either disable 'CONFIG_USERSPACE', or set 'CONFIG_KOBJECT_TEXT_AREA' to a value larger than CONFIG_KOBJECT_TEXT_AREA."
-  );
  *(.text)
  *(".text.*")
  *(".TEXT.*")
@@ -102,7 +91,6 @@ _vector_end = .;
   KEEP(*(SORT(.init_[_A-Z0-9]*)))
  }
  ASSERT(SIZEOF(initlevel_error) == 0, "Undefined initialization levels used.")
- z_object_assignment_area : SUBALIGN(4) { _z_object_assignment_list_start = .; KEEP(*(SORT_BY_NAME(._z_object_assignment.static.*))); _z_object_assignment_list_end = .; } > FLASH
  app_shmem_regions : ALIGN_WITH_INPUT
  {
   __app_shmem_regions_start = .;
@@ -153,7 +141,6 @@ _vector_end = .;
  *(.rodata)
  *(".rodata.*")
  *(.gnu.linkonce.r.*)
- *(".kobject_data.rodata*")
  . = ALIGN(4);
  } > FLASH
  _image_rodata_end = .;
@@ -181,46 +168,6 @@ _vector_end = .;
 } > SRAM AT > FLASH
 _ramfunc_ram_size = _ramfunc_ram_end - _ramfunc_ram_start;
 _ramfunc_rom_start = LOADADDR(.ramfunc);
- app_smem :
- {
-  . = ALIGN(_region_min_align);;
-  _app_smem_start = .;
-  . = ALIGN(_region_min_align); . = ALIGN( 1 << LOG2CEIL(z_data_smem_z_libc_partition_bss_end - z_data_smem_z_libc_partition_part_start));
-  z_data_smem_z_libc_partition_part_start = .;
-  KEEP(*(data_smem_z_libc_partition_data*))
-  *libc_nano.a:*(.data .data.*)
-  z_data_smem_z_libc_partition_bss_start = .;
-  KEEP(*(data_smem_z_libc_partition_bss*))
-  *libc_nano.a:*(.bss .bss.* COMMON COMMON.*)
-  z_data_smem_z_libc_partition_bss_end = .;
-  . = ALIGN(_region_min_align); . = ALIGN( 1 << LOG2CEIL(z_data_smem_z_libc_partition_bss_end - z_data_smem_z_libc_partition_part_start));
-  z_data_smem_z_libc_partition_part_end = .;
-  . = ALIGN(_region_min_align);;
-  _app_smem_end = .;
- } > SRAM AT > FLASH
- z_data_smem_z_libc_partition_part_size = z_data_smem_z_libc_partition_part_end - z_data_smem_z_libc_partition_part_start;
- z_data_smem_z_libc_partition_bss_size = z_data_smem_z_libc_partition_bss_end - z_data_smem_z_libc_partition_bss_start;
- _app_smem_size = _app_smem_end - _app_smem_start;
- _app_smem_rom_start = LOADADDR(app_smem);
-    bss (NOLOAD) : ALIGN_WITH_INPUT
- {
-        . = ALIGN(4);
- __bss_start = .;
- __kernel_ram_start = .;
- *(.bss)
- *(".bss.*")
- *(COMMON)
- *(".kernel_bss.*")
- __bss_end = ALIGN(4);
- } > SRAM AT > SRAM
-noinit (NOLOAD) :
-{
-        *(.noinit)
-        *(".noinit.*")
- z_user_stacks_start = .;
- *(.user_stacks*)
- z_user_stacks_end = .;
-} > SRAM AT > SRAM
     datas : ALIGN_WITH_INPUT
  {
  __data_ram_start = .;
@@ -255,7 +202,6 @@ noinit (NOLOAD) :
   __log_dynamic_end = .;
  } > SRAM AT > FLASH
  _static_thread_data_area : ALIGN_WITH_INPUT SUBALIGN(4) { __static_thread_data_list_start = .; KEEP(*(SORT_BY_NAME(.__static_thread_data.static.*))); __static_thread_data_list_end = .; } > SRAM AT > FLASH
- _static_kernel_objects_begin = .;
  k_timer_area : ALIGN_WITH_INPUT SUBALIGN(4) { _k_timer_list_start = .; *(SORT_BY_NAME(._k_timer.static.*)); _k_timer_list_end = .; } > SRAM AT > FLASH
  k_mem_slab_area : ALIGN_WITH_INPUT SUBALIGN(4) { _k_mem_slab_list_start = .; *(SORT_BY_NAME(._k_mem_slab.static.*)); _k_mem_slab_list_end = .; } > SRAM AT > FLASH
  k_mem_pool_area : ALIGN_WITH_INPUT SUBALIGN(4) { _k_mem_pool_list_start = .; *(SORT_BY_NAME(._k_mem_pool.static.*)); _k_mem_pool_list_end = .; } > SRAM AT > FLASH
@@ -273,19 +219,24 @@ noinit (NOLOAD) :
   _net_buf_pool_list = .;
   KEEP(*(SORT_BY_NAME("._net_buf_pool.static.*")))
  } > SRAM AT > FLASH
- _static_kernel_objects_end = .;
- z_kobject_data_begin = .;
- kobject_data : ALIGN_WITH_INPUT
- {
- *(".kobject_data.data*")
-        } > SRAM AT > FLASH
- priv_stacks_noinit : ALIGN_WITH_INPUT
- {
- z_priv_stacks_ram_start = .;
- *(".priv_stacks.noinit")
- z_priv_stacks_ram_end = .;
- } > SRAM AT > FLASH
     __data_ram_end = .;
+   bss (NOLOAD) : ALIGN_WITH_INPUT
+ {
+        . = ALIGN(4);
+ __bss_start = .;
+ __kernel_ram_start = .;
+ *(.bss)
+ *(".bss.*")
+ *(COMMON)
+ *(".kernel_bss.*")
+ __bss_end = ALIGN(4);
+ } > SRAM AT > SRAM
+    noinit (NOLOAD) :
+        {
+        *(.noinit)
+        *(".noinit.*")
+ *(".kernel_noinit.*")
+        } > SRAM
     _image_ram_end = .;
     _end = .;
     __kernel_ram_end = 0x20000000 + (256 * 1K);
