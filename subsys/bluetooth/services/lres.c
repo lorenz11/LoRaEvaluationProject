@@ -101,9 +101,11 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 }
 
 
-static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
-{
+#define MY_STACK_SIZE 4096
+#define MY_PRIORITY 5
+K_THREAD_STACK_DEFINE(my_stack_area, MY_STACK_SIZE);
+
+void exec_experiment(const void *buf, uint16_t len, void *c) {
 	uint8_t *pu = (uint8_t *) buf;
 	uint8_t exp_data[len];					// experiment settings data
 	for(int16_t i = 0; i < len; i++) {
@@ -257,8 +259,22 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	}
 	printk("end of experiment...........\n");
 
+	return;
+}
 
 
+
+static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
+{
+	
+	struct k_thread my_thread_data;
+
+	k_tid_t my_tid = k_thread_create(&my_thread_data, my_stack_area,
+                                 K_THREAD_STACK_SIZEOF(my_stack_area),
+                                 exex_experiment,
+                                 buf, len, NULL,
+                                 MY_PRIORITY, 0, K_NO_WAIT);
 
 
 	return 0;
