@@ -46,56 +46,11 @@ static void hrmc_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value
 static ssize_t read_blsc(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 void *buf, uint16_t len, uint16_t offset)
 {
-	char data[100];
-	strcpy(data, attr->user_data);
-	printk("thiss: %s\n", data);
+	printk("helllllllllo\n");
 	return bt_gatt_attr_read(conn, attr, buf, len, offset, &hrs_blsc,
 				 sizeof(hrs_blsc));
 }
 
-//'ssize_t (*)(struct bt_conn *, const struct bt_gatt_attr *, const void *, uint16_t,  uint16_t,  uint8_t)'
-
-static ssize_t testt_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
-{
-	uint8_t *pu = (uint8_t *) buf;
-	//pu++;
-	uint32_t frequ = 0;
-	frequ += (*pu) * 100000000;
-	pu++;
-	frequ += (*pu) * 10000000;
-	pu++;
-	frequ += (*pu) * 1000000;
-
- 
-
-	const struct device *lora_dev;
-	struct lora_modem_config config;
-	int ret;
-
-	lora_dev = device_get_binding(DEFAULT_RADIO);
-	if (!lora_dev) {
-		LOG_ERR("%s Device not found", DEFAULT_RADIO);
-	}
-
-	config.frequency = frequ;
-	config.bandwidth = BW_125_KHZ;
-	config.datarate = SF_10;
-	config.preamble_len = 8;
-	config.coding_rate = CR_4_5;
-	config.tx_power = 4;
-	config.tx = true;
-
-	ret = lora_config(lora_dev, &config);
-	if (ret < 0) {
-		LOG_ERR("LoRa config failed");
-	}
-
-
-
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
-	return 0;
-}
 
 /* Heart Rate Service Declaration */
 BT_GATT_SERVICE_DEFINE(hrs_svc,
@@ -106,8 +61,6 @@ BT_GATT_SERVICE_DEFINE(hrs_svc,
 		    BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),
 	BT_GATT_CHARACTERISTIC(BT_UUID_HRS_BODY_SENSOR, BT_GATT_CHRC_READ,
 			       BT_GATT_PERM_READ, read_blsc, NULL, NULL),
-	BT_GATT_CHARACTERISTIC(BT_UUID_HRS_TESTT, BT_GATT_CHRC_WRITE,
-			       BT_GATT_PERM_WRITE, NULL, testt_cb, NULL),
 	BT_GATT_CHARACTERISTIC(BT_UUID_HRS_CONTROL_POINT, BT_GATT_CHRC_WRITE,
 			       BT_GATT_PERM_NONE, NULL, NULL, NULL),
 );
