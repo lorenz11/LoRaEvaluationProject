@@ -132,7 +132,7 @@ void print_error(struct k_work *item)
         CONTAINER_OF(item, struct device_info, work);
     printk("Got error on device %s\n", the_device->name);
 }
-strcpy(my_device.name, "FOO_dev");
+
 
 
 static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
@@ -143,7 +143,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	k_work_q_start(&my_work_q, my_stack_area,
                K_THREAD_STACK_SIZEOF(my_stack_area), MY_PRIORITY);
 
-
+strcpy(my_device.name, "FOO_dev");
 	k_work_init(&my_device.work, print_error);
 	k_work_submit(&my_device.work);
 
