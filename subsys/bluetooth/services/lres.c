@@ -124,7 +124,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
                                  K_THREAD_STACK_SIZEOF(stack_area),
                                  testThread1,
                                  NULL, NULL, NULL,
-                                 MY_PRIORITY, K_USER, K_NO_WAIT);
+                                 TTT_PRIORITY, K_USER, K_NO_WAIT);
 
 	return 0;
 }

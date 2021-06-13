@@ -36,7 +36,7 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 
 
 
-/*#define MY_STACK_SIZE 500
+#define MY_STACK_SIZE 500
 #define MY_PRIORITY 5
 K_THREAD_STACK_DEFINE(my_stack_area, MY_STACK_SIZE);
 
@@ -44,7 +44,7 @@ K_THREAD_STACK_DEFINE(my_stack_area, MY_STACK_SIZE);
 void testThread(void *a, uint16_t b, void *c) {
 	printk("Thread executed: %d\n", b);
 	return;
-}*/
+}
 
 
 #include <logging/log.h>
@@ -162,13 +162,13 @@ void main(void)
 		return;
 	}
 
-	/*struct k_thread my_thread_data;
+	struct k_thread my_thread_data;
 
 	k_tid_t my_tid = k_thread_create(&my_thread_data, my_stack_area,
                                  K_THREAD_STACK_SIZEOF(my_stack_area),
                                  testThread,
                                  NULL, 5, NULL,
-                                 MY_PRIORITY, 0, K_NO_WAIT);*/
+                                 MY_PRIORITY, 0, K_NO_WAIT);
 	
 
 
