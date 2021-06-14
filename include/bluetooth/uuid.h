@@ -858,16 +858,29 @@ struct bt_uuid_128 {
 	BT_UUID_DECLARE_16(BT_UUID_LSES_SEND_COMMAND_VAL)
 
 // writing
-// for general writing msg to board
-/** @def BT_UUID_LSES_ANYTHING_VAL
- *  @brief LSES anything UUID value
+// for preparing board for looped explore
+/** @def BT_UUID_LSES_LOOP_PREP_VAL
+ *  @brief LSES looped explore preparation UUID value
  */
-#define BT_UUID_LSES_ANYTHING_VAL 0x2a3d
-/** @def BT_UUID_LSES_ANYTHING
- *  @brief LSES characteristic for anything
+#define BT_UUID_LSES_LOOP_PREP_VAL 0x2a3d
+/** @def BT_UUID_LSES_LOOP_PREP
+ *  @brief LSES characteristic for looped explore preparation
  */
-#define BT_UUID_LSES_ANYTHING \
-	BT_UUID_DECLARE_16(BT_UUID_LSES_ANYTHING_VAL)
+#define BT_UUID_LSES_LOOP_PREP \
+	BT_UUID_DECLARE_16(BT_UUID_LSES_LOOP_PREP_VAL)
+
+// writing
+// for preparing board for experiment
+/** @def BT_UUID_LSES_EXP_PREP_VAL
+ *  @brief LSES experiment preparation UUID value
+ */
+#define BT_UUID_LSES_EXP_PREP_VAL 0x2a3e
+/** @def BT_UUID_LSES_EXP_PREP
+ *  @brief LSES characteristic for experiment preparation
+ */
+#define BT_UUID_LSES_EXP_PREP_ \
+	BT_UUID_DECLARE_16(BT_UUID_LSES_EXP_PREP_VAL)
+
 
 
 //////////////////////////////////RECEIVER UUIDs///////////////////////////////////////
@@ -877,7 +890,7 @@ struct bt_uuid_128 {
 /** @def BT_UUID_LRES_STAT_VAL
  *  @brief LRES Characteristic Status Interval UUID value
  */
-#define BT_UUID_LRES_STAT_VAL 0x2a3e
+#define BT_UUID_LRES_STAT_VAL 0x2a3f
 /** @def BT_UUID_LRES_STAT
  *  @brief LRES Characteristic Status Interval
  */
@@ -889,7 +902,7 @@ struct bt_uuid_128 {
 /** @def BT_UUID_LRES_CHANGE_CONFIG_VAL
  *  @brief LRES Change Config UUID value
  */
-#define BT_UUID_LRES_CHANGE_CONFIG_VAL 0x2a3f
+#define BT_UUID_LRES_CHANGE_CONFIG_VAL 0x2a40
 /** @def BT_UUID_LRES_CHANGE_CONFIG
  *  @brief LRES change config
  */
@@ -900,7 +913,7 @@ struct bt_uuid_128 {
 /** @def BT_UUID_LRES_EXP_VAL
  *  @brief LRES Characteristic Exp UUID value
  */
-#define BT_UUID_LRES_EXP_VAL 0x2a40
+#define BT_UUID_LRES_EXP_VAL 0x2a41
 /** @def BT_UUID_LRES_EXP
  *  @brief LRES Characteristic Exp Interval
  */

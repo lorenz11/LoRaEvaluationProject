@@ -33,8 +33,8 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 static uint8_t lses_blsc;
 
 // to control the sending LoRa messages loop
-static uint8_t loop = 0;
 static uint16_t number_of_messages = 0;
+static uint8_t time_between_msgs = 0;
 
 static struct lora_modem_config config;
 
@@ -103,22 +103,12 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	return 0;
 }
 
-// gets a byte array containing the msg a LoRa transmission is supposed to contain and an optional number of loops for the explore mode
+
+// gets a byte array containing the msg a LoRa transmission is supposed to contain for explore mode
 static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
-	uint8_t single_msg = 0;
-
-	// buf has '!' at index 0 if messages are supposed to be sent in a loop
-	char *pc = (char *) buf;
-	if(*pc == 33) {
-		single_msg = 1;
-		loop = 1;
-		pc++;
-	}
-
 	// extract LoRa message
-	printk("length: %d\n", len);
 	char data[len];
 	
 	for(uint16_t i = 0; i < len; i++) {
@@ -131,33 +121,79 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	const struct device *lora_dev;
 	int ret;
 
-	// send message (single or in loop depending on <single_msg>)
+	// send message
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 	if (!lora_dev) {
 		LOG_ERR("%s Device not found", DEFAULT_RADIO);
 	}
 
-	if(single_msg == 1) {
+	ret = lora_send(lora_dev, data, MAX_DATA_LEN);
+	if (ret < 0) {
+		LOG_ERR("LoRa send failed");
+		return 0;
+	}
+
+	return 0;
+}
+
+
+// prepare or start a LoRa message sending loop ()
+static ssize_t loop_prep_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
+{
+	char *pc = (char *) buf;
+	if(*pc == '!') {						// set number of loops in explore mode
+		pc++;
+		uint16_t i = atoi(pc);
+		number_of_messages = i;				
+		printk("number: %d\n", i);		
+	} else if (*pc == '#') {				// set the time between messages
+		pc++;				
+		uint16_t i = atoi(pc);
+		time_between_msgs = i;
+		printk("time: %d\n", i);
+	} else {								// start the loop
+		char data[len];
+	
+		for(uint16_t i = 0; i < len; i++) {
+			data[i] = *pc;
+			pc++;
+		}
+		data[len] = '.';
+		printk("msg: %s\n", data);
+
+		const struct device *lora_dev;
+		int ret;
+
+		// send message
+		lora_dev = device_get_binding(DEFAULT_RADIO);
+		if (!lora_dev) {
+			LOG_ERR("%s Device not found", DEFAULT_RADIO);
+		}
+
 		uint16_t i = 0;
-		while (loop && (i < number_of_messages)) {
+		while (i < number_of_messages)) {
 			ret = lora_send(lora_dev, data, MAX_DATA_LEN);
 			if (ret < 0) {
 				LOG_ERR("LoRa send failed");
 				return 0;
 			}
 			LOG_INF("Data sent!");
-			k_sleep(K_MSEC(2000));
+			k_sleep(K_MSEC(time_between_msgs));
 			i++;
 		}
-	} else {
-		ret = lora_send(lora_dev, data, MAX_DATA_LEN);
-		if (ret < 0) {
-			LOG_ERR("LoRa send failed");
-			return 0;
-		}
+
 	}
+
 	return 0;
 }
+
+
+
+
+
+
+
 
 // callback for characteristic possibly used in the future
 static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
@@ -343,8 +379,8 @@ BT_GATT_SERVICE_DEFINE(lses_svc,
 			       BT_GATT_PERM_WRITE, NULL, change_config_cb, NULL),
 	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_SEND_COMMAND, BT_GATT_CHRC_WRITE,
 			       BT_GATT_PERM_WRITE, NULL, send_command_cb, NULL),
-	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_ANYTHING, BT_GATT_CHRC_WRITE,
-			       BT_GATT_PERM_WRITE, NULL, anything_cb, NULL),
+	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_LOOP_PREP, BT_GATT_CHRC_WRITE,
+			       BT_GATT_PERM_WRITE, NULL, loop_prep_cb, NULL),
 );
 
 static int lses_init(const struct device *dev)
