@@ -107,7 +107,8 @@ K_THREAD_STACK_DEFINE(my_stack_area, MY_STACK_SIZE);
 
 struct k_thread my_thread_data;
 
-void exec_experiment(const void *buf, uint16_t len, void *c) {
+void exec_experiment(void *buf, void *length, void *c) {
+	uint16_t len = *(uint16_t*) length;
 	uint8_t *pu = (uint8_t *) buf;
 	uint8_t exp_data[len];					// experiment settings data
 	for(int16_t i = 0; i < len; i++) {
@@ -139,7 +140,6 @@ void exec_experiment(const void *buf, uint16_t len, void *c) {
 		ret = lora_send(lora_dev, exp_data, len);
 		if (ret < 0) {
 			LOG_ERR("LoRa send failed");
-				return 0;
 		}
 
 		// configure as receiver, wait 2 seconds for ACK
@@ -265,15 +265,27 @@ void exec_experiment(const void *buf, uint16_t len, void *c) {
 }
 
 
+uint16_t len_param = 0;
 
 static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
+	len_param = len;
+
+	uint8_t *pu = (uint8_t *) buf;
+	uint8_t exp_data[len];					// experiment settings data
+	for(int16_t i = 0; i < len; i++) {
+		exp_data[i] = *pu;
+		pu++;
+	}
+
 	k_tid_t my_tid = k_thread_create(&my_thread_data, my_stack_area,
                                  K_THREAD_STACK_SIZEOF(my_stack_area),
                                  exec_experiment,
-                                 buf, len, NULL,
+                                 buf, len_param, NULL,
                                  MY_PRIORITY, 0, K_NO_WAIT);
+
+	printk("my_tid: %d\n", my_tid);
 
 
 	return 0;
