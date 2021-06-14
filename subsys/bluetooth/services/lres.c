@@ -281,13 +281,11 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		pu++;
 	}
 
-	k_tid_t my_tid = k_thread_create(&thread_data, stack_area,
-                                 K_THREAD_STACK_SIZEOF(stack_area),
-                                 exec_experiment,
-                                 NULL, NULL, NULL,
-                                 TT_PRIORITY, 0, K_NO_WAIT);
-
-	printk("my_tid: %d\n", my_tid);
+	k_thread_create(&thread_data, stack_area,
+			K_THREAD_STACK_SIZEOF(stack_area),
+			exec_experiment,
+			NULL, NULL, NULL,
+			TT_PRIORITY, 0, K_NO_WAIT);
 
 
 	return 0;
