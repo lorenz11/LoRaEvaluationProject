@@ -101,19 +101,21 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 }
 
 
-#define MY_STACK_SIZE 8192
-#define MY_PRIORITY 5
-K_THREAD_STACK_DEFINE(my_stack_area, MY_STACK_SIZE);
+#define STACK_SIZE 8192
+#define TT_PRIORITY 5
+K_THREAD_STACK_DEFINE(stack_area, STACK_SIZE);
 
-struct k_thread my_thread_data;
+struct k_thread thread_data;
 
-void exec_experiment(void *buf, void *length, void *c) {
-	uint16_t len = *(uint16_t*) length;
-	uint8_t *pu = (uint8_t *) buf;
-	uint8_t exp_data[len];					// experiment settings data
+uint8_t experiment_data[18];
+uint16_t exp_data_length = 0;
+
+void exec_experiment(void *a, void *b, void *c) {
+	uint8_t exp_data[exp_data_length];
+	uint16_t len = exp_data_length;
+
 	for(int16_t i = 0; i < len; i++) {
-		exp_data[i] = *pu;
-		pu++;
+		exp_data[i] = experiment_data[i];	
 	}
 
 	const struct device *lora_dev;
@@ -270,20 +272,20 @@ uint16_t len_param = 0;
 static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
-	len_param = len;
+	printk("at callback\n");
 
+	exp_data_length = len;
 	uint8_t *pu = (uint8_t *) buf;
-	uint8_t exp_data[len];					// experiment settings data
 	for(int16_t i = 0; i < len; i++) {
-		exp_data[i] = *pu;
+		experiment_data[i] = *pu;
 		pu++;
 	}
 
-	k_tid_t my_tid = k_thread_create(&my_thread_data, my_stack_area,
-                                 K_THREAD_STACK_SIZEOF(my_stack_area),
+	k_tid_t my_tid = k_thread_create(&thread_data, stack_area,
+                                 K_THREAD_STACK_SIZEOF(stack_area),
                                  exec_experiment,
-                                 buf, len_param, NULL,
-                                 MY_PRIORITY, 0, K_NO_WAIT);
+                                 NULL, NULL, NULL,
+                                 TT_PRIORITY, 0, K_NO_WAIT);
 
 	printk("my_tid: %d\n", my_tid);
 
