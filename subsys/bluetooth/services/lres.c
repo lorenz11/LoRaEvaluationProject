@@ -101,30 +101,180 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 }
 
 
-#define STACK_SIZE 1024
-#define TTT_PRIORITY 5
-K_THREAD_STACK_DEFINE(stack_area, STACK_SIZE);
+#define MY_STACK_SIZE 8192
+#define MY_PRIORITY 5
+K_THREAD_STACK_DEFINE(my_stack_area, MY_STACK_SIZE);
+
+struct k_thread my_thread_data;
+
+void exec_experiment(const void *buf, uint16_t len, void *c) {
+	uint8_t *pu = (uint8_t *) buf;
+	uint8_t exp_data[len];					// experiment settings data
+	for(int16_t i = 0; i < len; i++) {
+		exp_data[i] = *pu;
+		pu++;
+	}
+
+	const struct device *lora_dev;
+	lora_dev = device_get_binding(DEFAULT_RADIO);
+	if (!lora_dev) {
+		LOG_ERR("%s Device not found", DEFAULT_RADIO);
+	}
+
+	int ret;
+	int16_t rssi;
+	int8_t snr;
+	int l = -1;
+	uint8_t data[MAX_DATA_LEN] = {0};					// data array for ACK from sender device
+	bool exp_started = false;
+
+	while(!exp_started) {
+		// configure as sender and send experiment settings
+		config.tx = true;
+		ret = lora_config(lora_dev, &config);
+		if (ret < 0) {
+			LOG_ERR("LoRa config failed");
+		}
+
+		ret = lora_send(lora_dev, exp_data, len);
+		if (ret < 0) {
+			LOG_ERR("LoRa send failed");
+				return 0;
+		}
+
+		// configure as receiver, wait 2 seconds for ACK
+		config.tx = false;
+		ret = lora_config(lora_dev, &config);
+		if (ret < 0) {
+			LOG_ERR("LoRa config failed");
+		}
+			
+		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(2),
+					&rssi, &snr);
+		if (l < 0) {
+			LOG_ERR("no ACK received");	
+		} else {
+			if(memcmp(exp_data, data, len * sizeof(uint8_t)) == 0) {
+				printk("ACK is okay...............\n");
+				exp_started = true;				// check if received data exactly matches sent data
+			}
+		}
+	}
 
 
+	char delay[5];				// get experiment start delay
+	for(int16_t i = 0; i < l; i++) {
+		if(i > 8) {			
+			delay[i-9] = exp_data[i];
+		}
+	}
+	uint16_t d = atoi(delay); 
 
-void testThread1(void *a, void *b, void *c) {
-	printk("sth\n");
-	//printk("Thread executed: %d\n", b);
+
+	printk("exp_data[7] (coding rate byte): %d\n",  exp_data[7]);
+	
+
+	bool first_iteration = true;								
+	uint8_t transmission_data[MAX_TRANSM_LEN] ={0};				// exp_data[2] contains msg length
+	config.tx = false;
+	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
+
+	for(uint8_t i = 0; i < 8; i++) {
+		if(((exp_data[4] >> i)  & 0x01) == 1) {					// the 4th byte of the settings byte array represents the frequencies to use
+			config.frequency = frequencies[i];					// if a bit in that byte is set, the corresponding frequency will be used;
+			printk("frequency: %d\n", frequencies[i]);
+		} else {
+			continue;
+		}
+
+		for(uint8_t j = 0; j < 3; j++) {
+			if(((exp_data[5] >> j)  & 0x01) == 1) {
+				config.bandwidth =  j;
+				printk("bandwidth: %d\n", j);
+			} else {
+				continue;
+			}
+			for(uint8_t k = 0; k < 6; k++) {
+				if(((exp_data[6] >> k)  & 0x01) == 1) {
+					config.datarate =  k + 7;
+					printk("data rate: %d\n", k+7);
+				} else {
+					continue;
+				}
+				for(uint8_t m = 0; m < 4; m++) {
+					if(((exp_data[7] >> m)  & 0x01) == 1) {
+						config.coding_rate =  m + 1;
+						printk("coding rate: %d\n", m+1);
+					} else {
+						printk("coding rate bit not set for %d\n", m);
+						continue;
+					}
+					for(uint8_t p = 0; p < 8; p++) {
+						if(((exp_data[8] >> p)  & 0x01) == 1) {
+							config.tx_power =  p + 5;
+							printk("power: %d\n", p+1);
+							ret = lora_config(lora_dev, &config);
+							if (ret < 0) {
+								LOG_ERR("LoRa config failed");
+							}
+
+							
+
+							int64_t time_stamp;
+							int64_t milliseconds_spent = 0;
+							time_stamp = k_uptime_get();
+							int64_t iteration_time = exp_data[0] * exp_data[1] * 1000;					// exp_data[0] * exp_data[1] = # LoRa transmissions * time between transmissions
+							
+							if(first_iteration) {
+								iteration_time += 1000 * d;												// count down delay as part of the LoRa receive timing
+								first_iteration = false;
+							} else {
+								iteration_time += 5000;													// delay between iterations as part of the LoRa receive timing
+							}
+
+							uint8_t last_data_8 = 0;
+							while(iteration_time > 0) {													// exp_data[0] contains the number of LoRa transmissions per parameter combination
+								l = lora_recv(lora_dev, transmission_data, MAX_DATA_LEN, K_MSEC(iteration_time),
+										&rssi, &snr);
+
+								if(last_data_8 != transmission_data[8]) {								// checking if lora_recv just timed out or if something was actually received
+									bt_lres_notify(transmission_data, 1);
+									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
+										log_strdup(transmission_data), rssi, snr);
+									last_data_8 = transmission_data[8];
+								}
+
+								milliseconds_spent = k_uptime_delta(&time_stamp);
+								time_stamp = k_uptime_get();	
+								iteration_time = iteration_time - milliseconds_spent;						
+							}
+
+							// k_sleep(K_MSEC(5000));														// wait 5 seconds between combinations
+							printk("end of iteration\n");
+						} else {
+							continue;
+						}
+					}
+				}
+			}
+		}
+	}
+	printk("end of experiment...........\n");
+
 	return;
 }
+
 
 
 static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
-	
-	struct k_thread thread_data;
+	k_tid_t my_tid = k_thread_create(&my_thread_data, my_stack_area,
+                                 K_THREAD_STACK_SIZEOF(my_stack_area),
+                                 exex_experiment,
+                                 buf, len, NULL,
+                                 MY_PRIORITY, 0, K_NO_WAIT);
 
-    k_tid_t my_tid = k_thread_create(&thread_data, stack_area,
-                                 K_THREAD_STACK_SIZEOF(stack_area),
-                                 testThread1,
-                                 NULL, NULL, NULL,
-                                 TTT_PRIORITY, K_USER, K_NO_WAIT);
 
 	return 0;
 }
