@@ -858,16 +858,16 @@ struct bt_uuid_128 {
 	BT_UUID_DECLARE_16(BT_UUID_LSES_SEND_COMMAND_VAL)
 
 // writing
-// for preparing board for looped explore
-/** @def BT_UUID_LSES_LOOP_PREP_VAL
- *  @brief LSES looped explore preparation UUID value
+// for managing looped explore
+/** @def BT_UUID_LSES_LOOP_COMMAND_VAL
+ *  @brief LSES looped explore UUID value
  */
-#define BT_UUID_LSES_LOOP_PREP_VAL 0x2a3d
-/** @def BT_UUID_LSES_LOOP_PREP
- *  @brief LSES characteristic for looped explore preparation
+#define BT_UUID_LSES_LOOP_COMMAND_VAL 0x2a3d
+/** @def BT_UUID_LSES_LOOP_COMMAND
+ *  @brief LSES characteristic for looped explore
  */
-#define BT_UUID_LSES_LOOP_PREP \
-	BT_UUID_DECLARE_16(BT_UUID_LSES_LOOP_PREP_VAL)
+#define BT_UUID_LSES_LOOP_COMMAND \
+	BT_UUID_DECLARE_16(BT_UUID_LSES_LOOP_COMMAND_VAL)
 
 // writing
 // for preparing board for experiment
@@ -878,7 +878,7 @@ struct bt_uuid_128 {
 /** @def BT_UUID_LSES_EXP_PREP
  *  @brief LSES characteristic for experiment preparation
  */
-#define BT_UUID_LSES_EXP_PREP_ \
+#define BT_UUID_LSES_EXP_PREP \
 	BT_UUID_DECLARE_16(BT_UUID_LSES_EXP_PREP_VAL)
 
 

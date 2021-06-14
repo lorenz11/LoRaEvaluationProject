@@ -138,7 +138,7 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 
 
 // prepare or start a LoRa message sending loop ()
-static ssize_t loop_prep_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
 	char *pc = (char *) buf;
@@ -196,19 +196,11 @@ static ssize_t loop_prep_cb(struct bt_conn *conn, const struct bt_gatt_attr *att
 
 
 // callback for characteristic possibly used in the future
-static ssize_t anything_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+static ssize_t experiment_prep_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
 	printk("command received\n");
-	char *pc = (char *) buf;
-	if(*pc == 'a') {			// set number of loops in explore mode
-		loop = 0;
-		pc++;
-		uint16_t i = atoi(pc);
-		number_of_messages = i;
-		printk("number: %d\n", i);		
-	}
-
+	
 	if(*pc == 'b') {
 		// configure and prepare experiment mode
 		const struct device *lora_dev;
@@ -379,8 +371,10 @@ BT_GATT_SERVICE_DEFINE(lses_svc,
 			       BT_GATT_PERM_WRITE, NULL, change_config_cb, NULL),
 	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_SEND_COMMAND, BT_GATT_CHRC_WRITE,
 			       BT_GATT_PERM_WRITE, NULL, send_command_cb, NULL),
-	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_LOOP_PREP, BT_GATT_CHRC_WRITE,
-			       BT_GATT_PERM_WRITE, NULL, loop_prep_cb, NULL),
+	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_LOOP_COMMAND, BT_GATT_CHRC_WRITE,
+			       BT_GATT_PERM_WRITE, NULL, loop_command_cb, NULL),
+	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_EXP_PREP, BT_GATT_CHRC_WRITE,
+			       BT_GATT_PERM_WRITE, NULL, experiment_prep_cb, NULL),
 );
 
 static int lses_init(const struct device *dev)
