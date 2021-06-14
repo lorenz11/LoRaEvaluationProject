@@ -31,16 +31,21 @@ static uint8_t lses_blsc;
 K_THREAD_STACK_DEFINE(stack_area, STACK_SIZE);
 struct k_thread thread_data;
 
+uint8_t e_d[18];
+uint16_t length = 0;
 void testThread1(void *a, void *b, void *c) {
-	uint16_t len = *(uint16_t*) b;
-	uint8_t exp_data[len];
-
-	printk("sth: %d\n", test);
+	//uint16_t len = *(uint16_t*) b;
+	uint8_t exp_data[length];					// experiment settings data
+	for(int16_t i = 0; i < length; i++) {
+		exp_data[i] = e_d[i];
+		
+	}
+	for(int16_t j = 0; j < length; j++) {
+		printk("sth: %d\n", exp_data[j]);
+	}
 	return;
 }
 
-uint16_t length = 0;
-uint8_t exp_data[18];
 // is triggered when writing to corresponding characteristic on phone
 static ssize_t test_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
@@ -50,14 +55,14 @@ static ssize_t test_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 	length = len;
 	uint8_t *pu = (uint8_t *) buf;
 	for(int16_t i = 0; i < len; i++) {
-		exp_data[i] = *pu;
+		e_d[i] = *pu;
 		pu++;
 	}
 
     k_tid_t my_tid = k_thread_create(&thread_data, stack_area,
                                  K_THREAD_STACK_SIZEOF(stack_area),
                                  testThread1,
-                                 exp_data, &a, NULL,
+                                 NULL, NULL, NULL,
                                  TTT_PRIORITY, K_USER, K_NO_WAIT);
 
 	return 0;
