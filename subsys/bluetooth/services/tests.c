@@ -32,24 +32,32 @@ K_THREAD_STACK_DEFINE(stack_area, STACK_SIZE);
 struct k_thread thread_data;
 
 void testThread1(void *a, void *b, void *c) {
-	uint16_t test = *(uint16_t*) b;
+	uint16_t len = *(uint16_t*) b;
+	uint8_t exp_data[len];
+
 	printk("sth: %d\n", test);
 	return;
 }
 
-uint16_t a = 8;
+uint16_t length = 0;
+uint8_t exp_data[18];
 // is triggered when writing to corresponding characteristic on phone
 static ssize_t test_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
 	printk("at callback\n");
 
-	a = 4;
+	length = len;
+	uint8_t *pu = (uint8_t *) buf;
+	for(int16_t i = 0; i < len; i++) {
+		exp_data[i] = *pu;
+		pu++;
+	}
 
     k_tid_t my_tid = k_thread_create(&thread_data, stack_area,
                                  K_THREAD_STACK_SIZEOF(stack_area),
                                  testThread1,
-                                 NULL, &a, NULL,
+                                 exp_data, &a, NULL,
                                  TTT_PRIORITY, K_USER, K_NO_WAIT);
 
 	return 0;
