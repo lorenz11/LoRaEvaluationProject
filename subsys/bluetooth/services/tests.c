@@ -26,11 +26,28 @@ LOG_MODULE_REGISTER(tests);
 static uint8_t lses_blsc;
 
 
+#define STACK_SIZE 1024
+#define TTT_PRIORITY 5
+K_THREAD_STACK_DEFINE(stack_area, STACK_SIZE);
+
+void testThread1(void *a, void *b, void *c) {
+	printk("sth1\n");
+	return;
+}
+
 // is triggered when writing to corresponding characteristic on phone
 static ssize_t test_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
 	printk("at callback\n");
+	struct k_thread thread_data;
+
+    k_tid_t my_tid = k_thread_create(&thread_data, stack_area,
+                                 K_THREAD_STACK_SIZEOF(stack_area),
+                                 testThread1,
+                                 NULL, NULL, NULL,
+                                 TTT_PRIORITY, K_USER, K_NO_WAIT);
+
 	return 0;
 }
 
