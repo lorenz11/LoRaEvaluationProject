@@ -34,23 +34,6 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 
 #define LOG_LEVEL CONFIG_LOG_DEFAULT_LEVEL
 
-
-
-#define MY_STACK_SIZE 500
-#define MY_PRIORITY 5
-K_THREAD_STACK_DEFINE(my_stack_area, MY_STACK_SIZE);
-
-void testThread(void *a, uint16_t b, void *c) {
-	printk("Thread executed: %d\n", b);
-	return;
-}
-
-
-
-
-// for thread listening for incoming LoRa experiment commands
-
-
 #include <logging/log.h>
 LOG_MODULE_REGISTER(lora_receive);			// needs to register lora_receive?
 
@@ -121,7 +104,6 @@ static struct bt_conn_auth_cb auth_cb_display = {
 
 
 
-
 void main(void)
 {
     int err;
@@ -161,22 +143,4 @@ void main(void)
 		LOG_ERR("LoRa config failed");
 		return;
 	}
-
-	
-	struct k_thread my_thread_data;
-
-	k_tid_t my_tid = k_thread_create(&my_thread_data, my_stack_area,
-                                 K_THREAD_STACK_SIZEOF(my_stack_area),
-                                 testThread,
-                                 NULL, 5, NULL,
-                                 MY_PRIORITY, 0, K_NO_WAIT);
-
-	/*int64_t time_stamp;
-	int64_t milliseconds_spent;
-
-	time_stamp = k_uptime_get();
-	k_sleep(K_MSEC(6234));
-	milliseconds_spent = k_uptime_delta(&time_stamp);
-	printk("time spent: %lld\n", milliseconds_spent);*/
-
 }

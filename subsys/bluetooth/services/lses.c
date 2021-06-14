@@ -110,7 +110,7 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 {
 	// extract LoRa message
 	char data[len];
-	
+	char *pc = (char *) buf;
 	for(uint16_t i = 0; i < len; i++) {
 		data[i] = *pc;
 		pc++;
@@ -172,14 +172,14 @@ static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		}
 
 		uint16_t i = 0;
-		while (i < number_of_messages)) {
+		while (i < number_of_messages) {
 			ret = lora_send(lora_dev, data, MAX_DATA_LEN);
 			if (ret < 0) {
 				LOG_ERR("LoRa send failed");
 				return 0;
 			}
 			LOG_INF("Data sent!");
-			k_sleep(K_MSEC(time_between_msgs));
+			k_sleep(K_MSEC(time_between_msgs * 1000));
 			i++;
 		}
 
@@ -191,16 +191,12 @@ static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 
 
 
-
-
-
-
 // callback for characteristic possibly used in the future
 static ssize_t experiment_prep_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
 	printk("command received\n");
-	
+	char *pc = (char *) buf;
 	if(*pc == 'b') {
 		// configure and prepare experiment mode
 		const struct device *lora_dev;
