@@ -24,23 +24,24 @@ static struct z_stack_data stack_data[3] = {
 "\x58\x00\x00\x20", {}, K_OBJ_THREAD, 0, { .thread_id = 0 }
 "\xf8\x00\x00\x20", {}, K_OBJ_THREAD, 0, { .thread_id = 1 }
 "\x98\x01\x00\x20", {}, K_OBJ_THREAD, 0, { .thread_id = 2 }
-"\x70\x02\x00\x20", {}, K_OBJ_QUEUE, 0, { .unused = 0 }
-"\x58\x03\x00\x20", {}, K_OBJ_QUEUE, 0, { .unused = 0 }
-"\x9c\x03\x00\x20", {}, K_OBJ_QUEUE, 0, { .unused = 0 }
-"\xa0\x04\x00\x20", {}, K_OBJ_QUEUE, 0, { .unused = 0 }
-"\xe4\x04\x00\x20", {}, K_OBJ_QUEUE, 0, { .unused = 0 }
-"\x20\x06\x00\x20", {}, K_OBJ_THREAD, 0, { .thread_id = 3 }
+"\x38\x02\x00\x20", {}, K_OBJ_THREAD, 0, { .thread_id = 3 }
+"\x10\x03\x00\x20", {}, K_OBJ_QUEUE, 0, { .unused = 0 }
+"\xf8\x03\x00\x20", {}, K_OBJ_QUEUE, 0, { .unused = 0 }
+"\x3c\x04\x00\x20", {}, K_OBJ_QUEUE, 0, { .unused = 0 }
+"\x40\x05\x00\x20", {}, K_OBJ_QUEUE, 0, { .unused = 0 }
+"\x84\x05\x00\x20", {}, K_OBJ_QUEUE, 0, { .unused = 0 }
 "\xc0\x06\x00\x20", {}, K_OBJ_THREAD, 0, { .thread_id = 4 }
-"\x80\x09\x00\x20", {}, K_OBJ_THREAD, 0, { .thread_id = 6 }
-"\x20\x0a\x00\x20", {}, K_OBJ_THREAD, 0, { .thread_id = 5 }
-"\xc0\x0a\x00\x20", {}, K_OBJ_THREAD, 0, { .thread_id = 7 }
-"\x9c\x0b\x00\x20", {}, K_OBJ_MEM_SLAB, 0, { .unused = 0 }
-"\xbc\x0b\x00\x20", {}, K_OBJ_MEM_SLAB, 0, { .unused = 0 }
-"\x98\x14\x00\x20", {}, K_OBJ_SEM, 0, { .unused = 0 }
-"\xac\x1d\x00\x20", {}, K_OBJ_SEM, 0, { .unused = 0 }
-"\x64\x20\x00\x20", {}, K_OBJ_SEM, 0, { .unused = 0 }
-"\x04\x23\x00\x20", {}, K_OBJ_SEM, 0, { .unused = 0 }
-"\x1c\x23\x00\x20", {}, K_OBJ_SEM, 0, { .unused = 0 }
+"\x60\x07\x00\x20", {}, K_OBJ_THREAD, 0, { .thread_id = 5 }
+"\x20\x0a\x00\x20", {}, K_OBJ_THREAD, 0, { .thread_id = 7 }
+"\xc0\x0a\x00\x20", {}, K_OBJ_THREAD, 0, { .thread_id = 6 }
+"\x60\x0b\x00\x20", {}, K_OBJ_THREAD, 0, { .thread_id = 8 }
+"\x3c\x0c\x00\x20", {}, K_OBJ_MEM_SLAB, 0, { .unused = 0 }
+"\x5c\x0c\x00\x20", {}, K_OBJ_MEM_SLAB, 0, { .unused = 0 }
+"\x38\x15\x00\x20", {}, K_OBJ_SEM, 0, { .unused = 0 }
+"\x4c\x1e\x00\x20", {}, K_OBJ_SEM, 0, { .unused = 0 }
+"\x04\x21\x00\x20", {}, K_OBJ_SEM, 0, { .unused = 0 }
+"\xa4\x23\x00\x20", {}, K_OBJ_SEM, 0, { .unused = 0 }
+"\xbc\x23\x00\x20", {}, K_OBJ_SEM, 0, { .unused = 0 }
 "\x00\x60\x00\x20", {}, K_OBJ_THREAD_STACK_ELEMENT, 0, { .stack_data = &stack_data[0] }
 "\x00\x70\x00\x20", {}, K_OBJ_THREAD_STACK_ELEMENT, 0, { .stack_data = &stack_data[1] }
 "\x00\x74\x00\x20", {}, K_OBJ_THREAD_STACK_ELEMENT, 0, { .stack_data = &stack_data[2] }
@@ -98,4 +99,4 @@ void z_object_wordlist_foreach(_wordlist_cb_func_t func, void *context)
 	ALIAS_OF(z_object_gperf_wordlist_foreach);
 #endif
 
-Z_GENERIC_SECTION(.kobject_data.data) uint8_t _thread_idx_map[2] = { 0x0,  0xff, };
+Z_GENERIC_SECTION(.kobject_data.data) uint8_t _thread_idx_map[2] = { 0x0,  0xfe, };

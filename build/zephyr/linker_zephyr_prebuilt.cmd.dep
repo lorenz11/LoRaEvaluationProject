@@ -42,14 +42,11 @@ zephyr/linker_zephyr_prebuilt.cmd: \
  /home/lorenz/zephyrproject/zephyr/include/linker/cplusplus-rom.ld \
  /home/lorenz/zephyrproject/zephyr/build/zephyr/include/generated/snippets-ram-sections.ld \
  /home/lorenz/zephyrproject/zephyr/include/../arch/common/ramfunc.ld \
- /home/lorenz/zephyrproject/zephyr/build/zephyr/include/generated/app_smem.ld \
- /home/lorenz/zephyrproject/zephyr/build/zephyr/include/generated/app_smem_aligned.ld \
- /home/lorenz/zephyrproject/zephyr/include/linker/common-noinit.ld \
- /home/lorenz/zephyrproject/zephyr/build/zephyr/include/generated/snippets-noinit.ld \
  /home/lorenz/zephyrproject/zephyr/build/zephyr/include/generated/snippets-rwdata.ld \
  /home/lorenz/zephyrproject/zephyr/include/linker/common-ram.ld \
  /home/lorenz/zephyrproject/zephyr/include/linker/kobject.ld \
  /home/lorenz/zephyrproject/zephyr/include/linker/cplusplus-ram.ld \
+ /home/lorenz/zephyrproject/zephyr/build/zephyr/include/generated/snippets-noinit.ld \
  /home/lorenz/zephyrproject/zephyr/build/zephyr/include/generated/snippets-sections.ld \
  /home/lorenz/zephyrproject/zephyr/include/linker/intlist.ld \
  /home/lorenz/zephyrproject/zephyr/include/linker/debug-sections.ld
