@@ -24,12 +24,12 @@
 #include <bluetooth/gatt.h>
 #include <bluetooth/services/tests.h>
 
-
-
 #define LOG_LEVEL CONFIG_LOG_DEFAULT_LEVEL
 
+#include <logging/log.h>
+LOG_MODULE_REGISTER(lora_receive);
 
-
+// defining thread related stuff
 #define MY_STACK_SIZE 500
 #define MY_PRIORITY 5
 K_THREAD_STACK_DEFINE(my_stack_area, MY_STACK_SIZE);
@@ -39,12 +39,6 @@ void testThread(void *a, uint16_t b, void *c) {
 	printk("Thread executed: %d\n", b);
 	return;
 }
-
-
-#include <logging/log.h>
-LOG_MODULE_REGISTER(lora_receive);
-
-
 
 // ble service to be advertised
 static const struct bt_data ad[] = {
@@ -109,8 +103,6 @@ static void lres_notify(const void *data, uint8_t type_of_notification)
 }
 
 
-
-
 void main(void)
 {
 	// for ble connection
@@ -127,8 +119,8 @@ void main(void)
 	bt_conn_cb_register(&conn_callbacks);
 	bt_conn_auth_cb_register(&auth_cb_display);
 
+	// starting the new thread, defined above. This is working here!
 	struct k_thread my_thread_data;
-
 	k_tid_t my_tid = k_thread_create(&my_thread_data, my_stack_area,
                                  K_THREAD_STACK_SIZEOF(my_stack_area),
                                  testThread,

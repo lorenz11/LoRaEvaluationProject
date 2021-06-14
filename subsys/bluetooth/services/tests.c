@@ -25,7 +25,7 @@ LOG_MODULE_REGISTER(tests);
 
 static uint8_t lses_blsc;
 
-
+// defining thread related stuff
 #define STACK_SIZE 1024
 #define TTT_PRIORITY 5
 K_THREAD_STACK_DEFINE(stack_area, STACK_SIZE);
