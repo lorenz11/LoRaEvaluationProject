@@ -267,7 +267,7 @@ void exec_experiment(void *a, void *b, void *c) {
 }
 
 
-uint16_t len_param = 0;
+uint16_t len_param = 0;				// do i need this????????????
 
 static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
@@ -291,7 +291,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	return 0;
 }
 
-// Lora Eval Service Declaration: service, descriptor, 1 notification characteristic, 1 write characteristic
+// Lora Eval Service Declaration: service, descriptor, 1 notification characteristic, 2 write characteristics
 BT_GATT_SERVICE_DEFINE(lres_svc,
 	BT_GATT_PRIMARY_SERVICE(BT_UUID_LRES),
 	BT_GATT_CHARACTERISTIC(BT_UUID_LRES_STAT, BT_GATT_CHRC_NOTIFY,
