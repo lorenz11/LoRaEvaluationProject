@@ -96,6 +96,7 @@ void change_config(uint8_t* pu, bool tx) {
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
+	printk("hhhhhhhhhhhhhhhhhhh\n");
 	uint8_t *pu = (uint8_t *) buf;
 	change_config(pu, true);
 
