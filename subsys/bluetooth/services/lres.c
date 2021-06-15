@@ -287,7 +287,7 @@ void exec_experiment(void *a, void *b, void *c) {
 									ndata[0] = rssi;
 									ndata[1] = snr;
 
-									bt_lres_notify(ndata, 0);
+									bt_lres_notify(ndata, 0);											// send results to phone to monitor experiment
 									bt_lres_notify(transmission_data, 1);
 
 									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
