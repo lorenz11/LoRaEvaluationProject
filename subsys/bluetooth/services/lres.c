@@ -127,7 +127,6 @@ void receive_lora(void *a, void *b, void *c) {
 	}
 }
 
-bool reconnecting = false;
 // gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic) and starts receiving thread
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
@@ -137,16 +136,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	}
 
 	uint8_t *pu = (uint8_t *) buf;		
-	if(reconnecting) {					// return before changing config if this function is called with a reconnect during an experiment
-		return 0;
-	}
-	
 	change_config(pu, false);
-										// indicates this function is called after the first connect for an experiment: 
-	if(*pu == 'B') {					// return before starting new receive thread, all LoRa communication happens in the eyperiment code			
-		reconnecting = true;
-		return 0;
-	}
 
 	int8_t bt_data[1] = {-2};
 	bt_lres_notify(bt_data, 2);
@@ -321,18 +311,21 @@ void exec_experiment(void *a, void *b, void *c) {
 	return;
 }
 
-// receives the experiment settings via BLE and starts the receiving side of the experiment on a new thread
+// receives and changes the initial lora config for pre experiment lora communication OR
+//receives the experiment settings via BLE and starts the receiving side of the experiment on a new thread
 static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
 	uint8_t *pu = (uint8_t *) buf;
-	if(len == 5) {
+	if(len == 5) {								// receive and change config
 		change_config(pu, true);
 		printk("config changed for experiment...\n");
+		int8_t bt_data[1] = {-2};
+		bt_lres_notify(bt_data, 2);
 		return 0;
 	}
 
-	exp_data_length = len;
+	exp_data_length = len;						// start experiment
 	for(int16_t i = 0; i < len; i++) {
 		experiment_data[i] = *pu;
 		pu++;
