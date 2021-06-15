@@ -883,6 +883,26 @@ struct bt_uuid_128 {
 
 
 
+
+
+
+// writing
+// for writing config to board
+/** @def BT_UUID_LSES_CHANGE_TEST_VAL
+ *  @brief LSES Change Config UUID value
+ */
+#define BT_UUID_LSES_CHANGE_TEST_VAL 0x2a42
+/** @def BT_UUID_LSES_CHANGE_CONFIG
+ *  @brief LSES change config
+ */
+#define BT_UUID_LSES_CHANGE_TEST \
+	BT_UUID_DECLARE_16(BT_UUID_LSES_CHANGE_TEST_VAL)
+
+
+	
+
+
+
 //////////////////////////////////RECEIVER UUIDs///////////////////////////////////////
 
 // notification
