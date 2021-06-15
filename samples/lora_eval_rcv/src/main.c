@@ -96,12 +96,6 @@ static struct bt_conn_auth_cb auth_cb_display = {
 	.cancel = auth_cancel,
 };
 
-static void lres_notify(const void *data, uint8_t type_of_notification)
-{
-	bt_lres_notify(data, type_of_notification);
-}
-
-
 
 
 void main(void)
