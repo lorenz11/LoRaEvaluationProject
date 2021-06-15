@@ -263,9 +263,7 @@ void exec_experiment(void *a, void *b, void *c) {
 							if (ret < 0) {
 								LOG_ERR("LoRa config failed");
 							}
-
 							
-
 							int64_t time_stamp;
 							int64_t milliseconds_spent = 0;
 							time_stamp = k_uptime_get();
@@ -284,7 +282,14 @@ void exec_experiment(void *a, void *b, void *c) {
 										&rssi, &snr);
 
 								if(last_data_8 != transmission_data[8]) {								// checking if lora_recv just timed out or if something was actually received
+									uint8_t ndata[2] = {0};
+									rssi = (uint8_t) -rssi; 											// negated to fit into an unsigned int (original value is negative)
+									ndata[0] = rssi;
+									ndata[1] = snr;
+
+									bt_lres_notify(ndata, 0);
 									bt_lres_notify(transmission_data, 1);
+
 									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 										log_strdup(transmission_data), rssi, snr);
 									last_data_8 = transmission_data[8];
