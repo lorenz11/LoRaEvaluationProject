@@ -88,6 +88,9 @@ void change_config(uint8_t* pu, bool tx) {
 	}
 }
 
+
+
+
 #define STACK_SIZE 8192
 #define TT_PRIORITY 5
 K_THREAD_STACK_DEFINE(stack_area0, STACK_SIZE);
@@ -95,6 +98,7 @@ K_THREAD_STACK_DEFINE(stack_area0, STACK_SIZE);
 struct k_thread thread_data0;
 k_tid_t thread0_tid;
 
+// separate LoRa receive thread code
 void receive_lora(void *a, void *b, void *c) {
 	const struct device *lora_dev;
 	lora_dev = device_get_binding(DEFAULT_RADIO);
@@ -123,18 +127,26 @@ void receive_lora(void *a, void *b, void *c) {
 	}
 }
 
-// gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic)
+bool reconnecting = false;
+// gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic) and starts receiving thread
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
 	if(thread0_tid != NULL) {
 		k_thread_abort(thread0_tid);
-	} else {
-		printk("tid is NULL\n");
+	}
+
+	uint8_t *pu = (uint8_t *) buf;		
+	if(reconnecting) {					// return before changing config if this function is called with a reconnect during an experiment
+		return 0;
 	}
 	
-	uint8_t *pu = (uint8_t *) buf;
 	change_config(pu, false);
+										// indicates this function is called after the first connect for an experiment: 
+	if(*pu == 'B') {					// return before starting new receive thread, all LoRa communication happens in the eyperiment code			
+		reconnecting = true;
+		return 0;
+	}
 
 	int8_t bt_data[1] = {-2};
 	bt_lres_notify(bt_data, 2);
@@ -148,6 +160,8 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 }
 
 
+
+
 K_THREAD_STACK_DEFINE(stack_area1, STACK_SIZE);
 
 struct k_thread thread_data1;
@@ -155,6 +169,7 @@ struct k_thread thread_data1;
 uint8_t experiment_data[18];
 uint16_t exp_data_length = 0;
 
+// experiment receive thread code
 void exec_experiment(void *a, void *b, void *c) {
 	uint8_t exp_data[exp_data_length];
 	uint16_t len = exp_data_length;
@@ -306,19 +321,16 @@ void exec_experiment(void *a, void *b, void *c) {
 			}
 		}
 	}
+	reconnecting = false;
 	printk("end of experiment...........\n");
 
 	return;
 }
 
-
-uint16_t len_param = 0;				// do i need this????????????
-
+// receives the experiment settings via BLE and starts the receiving side of the experiment on a new thread
 static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
-	printk("at callback\n");
-
 	exp_data_length = len;
 	uint8_t *pu = (uint8_t *) buf;
 	for(int16_t i = 0; i < len; i++) {
@@ -331,7 +343,6 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 			exec_experiment,
 			NULL, NULL, NULL,
 			TT_PRIORITY, 0, K_NO_WAIT);
-
 
 	return 0;
 }
