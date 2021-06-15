@@ -160,7 +160,9 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 // prepare or start a LoRa message sending loop ()
 static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
-{
+{	
+	printk("at loop c callback...\n");
+
 	char *pc = (char *) buf;
 	if(*pc == '!') {						// set number of loops in explore mode
 		pc++;
@@ -388,7 +390,7 @@ BT_GATT_SERVICE_DEFINE(lses_svc,
 			       BT_GATT_PERM_WRITE, NULL, send_command_cb, NULL),
 	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_LOOP_COMMAND, BT_GATT_CHRC_WRITE,
 			       BT_GATT_PERM_WRITE, NULL, loop_command_cb, NULL),
-	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_CHANGE_CONFIG, BT_GATT_CHRC_WRITE,
+	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_CHANGE_TEST, BT_GATT_CHRC_WRITE,
 			       BT_GATT_PERM_WRITE, NULL, test_cb, NULL),
 	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_EXP_PREP, BT_GATT_CHRC_WRITE,
 			       BT_GATT_PERM_WRITE, NULL, prepare_sender_cb, NULL),
