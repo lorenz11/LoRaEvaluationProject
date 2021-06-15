@@ -305,7 +305,6 @@ void exec_experiment(void *a, void *b, void *c) {
 			}
 		}
 	}
-	reconnecting = false;
 	printk("end of experiment...........\n");
 
 	return;
