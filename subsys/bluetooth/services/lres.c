@@ -88,15 +88,55 @@ void change_config(uint8_t* pu, bool tx) {
 	}
 }
 
+#define STACK_SIZE 8192
+#define TTT_PRIORITY 5
+K_THREAD_STACK_DEFINE(stack_area, STACK_SIZE);
+
+struct k_thread thread_data0;
+k_tid_t thread0_tid;
+
+void receive_lora(void *a, void *b, void *c) {
+	lora_dev = device_get_binding(DEFAULT_RADIO);
+	
+	while (1) {
+		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
+				&rssi, &snr);
+		
+		uint8_t ndata[2] = {0};
+		rssi = (uint8_t) -rssi; // negated to fit into an unsigned int (original value is negative)
+		ndata[0] = rssi;
+		ndata[1] = snr;
+
+		// notfiy phone with sent LoRa message and other data
+		lres_notify(ndata, 0);
+		lres_notify(data, 1);
+		
+		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
+			log_strdup(data), rssi, snr);
+	}
+}
+
 // gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic)
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
+	if(thread0_tid != NULL) {
+		k_thread_abort(thread0_tid)
+	} else {
+		printk("tid is NULL\n");
+	}
+	
 	uint8_t *pu = (uint8_t *) buf;
 	change_config(pu, false);
 
 	int8_t bt_data[1] = {-2};
 	bt_lres_notify(bt_data, 2);
+
+	thread0_tid = k_thread_create(&thread_data1, stack_area,
+			K_THREAD_STACK_SIZEOF(stack_area),
+			receive_lora,
+			NULL, NULL, NULL,
+			TT_PRIORITY, 0, K_NO_WAIT);
 	return 0;
 }
 
@@ -105,7 +145,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 #define TT_PRIORITY 5
 K_THREAD_STACK_DEFINE(stack_area, STACK_SIZE);
 
-struct k_thread thread_data;
+struct k_thread thread_data1;
 
 uint8_t experiment_data[18];
 uint16_t exp_data_length = 0;
@@ -281,7 +321,7 @@ static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		pu++;
 	}
 
-	k_thread_create(&thread_data, stack_area,
+	k_thread_create(&thread_data1, stack_area,
 			K_THREAD_STACK_SIZEOF(stack_area),
 			exec_experiment,
 			NULL, NULL, NULL,

@@ -148,27 +148,4 @@ void main(void)
 		LOG_ERR("Lora config failed");
 		return;
 	}
-
-	while (1) {
-		/* Block until data arrives */
-		printk("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
-		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
-				&rssi, &snr);
-		if (len < 0) {
-			LOG_ERR("LoRa receive failed");
-			return;
-		}
-		printk("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
-		uint8_t ndata[2] = {0};
-		rssi = (uint8_t) -rssi; // negated to fit into an unsigned int (original value is negative)
-		ndata[0] = rssi;
-		ndata[1] = snr;
-
-		// notfiy phone with sent LoRa message and other data
-		lres_notify(ndata, 0);
-		lres_notify(data, 1);
-		
-		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
-			log_strdup(data), rssi, snr);
-	}
 }
