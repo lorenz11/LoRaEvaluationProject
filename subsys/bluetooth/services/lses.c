@@ -110,13 +110,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 
 
 
-// gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic)
-static ssize_t test_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
-{
-	printk("test runs...\n");
-	return 0;
-}
+
 
 
 
@@ -227,7 +221,6 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 		LOG_ERR("%s Device not found", DEFAULT_RADIO);
 	}
 
-	pc++;
 	change_config(pc, false);
 	bt_lses_notify(-2);
 
@@ -377,6 +370,15 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 	return 0;
 }
 
+
+// gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic)
+static ssize_t test_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
+{
+	printk("test runs...\n");
+	return 0;
+}
+
 // Lora Eval Service Declaration: service, descriptor, 1 notification characteristic, 3 write characteristics
 BT_GATT_SERVICE_DEFINE(lses_svc,
 	BT_GATT_PRIMARY_SERVICE(BT_UUID_LSES),
@@ -390,10 +392,10 @@ BT_GATT_SERVICE_DEFINE(lses_svc,
 			       BT_GATT_PERM_WRITE, NULL, send_command_cb, NULL),
 	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_LOOP_COMMAND, BT_GATT_CHRC_WRITE,
 			       BT_GATT_PERM_WRITE, NULL, loop_command_cb, NULL),
-	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_CHANGE_TEST, BT_GATT_CHRC_WRITE,
-			       BT_GATT_PERM_WRITE, NULL, test_cb, NULL),
 	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_EXP_PREP, BT_GATT_CHRC_WRITE,
 			       BT_GATT_PERM_WRITE, NULL, prepare_sender_cb, NULL),
+	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_CHANGE_TEST, BT_GATT_CHRC_WRITE,
+			       BT_GATT_PERM_WRITE, NULL, test_cb, NULL),
 );
 
 static int lses_init(const struct device *dev)

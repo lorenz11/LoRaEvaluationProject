@@ -8977,14 +8977,8 @@ static ssize_t test_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
     457c:	20001544 	.word	0x20001544
 
 00004580 <send_command_cb>:
-
-
-// gets a byte array containing the msg a LoRa transmission is supposed to contain for explore mode
-static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
     4580:	b5b0      	push	{r4, r5, r7, lr}
-	// extract LoRa message
 	char data[len];
     4582:	1dd9      	adds	r1, r3, #7
     4584:	4668      	mov	r0, sp
@@ -8995,15 +8989,11 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	char data[len];
     458e:	468d      	mov	sp, r1
     4590:	466d      	mov	r5, sp
-	char *pc = (char *) buf;
 	for(uint16_t i = 0; i < len; i++) {
     4592:	2100      	movs	r1, #0
     4594:	b288      	uxth	r0, r1
     4596:	4283      	cmp	r3, r0
     4598:	d829      	bhi.n	45ee <send_command_cb+0x6e>
-		data[i] = *pc;
-		pc++;
-	}
 	data[len] = '.';
     459a:	222e      	movs	r2, #46	; 0x2e
     459c:	54ea      	strb	r2, [r5, r3]
@@ -9019,11 +9009,6 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	return z_impl_device_get_binding(name);
     45a6:	4815      	ldr	r0, [pc, #84]	; (45fc <send_command_cb+0x7c>)
     45a8:	f018 fc00 	bl	1cdac <z_impl_device_get_binding>
-	const struct device *lora_dev;
-	int ret;
-
-	// send message
-	lora_dev = device_get_binding(DEFAULT_RADIO);
 	if (!lora_dev) {
     45ac:	4604      	mov	r4, r0
     45ae:	b950      	cbnz	r0, 45c6 <send_command_cb+0x46>
@@ -9037,8 +9022,6 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
     45bc:	0192      	lsls	r2, r2, #6
     45be:	f042 0201 	orr.w	r2, r2, #1
     45c2:	f01a fcf8 	bl	1efb6 <log_1>
-	}
-
 	ret = lora_send(lora_dev, data, MAX_DATA_LEN);
     45c6:	2214      	movs	r2, #20
     45c8:	4629      	mov	r1, r5
@@ -9056,10 +9039,6 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
     45de:	0189      	lsls	r1, r1, #6
     45e0:	f041 0101 	orr.w	r1, r1, #1
     45e4:	f01a fcda 	bl	1ef9c <log_0>
-		return 0;
-	}
-
-	return 0;
 }
     45e8:	2000      	movs	r0, #0
     45ea:	46bd      	mov	sp, r7
@@ -9079,11 +9058,6 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
     460c:	00025b0c 	.word	0x00025b0c
 
 00004610 <loop_command_cb>:
-
-
-// prepare or start a LoRa message sending loop ()
-static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {	
     4610:	e92d 4ff8 	stmdb	sp!, {r3, r4, r5, r6, r7, r8, r9, sl, fp, lr}
     4614:	4614      	mov	r4, r2
@@ -9094,13 +9068,10 @@ static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
     461a:	4698      	mov	r8, r3
 	printk("at loop c callback...\n");
     461c:	f01a f8e4 	bl	1e7e8 <printk>
-
-	char *pc = (char *) buf;
 	if(*pc == '!') {						// set number of loops in explore mode
     4620:	7823      	ldrb	r3, [r4, #0]
     4622:	2b21      	cmp	r3, #33	; 0x21
     4624:	d10c      	bne.n	4640 <loop_command_cb+0x30>
-		pc++;
 		uint16_t i = atoi(pc);
     4626:	1c60      	adds	r0, r4, #1
     4628:	f01f fa32 	bl	23a90 <atoi>
@@ -9112,17 +9083,8 @@ static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
     4630:	8018      	strh	r0, [r3, #0]
 		printk("number: %d\n", i);		
     4632:	4839      	ldr	r0, [pc, #228]	; (4718 <loop_command_cb+0x108>)
-	} else if (*pc == '#') {				// set the time between messages
-		pc++;				
-		uint16_t i = atoi(pc);
-		time_between_msgs = i;
 		printk("time: %d\n", i);
     4634:	f01a f8d8 	bl	1e7e8 <printk>
-		}
-
-	}
-
-	return 0;
 }
     4638:	2000      	movs	r0, #0
     463a:	46bd      	mov	sp, r7
@@ -9458,7 +9420,7 @@ int bt_lses_notify(int8_t type_of_notification)
     4884:	f01a fb97 	bl	1efb6 <log_1>
 	change_config(pc, false);
     4888:	2100      	movs	r1, #0
-    488a:	1c68      	adds	r0, r5, #1
+    488a:	4628      	mov	r0, r5
     488c:	f7ff ff58 	bl	4740 <change_config>
 	bt_lses_notify(-2);
     4890:	f06f 0001 	mvn.w	r0, #1
