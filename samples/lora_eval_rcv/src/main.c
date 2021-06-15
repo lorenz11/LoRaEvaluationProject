@@ -119,33 +119,4 @@ void main(void)
 
 	bt_conn_cb_register(&conn_callbacks);
 	bt_conn_auth_cb_register(&auth_cb_display);
-
-	// for LoRa communication
-	const struct device *lora_dev;
-	struct lora_modem_config config;
-	int ret, len;
-	uint8_t data[MAX_DATA_LEN] = {0};
-	
-	int16_t rssi;
-	int8_t snr;
-
-	lora_dev = device_get_binding(DEFAULT_RADIO);
-	if (!lora_dev) {
-		LOG_ERR("%s Device not found", DEFAULT_RADIO);
-		return;
-	}
-
-	config.frequency = 868100000;
-	config.bandwidth = 0;
-	config.datarate = 10;
-	config.preamble_len = 8;
-	config.coding_rate = 1;
-	config.tx_power = 5;
-	config.tx = false;
-
-	ret = lora_config(lora_dev, &config);
-	if (ret < 0) {
-		LOG_ERR("Lora config failed");
-		return;
-	}
 }
