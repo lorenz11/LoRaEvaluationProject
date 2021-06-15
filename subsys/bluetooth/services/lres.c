@@ -192,13 +192,7 @@ void exec_experiment(void *a, void *b, void *c) {
 	bool exp_started = false;
 
 	while(!exp_started) {
-		// configure as sender and send experiment settings
-		config.tx = true;
-		ret = lora_config(lora_dev, &config);
-		if (ret < 0) {
-			LOG_ERR("LoRa config failed");
-		}
-
+		// send experiment settings to other board
 		ret = lora_send(lora_dev, exp_data, len);
 		if (ret < 0) {
 			LOG_ERR("LoRa send failed");
@@ -328,11 +322,17 @@ void exec_experiment(void *a, void *b, void *c) {
 }
 
 // receives the experiment settings via BLE and starts the receiving side of the experiment on a new thread
-static ssize_t exp_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
-	exp_data_length = len;
 	uint8_t *pu = (uint8_t *) buf;
+	if(len == 5) {
+		change_config(pu, true);
+		printk("config changed for experiment...\n");
+		return 0;
+	}
+
+	exp_data_length = len;
 	for(int16_t i = 0; i < len; i++) {
 		experiment_data[i] = *pu;
 		pu++;
@@ -357,7 +357,7 @@ BT_GATT_SERVICE_DEFINE(lres_svc,
 	BT_GATT_CHARACTERISTIC(BT_UUID_LRES_CHANGE_CONFIG, BT_GATT_CHRC_WRITE,
 			       BT_GATT_PERM_WRITE, NULL, change_config_cb, NULL),
 	BT_GATT_CHARACTERISTIC(BT_UUID_LRES_EXP, BT_GATT_CHRC_WRITE,
-			       BT_GATT_PERM_WRITE, NULL, exp_settings_cb, NULL),
+			       BT_GATT_PERM_WRITE, NULL, experiment_settings_cb, NULL),
 );
 
 static int lres_init(const struct device *dev)

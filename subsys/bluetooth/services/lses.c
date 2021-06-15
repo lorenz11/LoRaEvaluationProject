@@ -197,155 +197,154 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 {
 	printk("command received\n");
 	char *pc = (char *) buf;
-	if(*pc == 'b') {
-		// configure and prepare experiment mode
-		const struct device *lora_dev;
-		lora_dev = device_get_binding(DEFAULT_RADIO);
-		if (!lora_dev) {
-			LOG_ERR("%s Device not found", DEFAULT_RADIO);
+	
+	// configure and prepare experiment mode
+	const struct device *lora_dev;
+	lora_dev = device_get_binding(DEFAULT_RADIO);
+	if (!lora_dev) {
+		LOG_ERR("%s Device not found", DEFAULT_RADIO);
+	}
+
+	pc++;
+	change_config(pc, false);
+	bt_lses_notify(-2);
+
+	printk("sender ready\n");
+
+
+
+
+	// wait for experiment started notification
+	int16_t rssi;
+	int8_t snr;
+	int l;
+	uint8_t data[MAX_DATA_LEN] = {0};
+	l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
+				&rssi, &snr);
+	if (l < 0) {
+		LOG_ERR("LoRa receive failed");
+		return 0;
+	}
+
+
+
+
+	// reconfigure device for sending and send received data as ACK, listen for retransmission until delay counted down
+	bool experiment_ready = false;
+	while(!experiment_ready) {
+		experiment_ready = true;
+		int ret;
+
+
+		char delay[l-9];
+		for(int16_t i = 0; i < l; i++) {
+			printk("unpacked data: %d\n", data[i]);
+			if(i > 8) {			// get experiment start delay
+				delay[i-9] = data[i];
+			}
 		}
-
-		pc++;
-		change_config(pc, false);
-		bt_lses_notify(-2);
-
-		printk("sender ready\n");
+		uint16_t d = atoi(delay); 
+		printk("delay: %d\n", d);
 
 
-
-
-		// wait for experiment started notification
-		int16_t rssi;
-		int8_t snr;
-		int l;
-		uint8_t data[MAX_DATA_LEN] = {0};
-		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
-					&rssi, &snr);
-		if (l < 0) {
-			LOG_ERR("LoRa receive failed");
+		config.tx = true;
+		ret = lora_config(lora_dev, &config);
+		if (ret < 0) {
+			LOG_ERR("LoRa config failed");
+		}
+		k_sleep(K_MSEC(200));
+		ret = lora_send(lora_dev, data, MAX_DATA_LEN);			// send received experiment settings back as ACK
+		if (ret < 0) {
+			LOG_ERR("LoRa send failed");
 			return 0;
 		}
 
 
+		config.tx = false;
+		ret = lora_config(lora_dev, &config);
+		if (ret < 0) {
+			LOG_ERR("LoRa config failed");
+		}
+		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(d),			// listen for retransmission in case ACK was lost
+				&rssi, &snr);
+		if (l < 0) {
+			LOG_ERR("LoRa receive failed");
+		}
+	}
 
 
-		// reconfigure device for sending and send received data as ACK, listen for retransmission until delay counted down
-		bool experiment_ready = false;
-		while(!experiment_ready) {
-			experiment_ready = true;
-			int ret;
 
 
-			char delay[l-9];
-			for(int16_t i = 0; i < l; i++) {
-				printk("unpacked data: %d\n", data[i]);
-				if(i > 8) {			// get experiment start delay
-					delay[i-9] = data[i];
-				}
-			}
-			uint16_t d = atoi(delay); 
-			printk("delay: %d\n", d);
+	// start experiment
+	char transmission_data[data[2]]; 	// data[2] contains msg length
+	transmission_data[5] = '_';
 
-
-			config.tx = true;
-			ret = lora_config(lora_dev, &config);
-			if (ret < 0) {
-				LOG_ERR("LoRa config failed");
-			}
-			k_sleep(K_MSEC(200));
-			ret = lora_send(lora_dev, data, MAX_DATA_LEN);			// send received experiment settings back as ACK
-			if (ret < 0) {
-				LOG_ERR("LoRa send failed");
-				return 0;
-			}
-
-
-			config.tx = false;
-			ret = lora_config(lora_dev, &config);
-			if (ret < 0) {
-				LOG_ERR("LoRa config failed");
-			}
-			l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(d),			// listen for retransmission in case ACK was lost
-					&rssi, &snr);
-			if (l < 0) {
-				LOG_ERR("LoRa receive failed");
-			}
+	config.tx = true;
+	int ret;
+	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
+	for(uint8_t i = 0; i < 8; i++) {
+		if(((data[4] >> i)  & 0x01) == 1) {					// the 4th byte of the settings byte array represents the frequencies to use
+			config.frequency = frequencies[i];				// if a bit in that byte is set, the corresponding frequency will be used;
+			transmission_data[0] = (char) i + 48;
+			printk("frequency: %d\n", frequencies[i]);
+		} else {
+			continue;
 		}
 
-
-
-
-		// start experiment
-		char transmission_data[data[2]]; 	// data[2] contains msg length
-		transmission_data[5] = '_';
-	
-		config.tx = true;
-		int ret;
-		int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
-		for(uint8_t i = 0; i < 8; i++) {
-			if(((data[4] >> i)  & 0x01) == 1) {					// the 4th byte of the settings byte array represents the frequencies to use
-				config.frequency = frequencies[i];				// if a bit in that byte is set, the corresponding frequency will be used;
-				transmission_data[0] = (char) i + 48;
-				printk("frequency: %d\n", frequencies[i]);
+		for(uint8_t j = 0; j < 3; j++) {
+			if(((data[5] >> j)  & 0x01) == 1) {
+				config.bandwidth =  j;
+				transmission_data[1] = (char) j + 48;
+				printk("bandwidth: %d\n", j);
 			} else {
 				continue;
 			}
-
-			for(uint8_t j = 0; j < 3; j++) {
-				if(((data[5] >> j)  & 0x01) == 1) {
-					config.bandwidth =  j;
-					transmission_data[1] = (char) j + 48;
-					printk("bandwidth: %d\n", j);
+			for(uint8_t k = 0; k < 6; k++) {
+				if(((data[6] >> k)  & 0x01) == 1) {
+					config.datarate =  k + 7;
+					transmission_data[2] = (char) k + 48;
+					printk("data rate: %d\n", k+7);
 				} else {
 					continue;
 				}
-				for(uint8_t k = 0; k < 6; k++) {
-					if(((data[6] >> k)  & 0x01) == 1) {
-						config.datarate =  k + 7;
-						transmission_data[2] = (char) k + 48;
-						printk("data rate: %d\n", k+7);
+				for(uint8_t l = 0; l < 4; l++) {
+					if(((data[7] >> l)  & 0x01) == 1) {
+						config.coding_rate =  l + 1;
+						transmission_data[3] = (char) l + 48;
+						printk("coding rate: %d\n", l+1);
 					} else {
 						continue;
 					}
-					for(uint8_t l = 0; l < 4; l++) {
-						if(((data[7] >> l)  & 0x01) == 1) {
-							config.coding_rate =  l + 1;
-							transmission_data[3] = (char) l + 48;
-							printk("coding rate: %d\n", l+1);
+					for(uint8_t m = 0; m < 8; m++) {
+						if(((data[8] >> m)  & 0x01) == 1) {
+							config.tx_power =  m + 1;
+							transmission_data[4] = (char) m + 48;
+							printk("power: %d\n", m+1);
+							ret = lora_config(lora_dev, &config);
+							if (ret < 0) {
+								LOG_ERR("LoRa config failed");
+							}
+							for(uint8_t n = 0; n < data[0]; n++) {						// data[0] contains the number of LoRa transmissions per parameter combination
+								transmission_data[6] = (char) n / 100 + 48;						// include numbering into transmission content (as String (3 bytes) not as byte (1 byte))
+								transmission_data[7] = (char) n / 10 + 48;						// this line needs to be changed if max number of transmissions per combination is changed (it is 100 now)
+								transmission_data[8] = (char) n % 10 + 48;
+
+								for(uint8_t p = 9; p < (data[2] - 1); p++) {					// data[2] contains message length (length of the transmitted content)
+									transmission_data[p] = 'a';								// fills the message up with a's until desired message length
+								}
+								transmission_data[data[2] - 1] = '.';
+
+								ret = lora_send(lora_dev, transmission_data, data[2]);
+								if (ret < 0) {
+									LOG_ERR("LoRa send failed");
+									return 0;
+								}
+								k_sleep(K_MSEC(data[1] * 1000));						// data[1] contains the number of seconds between transmissions
+							}
+
+							k_sleep(K_MSEC(5000));										// wait 5 seconds between combinations
 						} else {
 							continue;
-						}
-						for(uint8_t m = 0; m < 8; m++) {
-							if(((data[8] >> m)  & 0x01) == 1) {
-								config.tx_power =  m + 1;
-								transmission_data[4] = (char) m + 48;
-								printk("power: %d\n", m+1);
-								ret = lora_config(lora_dev, &config);
-								if (ret < 0) {
-									LOG_ERR("LoRa config failed");
-								}
-								for(uint8_t n = 0; n < data[0]; n++) {						// data[0] contains the number of LoRa transmissions per parameter combination
-									transmission_data[6] = (char) n / 100 + 48;						// include numbering into transmission content (as String (3 bytes) not as byte (1 byte))
-									transmission_data[7] = (char) n / 10 + 48;						// this line needs to be changed if max number of transmissions per combination is changed (it is 100 now)
-									transmission_data[8] = (char) n % 10 + 48;
-
-									for(uint8_t p = 9; p < (data[2] - 1); p++) {					// data[2] contains message length (length of the transmitted content)
-										transmission_data[p] = 'a';								// fills the message up with a's until desired message length
-									}
-									transmission_data[data[2] - 1] = '.';
-
-									ret = lora_send(lora_dev, transmission_data, data[2]);
-									if (ret < 0) {
-										LOG_ERR("LoRa send failed");
-										return 0;
-									}
-									k_sleep(K_MSEC(data[1] * 1000));						// data[1] contains the number of seconds between transmissions
-								}
-
-								k_sleep(K_MSEC(5000));										// wait 5 seconds between combinations
-							} else {
-								continue;
-							}
 						}
 					}
 				}
