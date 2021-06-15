@@ -105,6 +105,25 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 }
 
 
+
+
+
+
+
+// gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic)
+static ssize_t test_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
+{
+	printk("test runs...\n");
+	return 0;
+}
+
+
+
+
+
+
+
 // gets a byte array containing the msg a LoRa transmission is supposed to contain for explore mode
 static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
@@ -369,6 +388,8 @@ BT_GATT_SERVICE_DEFINE(lses_svc,
 			       BT_GATT_PERM_WRITE, NULL, send_command_cb, NULL),
 	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_LOOP_COMMAND, BT_GATT_CHRC_WRITE,
 			       BT_GATT_PERM_WRITE, NULL, loop_command_cb, NULL),
+	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_CHANGE_CONFIG, BT_GATT_CHRC_WRITE,
+			       BT_GATT_PERM_WRITE, NULL, test_cb, NULL),
 	BT_GATT_CHARACTERISTIC(BT_UUID_LSES_EXP_PREP, BT_GATT_CHRC_WRITE,
 			       BT_GATT_PERM_WRITE, NULL, prepare_sender_cb, NULL),
 );
