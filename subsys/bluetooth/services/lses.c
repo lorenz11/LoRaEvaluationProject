@@ -32,7 +32,7 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 
 static uint8_t lses_blsc;
 
-// to control the sending LoRa messages loop
+// to control the sending LoRa messages loop in explore mode
 static uint16_t number_of_messages = 0;
 static uint8_t time_between_msgs = 0;
 
@@ -58,32 +58,29 @@ void change_config(uint8_t* pu, bool tx) {
 	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
 
 	config.frequency = frequencies[*pu];
-	printk("[NOTIFICATION] data %d\n", *pu);
+	printk("fr data %d\n", *pu);
 	pu++;
 
 	config.bandwidth = *pu;
-	printk("[NOTIFICATION] data %d length\n", *pu);
+	printk("bw data %d length\n", *pu);
 	pu++;
 
 	config.datarate = *pu + 7;
-	printk("[NOTIFICATION] dat %d length\n", *pu);
+	printk("sf data %d length\n", *pu);
 	pu++;
 
 	config.preamble_len = 8;
 
 	config.coding_rate = *pu + 1;
-	printk("[NOTIFICATION] data %d length\n", *pu);
+	printk("cr data %d length\n", *pu);
 	pu++;
 
 	config.tx_power = *pu + 5;
-	printk("[NOTIFICATION] data %d length\n", *pu);
+	printk("pw data %d length\n", *pu);
 
 	config.tx = tx;
 
 	lora_dev = device_get_binding(DEFAULT_RADIO);
-	if (!lora_dev) {
-		LOG_ERR("%s Device not found", DEFAULT_RADIO);
-	}
 
 	int ret;
 	ret = lora_config(lora_dev, &config);
@@ -96,24 +93,12 @@ void change_config(uint8_t* pu, bool tx) {
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
-	printk("hhhhhhhhhhhhhhhhhhh\n");
 	uint8_t *pu = (uint8_t *) buf;
 	change_config(pu, true);
 
 	bt_lses_notify(-2);
 	return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -137,16 +122,9 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 
 	// send message
 	lora_dev = device_get_binding(DEFAULT_RADIO);
-	if (!lora_dev) {
-		LOG_ERR("%s Device not found", DEFAULT_RADIO);
-	}
 
 	ret = lora_send(lora_dev, data, MAX_DATA_LEN);
-	if (ret < 0) {
-		LOG_ERR("LoRa send failed");
-		return 0;
-	}
-
+	
 	return 0;
 }
 
@@ -161,13 +139,11 @@ static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	if(*pc == '!') {						// set number of loops in explore mode
 		pc++;
 		uint16_t i = atoi(pc);
-		number_of_messages = i;				
-		printk("number: %d\n", i);		
+		number_of_messages = i;						
 	} else if (*pc == '#') {				// set the time between messages
 		pc++;				
 		uint16_t i = atoi(pc);
 		time_between_msgs = i;
-		printk("time: %d\n", i);
 	} else {								// start the loop
 		char data[len];
 	
@@ -176,24 +152,17 @@ static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 			pc++;
 		}
 		data[len] = '.';
-		printk("msg: %s\n", data);
 
 		const struct device *lora_dev;
 		int ret;
 
 		// send message
 		lora_dev = device_get_binding(DEFAULT_RADIO);
-		if (!lora_dev) {
-			LOG_ERR("%s Device not found", DEFAULT_RADIO);
-		}
 
 		uint16_t i = 0;
 		while (i < number_of_messages) {
 			ret = lora_send(lora_dev, data, MAX_DATA_LEN);
-			if (ret < 0) {
-				LOG_ERR("LoRa send failed");
-				return 0;
-			}
+			
 			LOG_INF("Data sent!");
 			k_sleep(K_MSEC(time_between_msgs * 1000));
 			i++;
@@ -207,19 +176,15 @@ static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 
 
 
-// callback for characteristic possibly used in the future
+// prepare sender for experiment and conduct it
 static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
-	printk("command received\n");
 	char *pc = (char *) buf;
 	
 	// configure and prepare experiment mode
 	const struct device *lora_dev;
 	lora_dev = device_get_binding(DEFAULT_RADIO);
-	if (!lora_dev) {
-		LOG_ERR("%s Device not found", DEFAULT_RADIO);
-	}
 
 	change_config(pc, false);
 	bt_lses_notify(-2);
@@ -228,20 +193,20 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 
 
 
-
-	// wait for experiment started notification
+	// wait for experiment started notification or a ping
 	int16_t rssi;
 	int8_t snr;
 	int l;
 	uint8_t data[MAX_DATA_LEN] = {0};
-	l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
-				&rssi, &snr);
-	if (l < 0) {
-		LOG_ERR("LoRa receive failed");
-		return 0;
+	bool experiment_started;
+
+	while(!experiment started) {
+		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
+					&rssi, &snr);
+		
+		if(data[0])
 	}
-
-
+	
 
 
 	// reconfigure device for sending and send received data as ACK, listen for retransmission until delay counted down
@@ -253,40 +218,29 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 
 		char delay[l-9];
 		for(int16_t i = 0; i < l; i++) {
-			printk("unpacked data: %d\n", data[i]);
-			if(i > 8) {			// get experiment start delay
+			if(i > 8) {														// get experiment start delay
 				delay[i-9] = data[i];
 			}
 		}
 		uint16_t d = atoi(delay); 
-		printk("delay: %d\n", d);
 
 
 		config.tx = true;
 		ret = lora_config(lora_dev, &config);
-		if (ret < 0) {
-			LOG_ERR("LoRa config failed");
-		}
+		
 		k_sleep(K_MSEC(200));
-		ret = lora_send(lora_dev, data, MAX_DATA_LEN);			// send received experiment settings back as ACK
-		if (ret < 0) {
-			LOG_ERR("LoRa send failed");
-			return 0;
-		}
+		ret = lora_send(lora_dev, data, MAX_DATA_LEN);						// send received experiment settings back as ACK
 
 
 		config.tx = false;
 		ret = lora_config(lora_dev, &config);
-		if (ret < 0) {
-			LOG_ERR("LoRa config failed");
-		}
+		
 		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(d),			// listen for retransmission in case ACK was lost
 				&rssi, &snr);
 		if (l < 0) {
 			LOG_ERR("LoRa receive failed");
 		}
 	}
-
 
 
 
@@ -334,11 +288,9 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 						if(((data[8] >> m)  & 0x01) == 1) {
 							config.tx_power =  m + 1;
 							transmission_data[4] = (char) m + 48;
-							printk("power: %d\n", m+1);
+							
 							ret = lora_config(lora_dev, &config);
-							if (ret < 0) {
-								LOG_ERR("LoRa config failed");
-							}
+							
 							for(uint8_t n = 0; n < data[0]; n++) {						// data[0] contains the number of LoRa transmissions per parameter combination
 								transmission_data[6] = (char) n / 100 + 48;						// include numbering into transmission content (as String (3 bytes) not as byte (1 byte))
 								transmission_data[7] = (char) n / 10 + 48;						// this line needs to be changed if max number of transmissions per combination is changed (it is 100 now)
@@ -350,10 +302,7 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 								transmission_data[data[2] - 1] = '.';
 
 								ret = lora_send(lora_dev, transmission_data, data[2]);
-								if (ret < 0) {
-									LOG_ERR("LoRa send failed");
-									return 0;
-								}
+								
 								k_sleep(K_MSEC(data[1] * 1000));						// data[1] contains the number of seconds between transmissions
 							}
 

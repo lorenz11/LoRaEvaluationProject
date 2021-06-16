@@ -141,6 +141,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	int8_t bt_data[1] = {-2};
 	bt_lres_notify(bt_data, 2);
 
+	// (re-) start the LoRa receiving thread after changing config
 	thread0_tid = k_thread_create(&thread_data0, stack_area0,
 			K_THREAD_STACK_SIZEOF(stack_area0),
 			receive_lora,
@@ -161,6 +162,7 @@ uint16_t exp_data_length = 0;
 
 // experiment receive thread code
 void exec_experiment(void *a, void *b, void *c) {
+	// initialize stuff
 	uint8_t exp_data[exp_data_length];
 	uint16_t len = exp_data_length;
 
@@ -170,10 +172,7 @@ void exec_experiment(void *a, void *b, void *c) {
 
 	const struct device *lora_dev;
 	lora_dev = device_get_binding(DEFAULT_RADIO);
-	if (!lora_dev) {
-		LOG_ERR("%s Device not found", DEFAULT_RADIO);
-	}
-
+	
 	int ret;
 	int16_t rssi;
 	int8_t snr;
@@ -181,34 +180,30 @@ void exec_experiment(void *a, void *b, void *c) {
 	uint8_t data[MAX_DATA_LEN] = {0};					// data array for ACK from sender device
 	bool exp_started = false;
 
-	while(!exp_started) {
-		// send experiment settings to other board
-		ret = lora_send(lora_dev, exp_data, len);
-		if (ret < 0) {
-			LOG_ERR("LoRa send failed");
-		}
 
-		// configure as receiver, wait 2 seconds for ACK
+
+	// sends experiment settings and waits for 2 seconds in a loop until ACK arrives
+	while(!exp_started) {
+		ret = lora_send(lora_dev, exp_data, len);					// send experiment settings to other board
+
 		config.tx = false;
-		ret = lora_config(lora_dev, &config);
-		if (ret < 0) {
-			LOG_ERR("LoRa config failed");
-		}
+		ret = lora_config(lora_dev, &config);						// configure as receiver, wait 2 seconds for ACK
 			
-		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(2),
+		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(2),	// wait for ACK
 					&rssi, &snr);
 		if (l < 0) {
 			LOG_ERR("no ACK received");	
 		} else {
 			if(memcmp(exp_data, data, len * sizeof(uint8_t)) == 0) {
 				printk("ACK is okay...............\n");
-				exp_started = true;				// check if received data exactly matches sent data
+				exp_started = true;									// check if received data exactly matches sent data
 			}
 		}
 	}
 
 
-	char delay[5];				// get experiment start delay
+
+	char delay[5];													// get experiment start delay
 	for(int16_t i = 0; i < l; i++) {
 		if(i > 8) {			
 			delay[i-9] = exp_data[i];
@@ -217,10 +212,9 @@ void exec_experiment(void *a, void *b, void *c) {
 	uint16_t d = atoi(delay); 
 
 
-	printk("exp_data[7] (coding rate byte): %d\n",  exp_data[7]);
 	
-
-	bool first_iteration = true;								
+	// start experiment as receiver
+	bool first_iteration = true;								// first iteration has the delay added to its lora receive timeout							
 	uint8_t transmission_data[MAX_TRANSM_LEN] ={0};				// exp_data[2] contains msg length
 	config.tx = false;
 	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
@@ -260,9 +254,6 @@ void exec_experiment(void *a, void *b, void *c) {
 							config.tx_power =  p + 5;
 							printk("power: %d\n", p+1);
 							ret = lora_config(lora_dev, &config);
-							if (ret < 0) {
-								LOG_ERR("LoRa config failed");
-							}
 							
 							int64_t time_stamp;
 							int64_t milliseconds_spent = 0;
@@ -316,17 +307,21 @@ void exec_experiment(void *a, void *b, void *c) {
 }
 
 // receives and changes the initial lora config for pre experiment lora communication OR
-//receives the experiment settings via BLE and starts the receiving side of the experiment on a new thread
+// receives the experiment settings via BLE and starts the receiving side of the experiment on a new thread OR
+// receives a ping command and pings the sender device
 static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
 	uint8_t *pu = (uint8_t *) buf;
 	if(len == 5) {								// receive and change config
 		change_config(pu, true);
-		printk("config changed for experiment...\n");
 		int8_t bt_data[1] = {-2};
 		bt_lres_notify(bt_data, 2);
 		return 0;
+	}
+
+	if(len == 1) {
+
 	}
 
 	exp_data_length = len;						// start experiment
