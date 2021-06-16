@@ -317,40 +317,45 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 		change_config(pu, true);
 		int8_t bt_data[1] = {-2};
 		bt_lres_notify(bt_data, 2);
+		printk("changed config at x\n");
 		return 0;
 	}
 
 	if(len == 1) {
+		printk("arrived at x........\n");
 		int16_t rssi;
 		int8_t snr;
 		int l = -1;
 		char ping[5] = {'!', 'p', 'i', 'n', 'g'};
 
+		const struct device *lora_dev;
+		lora_dev = device_get_binding(DEFAULT_RADIO);
 		lora_send(lora_dev, ping, 5);						
 
 		config.tx = false;
 		lora_config(lora_dev, &config);						
 			
-		char ping[4] = {0};
-		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(2),	
+		char resp[5] = {0};
+		l = lora_recv(lora_dev, resp, MAX_DATA_LEN, K_SECONDS(3),	
 					&rssi, &snr);
 
 		if (l < 0) {
 			LOG_ERR("no response received");	
 		} else {
-			if(memcmp(exp_data, data, 5 * sizeof(uint8_t)) == 0) {
+			if(memcmp(ping, resp, 5 * sizeof(uint8_t)) == 0) {
 				printk("ping is okay\n");
-				int8_t bt_data[1] = {-2};
+				int8_t bt_data[1] = {-3};
 				bt_lres_notify(bt_data, 2);									// check if received ping exactly matches sent ping
 			} else {
 				printk("ping does not match\n");	
-				int8_t bt_data[1] = {-2};
+				int8_t bt_data[1] = {-4};
 				bt_lres_notify(bt_data, 2);	
 			}
 		}
 
 		config.tx = true;
-		lora_config(lora_dev, &config);		
+		lora_config(lora_dev, &config);	
+		return 0;	
 	}
 
 	exp_data_length = len;						// start experiment
@@ -421,7 +426,8 @@ int bt_lres_notify(const void *data, uint8_t type_of_notification)
 		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &data, sizeof(data));
 	} else {		// notify about config changed
 		static int8_t notifier[1];
-		notifier[0] = -2;
+		char *pc = (char *) data;
+		notifier[0] = *pc;
 
 		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &notifier, sizeof(notifier));
 	}

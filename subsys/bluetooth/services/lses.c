@@ -196,18 +196,20 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 	// wait for experiment started notification or a ping
 	int16_t rssi;
 	int8_t snr;
-	int l;
+	int l = 9;;
 	uint8_t data[MAX_DATA_LEN] = {0};
-	bool experiment_started;
+	bool experiment_started = false;
 
-	while(!experiment started) {
+	while(!experiment_started) {
 		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 					&rssi, &snr);
 		
-		if(data[0] = '!') {					// in this case it is a ping instead of the experiment settings, which start the experiment procedure
+		printk("value at xx: %d\n", data[0]);
+		if(data[0] == 33) {					// in this case it is a ping instead of the experiment settings, which start the experiment procedure
+			printk("helllllllllllllooooooooooooooooo\n");
 			config.tx = true;
 			lora_config(lora_dev, &config);	
-			lora_send(lora_dev, ping, 5);
+			lora_send(lora_dev, data, 5);
 			data[0] = -1;
 			config.tx = false;
 			lora_config(lora_dev, &config);					
