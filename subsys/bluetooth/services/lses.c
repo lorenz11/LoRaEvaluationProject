@@ -204,7 +204,16 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 					&rssi, &snr);
 		
-		if(data[0])
+		if(data[0] = '!') {					// in this case it is a ping instead of the experiment settings, which start the experiment procedure
+			config.tx = true;
+			lora_config(lora_dev, &config);	
+			lora_send(lora_dev, ping, 5);
+			data[0] = -1;
+			config.tx = false;
+			lora_config(lora_dev, &config);					
+		} else {
+			experiment_started = true;
+		}
 	}
 	
 
@@ -235,7 +244,7 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 		config.tx = false;
 		ret = lora_config(lora_dev, &config);
 		
-		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(d),			// listen for retransmission in case ACK was lost
+		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(d),			// listen for retransmission in case ACK was lost as long as the specified delay
 				&rssi, &snr);
 		if (l < 0) {
 			LOG_ERR("LoRa receive failed");

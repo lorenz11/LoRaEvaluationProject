@@ -321,7 +321,36 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 	}
 
 	if(len == 1) {
+		int16_t rssi;
+		int8_t snr;
+		int l = -1;
+		char ping[5] = {'!', 'p', 'i', 'n', 'g'};
 
+		lora_send(lora_dev, ping, 5);						
+
+		config.tx = false;
+		lora_config(lora_dev, &config);						
+			
+		char ping[4] = {0};
+		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(2),	
+					&rssi, &snr);
+
+		if (l < 0) {
+			LOG_ERR("no response received");	
+		} else {
+			if(memcmp(exp_data, data, 5 * sizeof(uint8_t)) == 0) {
+				printk("ping is okay\n");
+				int8_t bt_data[1] = {-2};
+				bt_lres_notify(bt_data, 2);									// check if received ping exactly matches sent ping
+			} else {
+				printk("ping does not match\n");	
+				int8_t bt_data[1] = {-2};
+				bt_lres_notify(bt_data, 2);	
+			}
+		}
+
+		config.tx = true;
+		lora_config(lora_dev, &config);		
 	}
 
 	exp_data_length = len;						// start experiment
