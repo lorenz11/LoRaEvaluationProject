@@ -185,6 +185,9 @@ k_tid_t thread1_tid;
 
 // experiment send thread code
 void exec_experiment(void *a, void *b, void *c) {
+	const struct device *lora_dev;
+	lora_dev = device_get_binding(DEFAULT_RADIO);
+
 	// wait for experiment started notification or a ping
 	int16_t rssi;
 	int8_t snr;
@@ -327,15 +330,17 @@ void exec_experiment(void *a, void *b, void *c) {
 static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
+	printk("hellllllllllloooooooooooooooooooooooooooooooooooooooooo\n");
 	const struct device *lora_dev;
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 
 	if(len == 1) {									// an already prepared sender is supposed to be canceled
 		config.tx = true;
 		lora_config(lora_dev, &config);
-		if(thread0_tid != NULL) {
+		if(thread1_tid != NULL) {
 			k_thread_abort(thread1_tid);
 		}
+		printk("thread canceled\n");
 		return 0;
 	}
 
