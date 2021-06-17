@@ -9091,7 +9091,7 @@ void exec_loop(void *a, void *b, void *c) {
     4604:	fa1f f388 	uxth.w	r3, r8
     4608:	429a      	cmp	r2, r3
     460a:	d807      	bhi.n	461c <exec_loop+0x60>
-			k_sleep(K_MSEC(time_between_msgs * 1000));
+			k_sleep(K_SECONDS(time_between_msgs));
 			i++;
 		}
 
@@ -9113,7 +9113,7 @@ void exec_loop(void *a, void *b, void *c) {
     4626:	4621      	mov	r1, r4
     4628:	4811      	ldr	r0, [pc, #68]	; (4670 <exec_loop+0xb4>)
     462a:	f01a fc77 	bl	1ef1c <log_0>
-			k_sleep(K_MSEC(time_between_msgs * 1000));
+			k_sleep(K_SECONDS(time_between_msgs));
     462e:	4b11      	ldr	r3, [pc, #68]	; (4674 <exec_loop+0xb8>)
     4630:	781b      	ldrb	r3, [r3, #0]
     4632:	f44f 7c7a 	mov.w	ip, #1000	; 0x3e8
@@ -9129,7 +9129,7 @@ void exec_loop(void *a, void *b, void *c) {
     4642:	2100      	movs	r1, #0
     4644:	f44f 727a 	mov.w	r2, #1000	; 0x3e8
     4648:	2300      	movs	r3, #0
-    464a:	fbce 010c 	smlal	r0, r1, lr, ip
+    464a:	fbee 010c 	umlal	r0, r1, lr, ip
     464e:	f7fc f9f5 	bl	a3c <__aeabi_uldivmod>
 	return z_impl_k_sleep(timeout);
     4652:	f019 f935 	bl	1d8c0 <z_impl_k_sleep>
