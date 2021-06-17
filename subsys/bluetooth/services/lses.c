@@ -183,6 +183,7 @@ K_THREAD_STACK_DEFINE(stack_area1, STACK_SIZE);
 struct k_thread thread_data1;
 k_tid_t thread1_tid;
 
+// experiment send thread code
 void exec_experiment(void *a, void *b, void *c) {
 	// wait for experiment started notification or a ping
 	int16_t rssi;
@@ -322,7 +323,7 @@ void exec_experiment(void *a, void *b, void *c) {
 	return;
 }
 
-// prepare sender for experiment and conduct it
+// prepare sender for experiment and start sending thread or cancel prepared sender
 static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
