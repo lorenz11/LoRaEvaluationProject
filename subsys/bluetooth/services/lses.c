@@ -339,13 +339,9 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 	if(len == 1) {									// an already prepared sender is supposed to be canceled
 		config.tx = true;
 		lora_config(lora_dev, &config);
-<<<<<<< HEAD
-		if(thread1_tid != NULL) {
-=======
 		printk("is thread0 = NULL? yes\n")
 		if(thread0_tid != NULL) {
 			printk("is thread0 = NULL? no\n")
->>>>>>> 8ab1452772fd84e10b204f9f419afe93a781ad67
 			k_thread_abort(thread1_tid);
 		}
 		printk("thread canceled\n");
