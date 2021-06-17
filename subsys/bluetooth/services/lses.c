@@ -332,19 +332,16 @@ void exec_experiment(void *a, void *b, void *c) {
 static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
-	printk("hellllllllllloooooooooooooooooooooooooooooooooooooooooo\n");
 	const struct device *lora_dev;
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 
 	if(len == 1) {									// an already prepared sender is supposed to be canceled
 		config.tx = true;
 		lora_config(lora_dev, &config);
-		printk("is thread0 = NULL? yes\n")
-		if(thread0_tid != NULL) {
-			printk("is thread0 = NULL? no\n")
+		if(thread1_tid != NULL) {
 			k_thread_abort(thread1_tid);
+			printk("thread canceled\n");
 		}
-		printk("thread canceled\n");
 		return 0;
 	}
 
@@ -354,7 +351,7 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 	change_config(pc, false);
 	bt_lses_notify(-2);
 
-	k_thread_create(&thread_data1, stack_area1,
+	thread1_tid = k_thread_create(&thread_data1, stack_area1,
 		K_THREAD_STACK_SIZEOF(stack_area1),
 		exec_experiment,
 		NULL, NULL, NULL,
