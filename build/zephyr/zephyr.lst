@@ -9033,10 +9033,10 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
     45b8:	00025a4b 	.word	0x00025a4b
 
 000045bc <exec_loop>:
-k_tid_t thread0_tid;
 
-uint8_t loop_data[255];
-uint16_t loop_data_length = 0;
+// to control the sending LoRa messages loop in explore mode
+static uint16_t number_of_messages = 0;
+static uint8_t time_between_msgs = 0;
 
 void exec_loop(void *a, void *b, void *c) {
     45bc:	e92d 43f8 	stmdb	sp!, {r3, r4, r5, r6, r7, r8, r9, lr}
