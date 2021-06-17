@@ -49,17 +49,6 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 	LOG_INF("LSES notifications %s", notif_enabled ? "enabled" : "disabled");
 }
 
-// notify phone about anything (currently only distinguishable in type of message (and only used for -2 = config changed))
-int bt_lses_notify(int8_t type_of_notification)
-{
-	int rc;
-	static int8_t notifier[1];
-	notifier[0] = type_of_notification;
-
-	rc = bt_gatt_notify(NULL, &lses_svc.attrs[1], &notifier, sizeof(notifier));
-	return rc == -ENOTCONN ? 0 : rc;
-}
-
 void change_config(uint8_t* pu, bool tx) {
 	const struct device *lora_dev;
 
@@ -96,6 +85,9 @@ void change_config(uint8_t* pu, bool tx) {
 		LOG_ERR("LoRa config failed");
 	}
 }
+
+// implemented at bottom of file (declared here for use in nexxt function)
+int bt_lses_notify(int8_t type_of_notification);
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -154,11 +146,11 @@ uint8_t loop_data[255];
 uint16_t loop_data_length = 0;
 
 void exec_loop(void *a, void *b, void *c) {
+	uint16_t len = loop_data_length;
 	char data[len];
 	
 		for(uint16_t i = 0; i < len; i++) {
-			data[i] = *pc;
-			pc++;
+			data[i] = loop_data[i];
 		}
 		data[len] = '.';
 
@@ -195,7 +187,7 @@ static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		uint16_t i = atoi(pc);
 		time_between_msgs = i;
 	} else if(*pc == '$') {
-		if(thread0_tid != null) {
+		if(thread0_tid != NULL) {
 			k_thread_abort(thread0_tid);
 			printk("loop thread canceled\n");
 		}
@@ -205,6 +197,8 @@ static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 			loop_data[i] = *pc;
 			pc++;
 		}
+
+		loop_data_length = len;
 
 		thread0_tid = k_thread_create(&thread_data0, stack_area0,
 			K_THREAD_STACK_SIZEOF(stack_area0),
@@ -431,6 +425,17 @@ static int lses_init(const struct device *dev)
 	lses_blsc = 0x01;
 
 	return 0;
+}
+
+// notify phone about anything (currently only distinguishable in type of message (and only used for -2 = config changed))
+int bt_lses_notify(int8_t type_of_notification)
+{
+	int rc;
+	static int8_t notifier[1];
+	notifier[0] = type_of_notification;
+
+	rc = bt_gatt_notify(NULL, &lses_svc.attrs[1], &notifier, sizeof(notifier));
+	return rc == -ENOTCONN ? 0 : rc;
 }
 
 SYS_INIT(lses_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
