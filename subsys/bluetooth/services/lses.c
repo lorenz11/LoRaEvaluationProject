@@ -49,8 +49,16 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 	LOG_INF("LSES notifications %s", notif_enabled ? "enabled" : "disabled");
 }
 
-// implemented at bottom of file (declared here for use in nexxt function)
-int bt_lses_notify(int8_t type_of_notification);
+// notify phone about anything (currently only distinguishable in type of message (and only used for -2 = config changed))
+int bt_lses_notify(int8_t type_of_notification)
+{
+	int rc;
+	static int8_t notifier[1];
+	notifier[0] = type_of_notification;
+
+	rc = bt_gatt_notify(NULL, &lses_svc.attrs[1], &notifier, sizeof(notifier));
+	return rc == -ENOTCONN ? 0 : rc;
+}
 
 void change_config(uint8_t* pu, bool tx) {
 	const struct device *lora_dev;
@@ -88,6 +96,12 @@ void change_config(uint8_t* pu, bool tx) {
 		LOG_ERR("LoRa config failed");
 	}
 }
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////			callbacks and thread definitions for Explore mode			/////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 // gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic)
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
@@ -129,6 +143,42 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 }
 
 
+#define STACK_SIZE 16384
+#define TT_PRIORITY 5
+K_THREAD_STACK_DEFINE(stack_area0, STACK_SIZE);
+
+struct k_thread thread_data0;
+k_tid_t thread0_tid;
+
+uint8_t loop_data[255];
+uint16_t loop_data_length = 0;
+
+void exec_loop(void *a, void *b, void *c) {
+	char data[len];
+	
+		for(uint16_t i = 0; i < len; i++) {
+			data[i] = *pc;
+			pc++;
+		}
+		data[len] = '.';
+
+		const struct device *lora_dev;
+
+		// send message
+		lora_dev = device_get_binding(DEFAULT_RADIO);
+
+		uint16_t i = 0;
+		while (i < number_of_messages) {
+			lora_send(lora_dev, data, MAX_DATA_LEN);
+			
+			LOG_INF("Data sent!");
+			k_sleep(K_MSEC(time_between_msgs * 1000));
+			i++;
+		}
+
+	return;
+}
+
 // prepare or start a LoRa message sending loop ()
 static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
@@ -144,30 +194,23 @@ static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		pc++;				
 		uint16_t i = atoi(pc);
 		time_between_msgs = i;
+	} else if(*pc == '$') {
+		if(thread0_tid != null) {
+			k_thread_abort(thread0_tid);
+			printk("loop thread canceled\n");
+		}
 	} else {								// start the loop
-		char data[len];
-	
+		loop_data_length = len;
 		for(uint16_t i = 0; i < len; i++) {
-			data[i] = *pc;
+			loop_data[i] = *pc;
 			pc++;
 		}
-		data[len] = '.';
 
-		const struct device *lora_dev;
-		int ret;
-
-		// send message
-		lora_dev = device_get_binding(DEFAULT_RADIO);
-
-		uint16_t i = 0;
-		while (i < number_of_messages) {
-			ret = lora_send(lora_dev, data, MAX_DATA_LEN);
-			
-			LOG_INF("Data sent!");
-			k_sleep(K_MSEC(time_between_msgs * 1000));
-			i++;
-		}
-
+		thread0_tid = k_thread_create(&thread_data0, stack_area0,
+			K_THREAD_STACK_SIZEOF(stack_area0),
+			exec_loop,
+			NULL, NULL, NULL,
+			TT_PRIORITY, 0, K_NO_WAIT);
 	}
 
 	return 0;
@@ -175,8 +218,10 @@ static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////			callback and thread definitions for Experiment mode			/////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define STACK_SIZE 16384
 #define TT_PRIORITY 5
 K_THREAD_STACK_DEFINE(stack_area1, STACK_SIZE);
 
@@ -359,7 +404,6 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 
 	printk("sender ready\n");
 
-	
 	return 0;
 }
 
@@ -387,17 +431,6 @@ static int lses_init(const struct device *dev)
 	lses_blsc = 0x01;
 
 	return 0;
-}
-
-// notify phone about anything (currently only distinguishable in type of message (and only used for -2 = config changed))
-int bt_lses_notify(int8_t type_of_notification)
-{
-	int rc;
-	static int8_t notifier[1];
-	notifier[0] = type_of_notification;
-
-	rc = bt_gatt_notify(NULL, &lses_svc.attrs[1], &notifier, sizeof(notifier));
-	return rc == -ENOTCONN ? 0 : rc;
 }
 
 SYS_INIT(lses_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);

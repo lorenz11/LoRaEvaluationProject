@@ -44,9 +44,48 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 	LOG_INF("LRES notifications %s", notif_enabled ? "enabled" : "disabled");
 }
 
-// implemented at bottom of file (declared here for use in next function)
-int bt_lres_notify(const void *data, uint8_t type_of_notification);
+// notify phone about anything
+int bt_lres_notify(const void *data, uint8_t type_of_notification)
+{
+	int rc;
 
+	if(type_of_notification == 0) {		// RSSI/SNR notification
+		printk("at stats\n");
+		uint8_t *pu = (uint8_t *) data;
+
+		static uint8_t stats[3];
+
+		// put -1 at index 0 to distinguish from msg notification
+		stats[0] = -1;
+		stats[1] = *pu;
+		pu++;
+		stats[2] = *pu;
+
+		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &stats, sizeof(stats));
+	} else if(type_of_notification == 1){							// msg notification
+		printk("at msg\n");
+		char *pc = (char *) data;
+		char data[MAX_DATA_LEN];
+	
+		for(uint16_t i = 0; i < MAX_DATA_LEN; i++) {
+			data[i] = *pc;
+			pc++;
+		}
+
+		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &data, sizeof(data));
+	} else {		// notify about config changed
+		static int8_t notifier[1];
+		char *pc = (char *) data;
+		notifier[0] = *pc;
+
+		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &notifier, sizeof(notifier));
+	}
+	
+
+	return rc == -ENOTCONN ? 0 : rc;
+}
+
+// for convenience: change LoRa parameter configuration according to arguments
 void change_config(uint8_t* pu, bool tx) {
 	const struct device *lora_dev;
 	uint16_t len = 5;
@@ -90,7 +129,7 @@ void change_config(uint8_t* pu, bool tx) {
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////			callbacks and thread definitions for Explore mode			/////////////////////
+/////////			callback and thread definition for Explore mode			/////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define STACK_SIZE 16384
@@ -154,8 +193,13 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////			callbacks and thread definitions for Experiment mode			/////////////////////
+/////////			callback and thread definitions for Experiment mode			/////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////
+////// for experiment ///
+/////////////////////////
 
 K_THREAD_STACK_DEFINE(stack_area1, STACK_SIZE);
 
@@ -311,6 +355,10 @@ void exec_experiment(void *a, void *b, void *c) {
 }
 
 
+/////////////////////////
+////// for pings ////////
+/////////////////////////
+
 #define STACK_SIZE2 2048
 #define TT_PRIORITY 5
 K_THREAD_STACK_DEFINE(stack_area2, STACK_SIZE2);
@@ -417,47 +465,6 @@ static int lres_init(const struct device *dev)
 	lres_blsc = 0x01;
 
 	return 0;
-}
-
-// notify phone about anything
-int bt_lres_notify(const void *data, uint8_t type_of_notification)
-{
-	int rc;
-
-	if(type_of_notification == 0) {		// RSSI/SNR notification
-		printk("at stats\n");
-		uint8_t *pu = (uint8_t *) data;
-
-		static uint8_t stats[3];
-
-		// put -1 at index 0 to distinguish from msg notification
-		stats[0] = -1;
-		stats[1] = *pu;
-		pu++;
-		stats[2] = *pu;
-
-		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &stats, sizeof(stats));
-	} else if(type_of_notification == 1){							// msg notification
-		printk("at msg\n");
-		char *pc = (char *) data;
-		char data[MAX_DATA_LEN];
-	
-		for(uint16_t i = 0; i < MAX_DATA_LEN; i++) {
-			data[i] = *pc;
-			pc++;
-		}
-
-		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &data, sizeof(data));
-	} else {		// notify about config changed
-		static int8_t notifier[1];
-		char *pc = (char *) data;
-		notifier[0] = *pc;
-
-		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &notifier, sizeof(notifier));
-	}
-	
-
-	return rc == -ENOTCONN ? 0 : rc;
 }
 
 SYS_INIT(lres_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
