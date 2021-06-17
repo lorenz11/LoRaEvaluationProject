@@ -32,10 +32,6 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 
 static uint8_t lses_blsc;
 
-// to control the sending LoRa messages loop in explore mode
-static uint16_t number_of_messages = 0;
-static uint8_t time_between_msgs = 0;
-
 static struct lora_modem_config config;
 
 
@@ -145,6 +141,10 @@ k_tid_t thread0_tid;
 uint8_t loop_data[255];
 uint16_t loop_data_length = 0;
 
+// to control the sending LoRa messages loop in explore mode
+static uint16_t number_of_messages = 0;
+static uint8_t time_between_msgs = 0;
+
 void exec_loop(void *a, void *b, void *c) {
 	uint16_t len = loop_data_length;
 	char data[len];
@@ -164,7 +164,7 @@ void exec_loop(void *a, void *b, void *c) {
 			lora_send(lora_dev, data, MAX_DATA_LEN);
 			
 			LOG_INF("Data sent!");
-			k_sleep(K_MSEC(time_between_msgs * 1000));
+			k_sleep(K_SECONDS(time_between_msgs));
 			i++;
 		}
 
