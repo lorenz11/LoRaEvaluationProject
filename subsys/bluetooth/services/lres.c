@@ -91,7 +91,7 @@ void change_config(uint8_t* pu, bool tx) {
 
 
 
-#define STACK_SIZE 8192
+#define STACK_SIZE 16384
 #define TT_PRIORITY 5
 K_THREAD_STACK_DEFINE(stack_area0, STACK_SIZE);
 
@@ -313,7 +313,7 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
 	uint8_t *pu = (uint8_t *) buf;
-	if(len == 5) {								// receive and change config
+	if(len == 5) {								// receive and change config (on connection)
 		change_config(pu, true);
 		int8_t bt_data[1] = {-2};
 		bt_lres_notify(bt_data, 2);
@@ -321,8 +321,7 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 		return 0;
 	}
 
-	if(len == 1) {
-		printk("arrived at x........\n");
+	if(len == 1) {								// it is a ping
 		int16_t rssi;
 		int8_t snr;
 		int l = -1;

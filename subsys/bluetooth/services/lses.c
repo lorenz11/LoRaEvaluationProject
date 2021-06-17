@@ -176,23 +176,14 @@ static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 
 
 
-// prepare sender for experiment and conduct it
-static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
-{
-	char *pc = (char *) buf;
-	
-	// configure and prepare experiment mode
-	const struct device *lora_dev;
-	lora_dev = device_get_binding(DEFAULT_RADIO);
+#define STACK_SIZE 16384
+#define TT_PRIORITY 5
+K_THREAD_STACK_DEFINE(stack_area1, STACK_SIZE);
 
-	change_config(pc, false);
-	bt_lses_notify(-2);
+struct k_thread thread_data1;
+k_tid_t thread1_tid;
 
-	printk("sender ready\n");
-
-
-
+void exec_experiment(void *a, void *b, void *c) {
 	// wait for experiment started notification or a ping
 	int16_t rssi;
 	int8_t snr;
@@ -206,7 +197,6 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 		
 		printk("value at xx: %d\n", data[0]);
 		if(data[0] == 33) {					// in this case it is a ping instead of the experiment settings, which start the experiment procedure
-			printk("helllllllllllllooooooooooooooooo\n");
 			config.tx = true;
 			lora_config(lora_dev, &config);	
 			lora_send(lora_dev, data, 5);
@@ -326,6 +316,42 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 			}
 		}
 	}
+
+	printk("end of experiment...........\n");
+
+	return;
+}
+
+// prepare sender for experiment and conduct it
+static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
+{
+	const struct device *lora_dev;
+	lora_dev = device_get_binding(DEFAULT_RADIO);
+
+	if(len == 1) {									// an already prepared sender is supposed to be canceled
+		config.tx = true;
+		lora_config(lora_dev, &config);
+		if(thread0_tid != NULL) {
+			k_thread_abort(thread1_tid);
+		}
+		return 0;
+	}
+
+	char *pc = (char *) buf;
+
+	// configure and prepare experiment mode
+	change_config(pc, false);
+	bt_lses_notify(-2);
+
+	k_thread_create(&thread_data1, stack_area1,
+		K_THREAD_STACK_SIZEOF(stack_area1),
+		exec_experiment,
+		NULL, NULL, NULL,
+		TT_PRIORITY, 0, K_NO_WAIT);
+
+	printk("sender ready\n");
+
 	
 	return 0;
 }
