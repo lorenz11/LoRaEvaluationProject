@@ -89,7 +89,9 @@ void change_config(uint8_t* pu, bool tx) {
 }
 
 
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////			callbacks and thread definitions for Explore mode			/////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define STACK_SIZE 16384
 #define TT_PRIORITY 5
@@ -151,7 +153,9 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 }
 
 
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////			callbacks and thread definitions for Experiment mode			/////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 K_THREAD_STACK_DEFINE(stack_area1, STACK_SIZE);
 
@@ -306,23 +310,16 @@ void exec_experiment(void *a, void *b, void *c) {
 	return;
 }
 
-// receives and changes the initial lora config for pre experiment lora communication OR
-// receives the experiment settings via BLE and starts the receiving side of the experiment on a new thread OR
-// receives a ping command and pings the sender device
-static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
-			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
-{
-	uint8_t *pu = (uint8_t *) buf;
-	if(len == 5) {								// receive and change config (on connection)
-		change_config(pu, true);
-		int8_t bt_data[1] = {-2};
-		bt_lres_notify(bt_data, 2);
-		printk("changed config at x\n");
-		return 0;
-	}
 
-	if(len == 1) {								// it is a ping
-		int16_t rssi;
+#define STACK_SIZE2 2048
+#define TT_PRIORITY 5
+K_THREAD_STACK_DEFINE(stack_area2, STACK_SIZE2);
+
+struct k_thread thread_data2;
+
+// function for waiting for ping return on separate thread
+void wait_for_ping_return(void *a, void *b, void *c) {
+	int16_t rssi;
 		int8_t snr;
 		int l = -1;
 		char ping[5] = {'!', 'p', 'i', 'n', 'g'};
@@ -354,6 +351,34 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 
 		config.tx = true;
 		lora_config(lora_dev, &config);	
+}
+
+
+// receives and changes the initial lora config for pre experiment lora communication OR
+// receives the experiment settings via BLE and starts the receiving side of the experiment on a new thread OR
+// receives a ping command and pings the sender device
+static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
+			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
+{
+	if(thread0_tid != NULL) {
+		k_thread_abort(thread0_tid);			// if still receiving on an explore mode thread, cancel this thread
+	}
+
+	uint8_t *pu = (uint8_t *) buf;
+	if(len == 5) {								// receive and change config (on connection)
+		change_config(pu, true);
+		int8_t bt_data[1] = {-2};
+		bt_lres_notify(bt_data, 2);
+		printk("changed config at x\n");
+		return 0;
+	}
+
+	if(len == 1) {								// it is a ping
+		k_thread_create(&thread_data2, stack_area2,
+			K_THREAD_STACK_SIZEOF(stack_area2),
+			wait_for_ping_return,
+			NULL, NULL, NULL,
+			TT_PRIORITY, 0, K_NO_WAIT);
 		return 0;	
 	}
 

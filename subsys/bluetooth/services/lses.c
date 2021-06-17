@@ -323,6 +323,8 @@ void exec_experiment(void *a, void *b, void *c) {
 	return;
 }
 
+
+
 // prepare sender for experiment and start sending thread or cancel prepared sender
 static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
@@ -333,7 +335,9 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 	if(len == 1) {									// an already prepared sender is supposed to be canceled
 		config.tx = true;
 		lora_config(lora_dev, &config);
+		printk("is thread0 = NULL? yes\n")
 		if(thread0_tid != NULL) {
+			printk("is thread0 = NULL? no\n")
 			k_thread_abort(thread1_tid);
 		}
 		return 0;
