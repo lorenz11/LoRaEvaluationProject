@@ -22,6 +22,7 @@ LOG_MODULE_REGISTER(lora_receive);
 
 void main(void)
 {
+	printk("started lora receive...\n");
 	const struct device *lora_dev = DEVICE_DT_GET(DEFAULT_RADIO_NODE);
 	struct lora_modem_config config;
 	int ret, len;
@@ -34,7 +35,7 @@ void main(void)
 		return;
 	}
 
-	config.frequency = 865100000;
+	config.frequency = 869500000;
 	config.bandwidth = BW_125_KHZ;
 	config.datarate = SF_10;
 	config.preamble_len = 8;
@@ -56,6 +57,7 @@ void main(void)
 			LOG_ERR("LoRa receive failed");
 			return;
 		}
+		printk("length: %d\n", len);
 
 		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 			log_strdup(data), rssi, snr);

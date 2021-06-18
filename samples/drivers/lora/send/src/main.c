@@ -15,7 +15,7 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 	     "No default LoRa radio specified in DT");
 #define DEFAULT_RADIO DT_LABEL(DEFAULT_RADIO_NODE)
 
-#define MAX_DATA_LEN 10
+#define MAX_DATA_LEN 14
 
 #define LOG_LEVEL CONFIG_LOG_DEFAULT_LEVEL
 #include <logging/log.h>
@@ -25,6 +25,7 @@ char data[MAX_DATA_LEN] = {'h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd'};
 
 void main(void)
 {
+	printk("started lora send...\n");
 	const struct device *lora_dev;
 	struct lora_modem_config config;
 	int ret;
@@ -35,12 +36,12 @@ void main(void)
 		return;
 	}
 
-	config.frequency = 865100000;
+	config.frequency = 869500000;
 	config.bandwidth = BW_125_KHZ;
 	config.datarate = SF_10;
 	config.preamble_len = 8;
 	config.coding_rate = CR_4_5;
-	config.tx_power = 4;
+	config.tx_power = 120;
 	config.tx = true;
 
 	ret = lora_config(lora_dev, &config);
@@ -50,6 +51,10 @@ void main(void)
 	}
 
 	while (1) {
+
+		/* Send data at 1s interval */
+		k_sleep(K_MSEC(4000));
+
 		ret = lora_send(lora_dev, data, MAX_DATA_LEN);
 		if (ret < 0) {
 			LOG_ERR("LoRa send failed");
@@ -57,8 +62,8 @@ void main(void)
 		}
 
 		LOG_INF("Data sent!");
+		k_sleep(K_FOREVER);
 
-		/* Send data at 1s interval */
-		k_sleep(K_MSEC(1000));
+
 	}
 }
