@@ -345,6 +345,7 @@ void exec_experiment(void *a, void *b, void *c) {
 								}
 								transmission_data[data[2] - 1] = '.';
 
+								printk("transmission datsa: %s\n", transmission_data);
 								ret = lora_send(lora_dev, transmission_data, data[2]);
 								
 								k_sleep(K_MSEC(data[1] * 1000));						// data[1] contains the number of seconds between transmissions

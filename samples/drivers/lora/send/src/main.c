@@ -28,7 +28,6 @@ void main(void)
 	printk("started lora send...\n");
 	const struct device *lora_dev;
 	struct lora_modem_config config;
-	int ret;
 
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 	if (!lora_dev) {
@@ -36,34 +35,39 @@ void main(void)
 		return;
 	}
 
-	config.frequency = 869500000;
+	config.frequency = 868100000;
 	config.bandwidth = BW_125_KHZ;
 	config.datarate = SF_10;
 	config.preamble_len = 8;
 	config.coding_rate = CR_4_5;
-	config.tx_power = 120;
+	config.tx_power = 5;
 	config.tx = true;
 
-	ret = lora_config(lora_dev, &config);
-	if (ret < 0) {
-		LOG_ERR("LoRa config failed");
-		return;
-	}
+	lora_config(lora_dev, &config);
 
 	while (1) {
 
 		/* Send data at 1s interval */
-		k_sleep(K_MSEC(4000));
+		k_sleep(K_MSEC(3000));
 
-		ret = lora_send(lora_dev, data, MAX_DATA_LEN);
-		if (ret < 0) {
-			LOG_ERR("LoRa send failed");
-			return;
-		}
+		lora_send(lora_dev, data, MAX_DATA_LEN);
+		k_sleep(K_SECONDS(3));
 
 		LOG_INF("Data sent!");
+
+		config.frequency = 869500000;
+		config.bandwidth = BW_125_KHZ;
+		config.datarate = SF_10;
+		config.preamble_len = 8;
+		config.coding_rate = CR_4_5;
+		config.tx_power = 5;
+		config.tx = true;
+
+		lora_config(lora_dev, &config);
+		
+		lora_send(lora_dev, data, MAX_DATA_LEN);
 		k_sleep(K_FOREVER);
 
-
+		return;
 	}
 }

@@ -47,16 +47,20 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 // implemented at bottom of file (declared here for use in next function)
 int bt_lres_notify(const void *data, uint8_t type_of_notification);
 
-
-uint32_t frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
 // for convenience: change LoRa parameter configuration according to arguments
 void change_config(uint8_t* pu, bool tx) {
 	const struct device *lora_dev;
 	uint16_t len = 5;
 
+	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
+
 	config.frequency = frequencies[*pu];
-	printk("[NOTIFICATION] datta %d length %u\n", *pu, len);
-	printk("fr in config_change: %d\n", config.frequency);
+	printk("address of pu: %p\n", pu);
+	printk("address of config struct%p\n", &config);
+	printk("address of config.frequency %p\n", &config.frequency);
+	printk("pu = %d\n", *pu);
+	printk("config.frequency = %d\n", config.frequency);
+	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 	pu++;
 
 	config.bandwidth = *pu;
@@ -112,10 +116,7 @@ void receive_lora(void *a, void *b, void *c) {
 	
 	int16_t rssi;
 	int8_t snr;
-
 	
-	printk("frequency value in receive_lora: %d\n", config.frequency);
-
 	while (1) {
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 				&rssi, &snr);
@@ -134,6 +135,7 @@ void receive_lora(void *a, void *b, void *c) {
 	}
 }
 
+
 // gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic) and starts receiving thread
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
@@ -144,7 +146,6 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 
 	uint8_t *pu = (uint8_t *) buf;		
 	change_config(pu, false);
-	printk("frequency value after change config: %d\n", config.frequency);
 
 	int8_t bt_data[1] = {-2};
 	bt_lres_notify(bt_data, 2);
@@ -261,7 +262,6 @@ void exec_experiment(void *a, void *b, void *c) {
 						config.coding_rate =  m + 1;
 						printk("coding rate: %d\n", m+1);
 					} else {
-						printk("coding rate bit not set for %d\n", m);
 						continue;
 					}
 					for(uint8_t p = 0; p < 8; p++) {
