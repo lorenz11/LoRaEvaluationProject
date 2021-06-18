@@ -21,7 +21,7 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 #include <logging/log.h>
 LOG_MODULE_REGISTER(lora_send);
 
-char data[MAX_DATA_LEN] = {'h', 'e', 'y'};
+char data[MAX_DATA_LEN] = {'h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd'};
 
 void main(void)
 {
@@ -35,7 +35,7 @@ void main(void)
 		return;
 	}
 
-	config.frequency = 868000000;
+	config.frequency = 865100000;
 	config.bandwidth = BW_125_KHZ;
 	config.datarate = SF_10;
 	config.preamble_len = 8;
@@ -56,7 +56,6 @@ void main(void)
 			return;
 		}
 
-		printk("printk sent\n");
 		LOG_INF("Data sent!");
 
 		/* Send data at 1s interval */

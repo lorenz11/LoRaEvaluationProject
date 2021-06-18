@@ -13,7 +13,6 @@
 #define DEFAULT_RADIO_NODE DT_ALIAS(lora0)
 BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 	     "No default LoRa radio specified in DT");
-#define DEFAULT_RADIO DT_LABEL(DEFAULT_RADIO_NODE)
 
 #define MAX_DATA_LEN 255
 
@@ -23,29 +22,24 @@ LOG_MODULE_REGISTER(lora_receive);
 
 void main(void)
 {
-	printk("started programmmmm!\n");
-	const struct device *lora_dev;
+	const struct device *lora_dev = DEVICE_DT_GET(DEFAULT_RADIO_NODE);
 	struct lora_modem_config config;
 	int ret, len;
 	uint8_t data[MAX_DATA_LEN] = {0};
-	
-	
-	
 	int16_t rssi;
 	int8_t snr;
 
-	lora_dev = device_get_binding(DEFAULT_RADIO);
-	if (!lora_dev) {
-		LOG_ERR("%s Device not found", DEFAULT_RADIO);
+	if (!device_is_ready(lora_dev)) {
+		LOG_ERR("%s Device not ready", lora_dev->name);
 		return;
 	}
 
-	config.frequency = 868000000;
+	config.frequency = 865100000;
 	config.bandwidth = BW_125_KHZ;
 	config.datarate = SF_10;
 	config.preamble_len = 8;
 	config.coding_rate = CR_4_5;
-	config.tx_power = 4;
+	config.tx_power = 14;
 	config.tx = false;
 
 	ret = lora_config(lora_dev, &config);
@@ -54,7 +48,6 @@ void main(void)
 		return;
 	}
 
-	int i = 0;
 	while (1) {
 		/* Block until data arrives */
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
@@ -63,8 +56,7 @@ void main(void)
 			LOG_ERR("LoRa receive failed");
 			return;
 		}
-		printk("rounnd %d\n", i);
-		i += 1;
+
 		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 			log_strdup(data), rssi, snr);
 	}
