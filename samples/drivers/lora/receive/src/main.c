@@ -37,18 +37,34 @@ void main(void)
 	}
 	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
 
-	config.frequency = frequencies[0];
-	config.bandwidth = BW_125_KHZ;
-	config.datarate = SF_10;
-	config.preamble_len = 8;
-	config.coding_rate = CR_4_5;
-	config.tx_power = 5;
-	config.tx = false;
 
-	lora_config(lora_dev, &config);
-
+	
+	bool sixEight = true;
 	while (1) {
-		/* Block until data arrives */
+		if(sixEight) {
+			config.frequency = frequencies[0];
+			config.bandwidth = BW_125_KHZ;
+			config.datarate = SF_10;
+			config.preamble_len = 8;
+			config.coding_rate = CR_4_5;
+			config.tx_power = 5;
+			config.tx = false;
+
+			lora_config(lora_dev, &config);
+			sixEight = false;
+		} else {
+			config.frequency = frequencies[7];
+			config.bandwidth = BW_125_KHZ;
+			config.datarate = SF_10;
+			config.preamble_len = 8;
+			config.coding_rate = CR_4_5;
+			config.tx_power = 5;
+			config.tx = false;
+
+			lora_config(lora_dev, &config);
+			sixEight = true;
+		}
+
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 				&rssi, &snr);
 		if (len < 0) {
@@ -59,14 +75,6 @@ void main(void)
 		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 			log_strdup(data), rssi, snr);
 
-		config.frequency = frequencies[7];
-		config.bandwidth = BW_125_KHZ;
-		config.datarate = SF_10;
-		config.preamble_len = 8;
-		config.coding_rate = CR_4_5;
-		config.tx_power = 5;
-		config.tx = false;
-
-		lora_config(lora_dev, &config);
+		
 	}
 }
