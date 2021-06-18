@@ -44,8 +44,6 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/lorenz/zephyrproject/zephyr/build/zephyr/drivers/spi/cmake_install.cmake")
   include("/home/lorenz/zephyrproject/zephyr/build/zephyr/drivers/lora/cmake_install.cmake")
   include("/home/lorenz/zephyrproject/zephyr/build/zephyr/drivers/serial/cmake_install.cmake")
-  include("/home/lorenz/zephyrproject/zephyr/build/zephyr/drivers/bluetooth/cmake_install.cmake")
-  include("/home/lorenz/zephyrproject/zephyr/build/zephyr/drivers/entropy/cmake_install.cmake")
   include("/home/lorenz/zephyrproject/zephyr/build/zephyr/drivers/timer/cmake_install.cmake")
 
 endif()

@@ -67,7 +67,5 @@ void main(void)
 		lora_send(lora_dev, data, MAX_DATA_LEN);
 
 		LOG_INF("Data sent!");
-
-		return;
 	}
 }
