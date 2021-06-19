@@ -39,7 +39,7 @@ void main(void)
 	bool sixEight = true;
 	while (1) {
 		if(sixEight) {
-			config.frequency = 868100000;
+			config.frequency = 869500000;
 			config.bandwidth = BW_125_KHZ;
 			config.datarate = SF_10;
 			config.preamble_len = 8;
@@ -51,12 +51,12 @@ void main(void)
 			sixEight = false;
 		} else {
 			config.frequency = 869500000;
-		config.bandwidth = BW_125_KHZ;
-		config.datarate = SF_10;
-		config.preamble_len = 8;
-		config.coding_rate = CR_4_5;
-		config.tx_power = 5;
-		config.tx = true;
+			config.bandwidth = BW_125_KHZ;
+			config.datarate = SF_10;
+			config.preamble_len = 8;
+			config.coding_rate = CR_4_8;
+			config.tx_power = 5;
+			config.tx = true;
 
 		lora_config(lora_dev, &config);
 		sixEight = true;
