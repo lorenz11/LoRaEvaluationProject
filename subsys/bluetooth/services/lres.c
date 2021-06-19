@@ -117,21 +117,47 @@ void receive_lora(void *a, void *b, void *c) {
 	int16_t rssi;
 	int8_t snr;
 	
+	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
+
+
+	
+	bool sixEight = true;
 	while (1) {
+		if(sixEight) {
+			config.frequency = frequencies[0];
+			config.bandwidth = 0;
+			config.datarate = 10;
+			config.preamble_len = 8;
+			config.coding_rate = 1;
+			config.tx_power = 5;
+			config.tx = false;
+
+			lora_config(lora_dev, &config);
+			sixEight = false;
+		} else {
+			config.frequency = frequencies[7];
+			config.bandwidth = 0;
+			config.datarate = 10;
+			config.preamble_len = 8;
+			config.coding_rate = 1;
+			config.tx_power = 5;
+			config.tx = false;
+
+			lora_config(lora_dev, &config);
+			sixEight = true;
+		}
+
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 				&rssi, &snr);
-		
-		uint8_t ndata[2] = {0};
-		rssi = (uint8_t) -rssi; // negated to fit into an unsigned int (original value is negative)
-		ndata[0] = rssi;
-		ndata[1] = snr;
+		if (len < 0) {
+			LOG_ERR("LoRa receive failed");
+			return;
+		}
 
-		// notfiy phone with sent LoRa message and other data
-		bt_lres_notify(ndata, 0);
-		bt_lres_notify(data, 1);
-		
 		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 			log_strdup(data), rssi, snr);
+
+		
 	}
 }
 

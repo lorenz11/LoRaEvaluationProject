@@ -41,13 +41,6 @@ void main(void)
 	
 	bool sixEight = true;
 	while (1) {
-		const struct device *lora_dev;
-		lora_dev = device_get_binding(DEFAULT_RADIO);
-		if (!lora_dev) {
-			LOG_ERR("%s Device not found", DEFAULT_RADIO);
-			return;
-		}
-
 		if(sixEight) {
 			config.frequency = frequencies[0];
 			config.bandwidth = BW_125_KHZ;
