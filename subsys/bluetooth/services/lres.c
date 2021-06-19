@@ -56,21 +56,20 @@ void change_config(bool tx) {
 
 	config.frequency = frequencies[config_data[0]];
 	printk("[NOTIFICATION] data %d\n", config_data[0]);
-	pu++;
 
 	config.bandwidth = config_data[1];
 	printk("[NOTIFICATION] data %d\n", config_data[1]);
-	pu++;
+	
 
 	config.datarate = config_data[2] + 7;
 	printk("[NOTIFICATION] dat %d\n", config_data[2]);
-	pu++;
+	
 
 	config.preamble_len = 8;
 
 	config.coding_rate = config_data[3] + 1;
 	printk("[NOTIFICATION] data %d\n", config_data[3]);
-	pu++;
+	
 
 	config.tx_power = config_data[4] + 5;
 	printk("[NOTIFICATION] data %d\n", config_data[4]);
@@ -99,18 +98,60 @@ K_THREAD_STACK_DEFINE(stack_area0, STACK_SIZE);
 struct k_thread thread_data0;
 k_tid_t thread0_tid;
 
+bool first = true;
 
 // separate LoRa receive thread code
 void receive_lora(void *a, void *b, void *c) {
 	lora_dev = device_get_binding(DEFAULT_RADIO);
+	//change_config(false);
 
 	int len;
 	uint8_t data[MAX_DATA_LEN] = {0};
 	
 	int16_t rssi;
 	int8_t snr;
+
+
+	if(first) {
+		config.frequency = frequencies[0];
+		config.bandwidth = 0;
+		config.datarate = 10;
+		config.preamble_len = 8;
+		config.coding_rate = 1;
+		config.tx_power = 5;
+		config.tx = false;
+		first = false;
+	} else {
+		config.frequency = frequencies[7];
+		config.bandwidth = 0;
+		config.datarate = 10;
+		config.preamble_len = 8;
+		config.coding_rate = 1;
+		config.tx_power = 5;
+		config.tx = false;
+		first = true;
+	}
+
+	lora_config(lora_dev, &config);
+
+
 	
-	while (1) {
+	while(1) {
+		
+
+		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
+					&rssi, &snr);
+
+		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
+			log_strdup(data), rssi, snr);
+	}
+
+
+
+
+
+	
+	/*while (1) {
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 				&rssi, &snr);
 		
@@ -125,10 +166,16 @@ void receive_lora(void *a, void *b, void *c) {
 		
 		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 			log_strdup(data), rssi, snr);
-	}
+	}*/
 	
 }
 
+
+
+K_THREAD_STACK_DEFINE(stack_area3, STACK_SIZE);
+
+struct k_thread thread_data3;
+k_tid_t thread3_tid;
 
 // gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic) and starts receiving thread
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
@@ -136,6 +183,8 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 {
 	if(thread0_tid != NULL) {
 		k_thread_abort(thread0_tid);
+		thread0_tid = NULL;
+		//thread_data0 = NULL;
 	}
 
 	uint8_t *pu = (uint8_t *) buf;
@@ -147,13 +196,21 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 
 	int8_t bt_data[1] = {-2};
 	bt_lres_notify(bt_data, 2);
-
+	if(first) {
 	// (re-) start the LoRa receiving thread after changing config
 	thread0_tid = k_thread_create(&thread_data0, stack_area0,
 			K_THREAD_STACK_SIZEOF(stack_area0),
 			receive_lora,
 			NULL, NULL, NULL,
 			TT_PRIORITY, 0, K_NO_WAIT);
+	}else {
+		thread3_tid = k_thread_create(&thread_data3, stack_area3,
+			K_THREAD_STACK_SIZEOF(stack_area3),
+			receive_lora,
+			NULL, NULL, NULL,
+			TT_PRIORITY, 0, K_NO_WAIT);
+	}
+	
 	return 0;
 }
 
@@ -379,7 +436,7 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 
 	uint8_t *pu = (uint8_t *) buf;
 	if(len == 5) {								// receive and change config (on connection)
-		change_config(pu, true);
+		//change_config(pu, true);
 		int8_t bt_data[1] = {-2};
 		bt_lres_notify(bt_data, 2);
 		printk("changed config at x\n");
