@@ -20,7 +20,7 @@
 #include <bluetooth/gatt.h>
 
 #define MAX_DATA_LEN 20
-#define MAX_TRANSM_LEN 20
+#define MAX_TRANSM_LEN 255
 
 #define LOG_LEVEL CONFIG_BT_LRES_LOG_LEVEL
 #include <logging/log.h>
