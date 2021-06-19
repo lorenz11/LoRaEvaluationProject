@@ -48,46 +48,41 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 int bt_lres_notify(const void *data, uint8_t type_of_notification);
 
 const struct device *lora_dev;
+int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
+uint8_t config_data[5];
 // for convenience: change LoRa parameter configuration according to arguments
-void change_config(uint8_t* pu, bool tx) {
+void change_config(bool tx) {
 	//const struct device *lora_dev;
-	uint16_t len = 5;
 
-	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
-
-	config.frequency = frequencies[*pu];
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+	config.frequency = frequencies[config_data[0]];
+	printk("[NOTIFICATION] data %d\n", config_data[0]);
 	pu++;
 
-	config.bandwidth = *pu;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+	config.bandwidth = config_data[1];
+	printk("[NOTIFICATION] data %d\n", config_data[1]);
 	pu++;
 
-	config.datarate = *pu + 7;
-	printk("[NOTIFICATION] dat %d length %u\n", *pu, len);
+	config.datarate = config_data[2] + 7;
+	printk("[NOTIFICATION] dat %d\n", config_data[2]);
 	pu++;
 
 	config.preamble_len = 8;
 
-	config.coding_rate = *pu + 1;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+	config.coding_rate = config_data[3] + 1;
+	printk("[NOTIFICATION] data %d\n", config_data[3]);
 	pu++;
 
-	config.tx_power = *pu + 5;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+	config.tx_power = config_data[4] + 5;
+	printk("[NOTIFICATION] data %d\n", config_data[4]);
 
 	config.tx = tx;
 
-	lora_dev = device_get_binding(DEFAULT_RADIO);
+	/*lora_dev = device_get_binding(DEFAULT_RADIO);
 	if (!lora_dev) {
 		LOG_ERR("%s Device not found", DEFAULT_RADIO);
-	}
-
-	int ret;
-	ret = lora_config(lora_dev, &config);
-	if (ret < 0) {
-		LOG_ERR("LoRa config failed");
-	}
+	}*/
+	lora_config(lora_dev, &config);
+	
 	return;
 	
 }
@@ -104,72 +99,16 @@ K_THREAD_STACK_DEFINE(stack_area0, STACK_SIZE);
 struct k_thread thread_data0;
 k_tid_t thread0_tid;
 
-uint8_t config_data[5];
 
-int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
 // separate LoRa receive thread code
 void receive_lora(void *a, void *b, void *c) {
-	// change_config(config_data, false);
-	
-
-	config.frequency = frequencies[config_data[0]];
-	printk("[NOTIFICATION] data %d\n", config_data[0]);
-
-	config.bandwidth = config_data[1];
-	printk("[NOTIFICATION] data %d\n", config_data[1]);
-	
-
-	config.datarate = config_data[2] + 7;
-	printk("[NOTIFICATION] dat %d\n", config_data[2]);
-	
-
-	config.preamble_len = 8;
-
-	config.coding_rate = config_data[3] + 1;
-	printk("[NOTIFICATION] data %d\n", config_data[3]);
-	
-	config.tx_power = config_data[4] + 5;
-	printk("[NOTIFICATION] data %d\n", config_data[4]);
-
-	config.tx = false;
-
 	lora_dev = device_get_binding(DEFAULT_RADIO);
-	if (!lora_dev) {
-		LOG_ERR("%s Device not found", DEFAULT_RADIO);
-	}
-
-	
-	lora_config(lora_dev, &config);
-
-
-
-
-
-
-
-
-
-
-
-	
-	//lora_dev = device_get_binding(DEFAULT_RADIO);
-
-	
 
 	int len;
 	uint8_t data[MAX_DATA_LEN] = {0};
 	
 	int16_t rssi;
 	int8_t snr;
-
-
-
-
-
-
-
-
-
 	
 	while (1) {
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
@@ -187,94 +126,6 @@ void receive_lora(void *a, void *b, void *c) {
 		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 			log_strdup(data), rssi, snr);
 	}
-	
-
-
-
-
-
-
-
-
-
-
-	
-
-
-
-
-
-
-
-	//int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
-
-	/*bool sixEight = true;
-	while (1) {
-		if(sixEight) {
-			config_data[0] = 0;
-			change_config(config_data, false);
-			sixEight = false;
-		} else {
-			config_data[0] = 7;
-			change_config(config_data, false);
-			sixEight = true;
-		}
-
-		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
-				&rssi, &snr);
-		if (len < 0) {
-			LOG_ERR("LoRa receive failed");
-			return;
-		}
-
-		uint8_t ndata[2] = {0};
-		rssi = (uint8_t) -rssi; // negated to fit into an unsigned int (original value is negative)
-		ndata[0] = rssi;
-		ndata[1] = snr;
-
-		//printk("333333333tttttttttttttt3333333333333\n");
-		// notfiy phone with sent LoRa message and other data
-		bt_lres_notify(ndata, 0);
-		bt_lres_notify(data, 1);
-
-		printk("config.fr: %d\n", config.frequency);
-		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
-			log_strdup(data), rssi, snr);
-
-	}*/
-
-
-
-		/*printk("1111111111111111111111111111\n");
-		if(sixEight) {
-			config_data[4] = 0;
-			change_config(config_data, false);
-			sixEight = false;
-		} else {
-			config_data[4] = 7;
-			change_config(config_data, false);
-			sixEight = true;
-		}
-		printk("222222222222222222222222222222\n");
-
-
-		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
-				&rssi, &snr);
-		
-		uint8_t ndata[2] = {0};
-		rssi = (uint8_t) -rssi; // negated to fit into an unsigned int (original value is negative)
-		ndata[0] = rssi;
-		ndata[1] = snr;
-
-		printk("33333333333333333333333333333333\n");
-		// notfiy phone with sent LoRa message and other data
-		bt_lres_notify(ndata, 0);
-		bt_lres_notify(data, 1);
-
-		printk("44444444444444444444444444444444\n");
-		
-		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
-			log_strdup(data), rssi, snr);*/
 	
 }
 
