@@ -33,6 +33,7 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 static uint8_t lses_blsc;
 
 static struct lora_modem_config config;
+int frequencies[8] =  {869500000 ,868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000};
 
 
 // when descriptor changed at phone (for enableing notifications)
@@ -47,8 +48,6 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 
 void change_config(uint8_t* pu, bool tx) {
 	const struct device *lora_dev;
-
-	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
 
 	config.frequency = frequencies[*pu];
 	printk("fr data %d\n", *pu);
@@ -294,7 +293,6 @@ void exec_experiment(void *a, void *b, void *c) {
 
 	config.tx = true;
 	int ret;
-	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
 	for(uint8_t i = 0; i < 8; i++) {
 		if(((data[4] >> i)  & 0x01) == 1) {					// the 4th byte of the settings byte array represents the frequencies to use
 			config.frequency = frequencies[i];				// if a bit in that byte is set, the corresponding frequency will be used;

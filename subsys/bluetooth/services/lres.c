@@ -33,6 +33,7 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 
 static uint8_t lres_blsc;
 static struct lora_modem_config config;
+int frequencies[8] =  {869500000 ,868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000};
 
 // when descriptor changed at phone (for enableing notifications)
 static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
@@ -47,43 +48,45 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 // implemented at bottom of file (declared here for use in next function)
 int bt_lres_notify(const void *data, uint8_t type_of_notification);
 
-const struct device *lora_dev;
-int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
-uint8_t config_data[5];
 // for convenience: change LoRa parameter configuration according to arguments
-void change_config(bool tx) {
-	//const struct device *lora_dev;
+void change_config(uint8_t* pu, bool tx) {
+	const struct device *lora_dev;
+	uint16_t len = 5;
 
-	config.frequency = frequencies[config_data[0]];
-	printk("[NOTIFICATION] data %d\n", config_data[0]);
+	config.frequency = frequencies[*pu];
+	printk("[NOTIFICATION] datta %d length %u\n", *pu, len);
+	printk("fr in config_change: %d\n", config.frequency);
+	pu++;
 
-	config.bandwidth = config_data[1];
-	printk("[NOTIFICATION] data %d\n", config_data[1]);
-	
+	config.bandwidth = *pu;
+	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+	pu++;
 
-	config.datarate = config_data[2] + 7;
-	printk("[NOTIFICATION] dat %d\n", config_data[2]);
-	
+	config.datarate = *pu + 7;
+	printk("[NOTIFICATION] dat %d length %u\n", *pu, len);
+	pu++;
 
 	config.preamble_len = 8;
 
-	config.coding_rate = config_data[3] + 1;
-	printk("[NOTIFICATION] data %d\n", config_data[3]);
-	
+	config.coding_rate = *pu + 1;
+	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+	pu++;
 
-	config.tx_power = config_data[4] + 5;
-	printk("[NOTIFICATION] data %d\n", config_data[4]);
+	config.tx_power = *pu + 5;
+	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
 
 	config.tx = tx;
 
-	/*lora_dev = device_get_binding(DEFAULT_RADIO);
+	lora_dev = device_get_binding(DEFAULT_RADIO);
 	if (!lora_dev) {
 		LOG_ERR("%s Device not found", DEFAULT_RADIO);
-	}*/
-	lora_config(lora_dev, &config);
-	
-	return;
-	
+	}
+
+	int ret;
+	ret = lora_config(lora_dev, &config);
+	if (ret < 0) {
+		LOG_ERR("LoRa config failed");
+	}
 }
 
 
@@ -98,12 +101,10 @@ K_THREAD_STACK_DEFINE(stack_area0, STACK_SIZE);
 struct k_thread thread_data0;
 k_tid_t thread0_tid;
 
-bool first = true;
-
 // separate LoRa receive thread code
 void receive_lora(void *a, void *b, void *c) {
+	const struct device *lora_dev;
 	lora_dev = device_get_binding(DEFAULT_RADIO);
-	//change_config(false);
 
 	int len;
 	uint8_t data[MAX_DATA_LEN] = {0};
@@ -111,47 +112,10 @@ void receive_lora(void *a, void *b, void *c) {
 	int16_t rssi;
 	int8_t snr;
 
-
-	if(first) {
-		config.frequency = frequencies[0];
-		config.bandwidth = 0;
-		config.datarate = 10;
-		config.preamble_len = 8;
-		config.coding_rate = 1;
-		config.tx_power = 5;
-		config.tx = false;
-		first = false;
-	} else {
-		config.frequency = frequencies[7];
-		config.bandwidth = 0;
-		config.datarate = 10;
-		config.preamble_len = 8;
-		config.coding_rate = 1;
-		config.tx_power = 5;
-		config.tx = false;
-		first = true;
-	}
-
-	lora_config(lora_dev, &config);
-
-
 	
-	while(1) {
-		
+	printk("frequency value in receive_lora: %d\n", config.frequency);
 
-		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
-					&rssi, &snr);
-
-		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
-			log_strdup(data), rssi, snr);
-	}
-
-
-
-
-
-	
-	/*while (1) {
+	while (1) {
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 				&rssi, &snr);
 		
@@ -166,16 +130,8 @@ void receive_lora(void *a, void *b, void *c) {
 		
 		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 			log_strdup(data), rssi, snr);
-	}*/
-	
+	}
 }
-
-
-
-K_THREAD_STACK_DEFINE(stack_area3, STACK_SIZE);
-
-struct k_thread thread_data3;
-k_tid_t thread3_tid;
 
 // gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic) and starts receiving thread
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
@@ -183,34 +139,21 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 {
 	if(thread0_tid != NULL) {
 		k_thread_abort(thread0_tid);
-		thread0_tid = NULL;
-		//thread_data0 = NULL;
 	}
 
-	uint8_t *pu = (uint8_t *) buf;
-	for(u_int8_t i = 0; i < 5; i++) {
-		config_data[i] = *pu;
-		pu++;
-	}	
-	//change_config(pu, false);
+	uint8_t *pu = (uint8_t *) buf;		
+	change_config(pu, false);
+	printk("frequency value after change config: %d\n", config.frequency);
 
 	int8_t bt_data[1] = {-2};
 	bt_lres_notify(bt_data, 2);
-	if(first) {
+
 	// (re-) start the LoRa receiving thread after changing config
 	thread0_tid = k_thread_create(&thread_data0, stack_area0,
 			K_THREAD_STACK_SIZEOF(stack_area0),
 			receive_lora,
 			NULL, NULL, NULL,
 			TT_PRIORITY, 0, K_NO_WAIT);
-	}else {
-		thread3_tid = k_thread_create(&thread_data3, stack_area3,
-			K_THREAD_STACK_SIZEOF(stack_area3),
-			receive_lora,
-			NULL, NULL, NULL,
-			TT_PRIORITY, 0, K_NO_WAIT);
-	}
-	
 	return 0;
 }
 
@@ -288,7 +231,6 @@ void exec_experiment(void *a, void *b, void *c) {
 	bool first_iteration = true;								// first iteration has the delay added to its lora receive timeout							
 	uint8_t transmission_data[MAX_TRANSM_LEN] ={0};				// exp_data[2] contains msg length
 	config.tx = false;
-	int frequencies[8] =  {868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000, 869500000};
 
 	for(uint8_t i = 0; i < 8; i++) {
 		if(((exp_data[4] >> i)  & 0x01) == 1) {					// the 4th byte of the settings byte array represents the frequencies to use
@@ -317,6 +259,7 @@ void exec_experiment(void *a, void *b, void *c) {
 						config.coding_rate =  m + 1;
 						printk("coding rate: %d\n", m+1);
 					} else {
+						printk("coding rate bit not set for %d\n", m);
 						continue;
 					}
 					for(uint8_t p = 0; p < 8; p++) {
@@ -436,7 +379,7 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 
 	uint8_t *pu = (uint8_t *) buf;
 	if(len == 5) {								// receive and change config (on connection)
-		//change_config(pu, true);
+		change_config(pu, true);
 		int8_t bt_data[1] = {-2};
 		bt_lres_notify(bt_data, 2);
 		printk("changed config at x\n");
@@ -495,6 +438,7 @@ int bt_lres_notify(const void *data, uint8_t type_of_notification)
 	int rc;
 
 	if(type_of_notification == 0) {		// RSSI/SNR notification
+		printk("at stats\n");
 		uint8_t *pu = (uint8_t *) data;
 
 		static uint8_t stats[3];
@@ -507,6 +451,7 @@ int bt_lres_notify(const void *data, uint8_t type_of_notification)
 
 		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &stats, sizeof(stats));
 	} else if(type_of_notification == 1){							// msg notification
+		printk("at msg\n");
 		char *pc = (char *) data;
 		char data[MAX_DATA_LEN];
 	
