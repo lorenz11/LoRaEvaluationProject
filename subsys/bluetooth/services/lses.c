@@ -345,10 +345,7 @@ void exec_experiment(void *a, void *b, void *c) {
 								transmission_data[8] = (char) n % 10 + 48;
 
 								for(uint8_t p = 9; p < (data[2] - 1); p++) {					// data[2] contains message length (length of the transmitted content)
-									transmission_data[p] = random_d[(n * (data[2] - 9) + (p - 9)) % 200];		
-									if(p == data[2] -2) {
-										printk("\n end:\n");
-									}												// fills the message up with a's until desired message length
+									transmission_data[p] = random_d[(n * (data[2] - 9) + (p - 9)) % 200];								// fills the message up with a's until desired message length
 								}
 								transmission_data[data[2] - 1] = '.';
 
