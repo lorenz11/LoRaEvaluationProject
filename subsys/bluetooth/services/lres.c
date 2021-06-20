@@ -238,7 +238,7 @@ void exec_experiment(void *a, void *b, void *c) {
 	uint8_t compare_data[MAX_TRANSM_LEN] ={0};
 	config.tx = false;
 
-	transmission_data[5] = '_';
+	compare_data[5] = '_';
 
 	for(uint8_t i = 0; i < 8; i++) {
 		if(((exp_data[4] >> i)  & 0x01) == 1) {					// the 4th byte of the settings byte array represents the frequencies to use
@@ -268,7 +268,7 @@ void exec_experiment(void *a, void *b, void *c) {
 				for(uint8_t m = 0; m < 4; m++) {
 					if(((exp_data[7] >> m)  & 0x01) == 1) {
 						config.coding_rate =  m + 1;
-						compare_data[3] = (char) l + 48;
+						compare_data[3] = (char) m + 48;
 						printk("coding rate: %d\n", m+1);
 					} else {
 						continue;
@@ -276,7 +276,7 @@ void exec_experiment(void *a, void *b, void *c) {
 					for(uint8_t p = 0; p < 8; p++) {
 						if(((exp_data[8] >> p)  & 0x01) == 1) {
 							config.tx_power =  p + 5;
-							compare_data[4] = (char) m + 48;
+							compare_data[4] = (char) p + 48;
 							printk("power: %d\n", p+1);
 							ret = lora_config(lora_dev, &config);
 							
@@ -310,7 +310,7 @@ void exec_experiment(void *a, void *b, void *c) {
 
 
 									char tmp[3];
-									for (int i = 0; i < 3; i++) {}
+									for (int i = 0; i < 3; i++) {
 										compare_data[i + 6] = transmission_data[i + 6];					// write msg number to compare data only after receive, because no way to know how many msgs were lost before this one
 										tmp[i] = transmission_data[i + 6];								// use the msg number (like 008) to determine which random data the transmission should contain
 									}
@@ -318,12 +318,14 @@ void exec_experiment(void *a, void *b, void *c) {
 
 
 									for(uint8_t p = 9; p < (exp_data[2] - 1); p++) {									// data[2] contains message length (length of the transmitted content)
-										compare_data[p] = random_d[(msg_num * (data[2] - 9) + (p - 9)) % 200];												// fills the message up with a's until desired message length
+										compare_data[p] = random_d[(msg_num * (exp_data[2] - 9) + (p - 9)) % 200];												// fills the message up with a's until desired message length
 									}
-									compare_data[data[2] - 1] = '.';
+									compare_data[exp_data[2] - 1] = '.';
 
 									bool same_content = true;
 									for(int z = 0; z < exp_data[2]; z++) {
+										printk("c%d", compare_data[z]);
+										printk("t%d ", transmission_data[z]);
 										if(compare_data[z] != transmission_data[z]) {
 											printk("not same data\n");
 											same_content = false;
@@ -331,6 +333,9 @@ void exec_experiment(void *a, void *b, void *c) {
 										}
 
 										//printk("d %d", transmission_data[z]);
+									}
+									if(same_content) {
+										printk("same content!!!\n");
 									}
 
 									/*for(int z = 9; z < exp_data[2]; z++) {
