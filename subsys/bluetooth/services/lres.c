@@ -57,21 +57,21 @@ void change_config(uint8_t* pu, bool tx) {
 	pu++;
 
 	config.bandwidth = *pu;
-	printk("bw data %d length\n", *pu);
+	printk("bw data %d\n", *pu);
 	pu++;
 
 	config.datarate = *pu + 7;
-	printk("sf data %d length\n", *pu);
+	printk("sf data %d\n", *pu);
 	pu++;
 
 	config.preamble_len = 8;
 
 	config.coding_rate = *pu + 1;
-	printk("cr data %d length\n", *pu);
+	printk("cr data %d\n", *pu);
 	pu++;
 
 	config.tx_power = *pu + 5;
-	printk("pw data %d length\n", *pu);
+	printk("pw data %d\n", *pu);
 
 	config.tx = tx;
 
@@ -109,9 +109,6 @@ void receive_lora(void *a, void *b, void *c) {
 	
 	int16_t rssi;
 	int8_t snr;
-
-	
-	printk("frequency value in receive_lora: %d\n", config.frequency);
 
 	while (1) {
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
@@ -165,11 +162,12 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 ////// for experiment ///
 /////////////////////////
 uint8_t random_d [200] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,
-					37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,
-					69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,
-					100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,
-					137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,
-					169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199};
+					37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,
+					73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,
+					107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,
+					134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,
+					161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,
+					188,189,190,191,192,193,194,195,196,197,198,199};
 
 
 K_THREAD_STACK_DEFINE(stack_area1, STACK_SIZE);
@@ -222,7 +220,8 @@ void exec_experiment(void *a, void *b, void *c) {
 
 
 
-	char delay[5];													// get experiment start delay
+	// get experiment start delay
+	char delay[5];													
 	for(int16_t i = 0; i < l; i++) {
 		if(i > 8) {			
 			delay[i-9] = exp_data[i];
@@ -296,17 +295,10 @@ void exec_experiment(void *a, void *b, void *c) {
 							while(iteration_time > 0) {													// exp_data[0] contains the number of LoRa transmissions per parameter combination
 								l = lora_recv(lora_dev, transmission_data, MAX_TRANSM_LEN, K_MSEC(iteration_time),
 										&rssi, &snr);
-
+								
 								if(last_data_8 != transmission_data[8]) {								// checking if lora_recv just timed out or if something was actually received
 									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 										log_strdup(transmission_data), rssi, snr);
-
-
-
-
-
-
-
 
 
 									char tmp[3];
@@ -317,33 +309,18 @@ void exec_experiment(void *a, void *b, void *c) {
 									int msg_num = atoi(tmp);	
 
 
-									for(uint8_t p = 9; p < (exp_data[2] - 1); p++) {									// data[2] contains message length (length of the transmitted content)
-										compare_data[p] = random_d[(msg_num * (exp_data[2] - 9) + (p - 9)) % 200];												// fills the message up with a's until desired message length
-									}
+									for(uint8_t p = 9; p < (exp_data[2] - 1); p++) {					// exp_data[2] contains message length (length of the transmitted content)
+										compare_data[p] = random_d[(msg_num * (exp_data[2] - 9) + (p - 9)) % 200];			
+									}																	// fills the message up with with random payload data until desired message length
 									compare_data[exp_data[2] - 1] = '.';
 
 									bool same_content = true;
 									for(int z = 0; z < exp_data[2]; z++) {
-										printk("c%d", compare_data[z]);
-										printk("t%d ", transmission_data[z]);
 										if(compare_data[z] != transmission_data[z]) {
-											printk("not same data\n");
 											same_content = false;
 											break;
 										}
-
-										//printk("d %d", transmission_data[z]);
 									}
-									if(same_content) {
-										printk("same content!!!\n");
-									}
-
-
-
-
-
-
-
 
 
 									uint8_t ndata[2] = {0};
@@ -352,9 +329,13 @@ void exec_experiment(void *a, void *b, void *c) {
 									ndata[1] = snr;
 
 									bt_lres_notify(ndata, 0);
-									transmission_data[9] = '.';											
+									if(same_content) {
+										transmission_data[10] = 't';
+									} else {
+										transmission_data[10] = 'f';
+									}
+									transmission_data[10] = '.';										
 									bt_lres_notify(transmission_data, 1);								// send results to phone to monitor experiment
-
 									last_data_8 = transmission_data[8];
 								}
 
