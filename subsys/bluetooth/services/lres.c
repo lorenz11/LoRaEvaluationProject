@@ -281,13 +281,16 @@ void exec_experiment(void *a, void *b, void *c) {
 							while(iteration_time > 0) {													// exp_data[0] contains the number of LoRa transmissions per parameter combination
 								l = lora_recv(lora_dev, transmission_data, MAX_TRANSM_LEN, K_MSEC(iteration_time),
 										&rssi, &snr);
-								LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
-										log_strdup(transmission_data), rssi, snr);
 
 								if(last_data_8 != transmission_data[8]) {								// checking if lora_recv just timed out or if something was actually received
 									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 										log_strdup(transmission_data), rssi, snr);
-										
+
+
+									for(int z = 0; z < exp_data[2]; z++) {
+										printk("d %d", transmission_data[z]);
+									}
+
 									uint8_t ndata[2] = {0};
 									rssi = (uint8_t) -rssi; 											// negated to fit into an unsigned int (original value is negative)
 									ndata[0] = rssi;
