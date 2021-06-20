@@ -51,29 +51,27 @@ int bt_lres_notify(const void *data, uint8_t type_of_notification);
 // for convenience: change LoRa parameter configuration according to arguments
 void change_config(uint8_t* pu, bool tx) {
 	const struct device *lora_dev;
-	uint16_t len = 5;
-
+	
 	config.frequency = frequencies[*pu];
-	printk("[NOTIFICATION] datta %d length %u\n", *pu, len);
-	printk("fr in config_change: %d\n", config.frequency);
+	printk("fr data %d\n", *pu);
 	pu++;
 
 	config.bandwidth = *pu;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+	printk("bw data %d length\n", *pu);
 	pu++;
 
 	config.datarate = *pu + 7;
-	printk("[NOTIFICATION] dat %d length %u\n", *pu, len);
+	printk("sf data %d length\n", *pu);
 	pu++;
 
 	config.preamble_len = 8;
 
 	config.coding_rate = *pu + 1;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+	printk("cr data %d length\n", *pu);
 	pu++;
 
 	config.tx_power = *pu + 5;
-	printk("[NOTIFICATION] data %d length %u\n", *pu, len);
+	printk("pw data %d length\n", *pu);
 
 	config.tx = tx;
 
@@ -259,7 +257,6 @@ void exec_experiment(void *a, void *b, void *c) {
 						config.coding_rate =  m + 1;
 						printk("coding rate: %d\n", m+1);
 					} else {
-						printk("coding rate bit not set for %d\n", m);
 						continue;
 					}
 					for(uint8_t p = 0; p < 8; p++) {
@@ -291,8 +288,9 @@ void exec_experiment(void *a, void *b, void *c) {
 									ndata[0] = rssi;
 									ndata[1] = snr;
 
-									bt_lres_notify(ndata, 0);											// send results to phone to monitor experiment
-									bt_lres_notify(transmission_data, 1);
+									bt_lres_notify(ndata, 0);
+									transmission_data[9] = '.';											
+									bt_lres_notify(transmission_data, 1);								// send results to phone to monitor experiment
 
 									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 										log_strdup(transmission_data), rssi, snr);
@@ -304,7 +302,6 @@ void exec_experiment(void *a, void *b, void *c) {
 								iteration_time = iteration_time - milliseconds_spent;						
 							}
 
-							// k_sleep(K_MSEC(5000));														// wait 5 seconds between combinations
 							printk("end of iteration\n");
 						} else {
 							continue;
@@ -382,7 +379,6 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 		change_config(pu, true);
 		int8_t bt_data[1] = {-2};
 		bt_lres_notify(bt_data, 2);
-		printk("changed config at x\n");
 		return 0;
 	}
 
@@ -438,7 +434,6 @@ int bt_lres_notify(const void *data, uint8_t type_of_notification)
 	int rc;
 
 	if(type_of_notification == 0) {		// RSSI/SNR notification
-		printk("at stats\n");
 		uint8_t *pu = (uint8_t *) data;
 
 		static uint8_t stats[3];
@@ -451,7 +446,6 @@ int bt_lres_notify(const void *data, uint8_t type_of_notification)
 
 		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &stats, sizeof(stats));
 	} else if(type_of_notification == 1){							// msg notification
-		printk("at msg\n");
 		char *pc = (char *) data;
 		char data[MAX_DATA_LEN];
 	

@@ -100,6 +100,10 @@ static struct bt_conn_auth_cb auth_cb_display = {
 
 void main(void)
 {
+	u32_t r = sys_rand32_get(void);
+	printk("random number: %d", r);
+	printk("random number: %d", (uint8_t) r);
+
 	// for ble connection
     int err;
 
