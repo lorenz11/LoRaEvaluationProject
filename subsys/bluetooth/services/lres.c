@@ -338,11 +338,6 @@ void exec_experiment(void *a, void *b, void *c) {
 										printk("same content!!!\n");
 									}
 
-									/*for(int z = 9; z < exp_data[2]; z++) {
-										printk("d %d", transmission_data[z]);
-									}*/
-
-
 
 
 
