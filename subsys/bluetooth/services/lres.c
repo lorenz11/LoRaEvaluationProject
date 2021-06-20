@@ -330,9 +330,9 @@ void exec_experiment(void *a, void *b, void *c) {
 
 									bt_lres_notify(ndata, 0);
 									if(same_content) {
-										transmission_data[10] = 't';
+										transmission_data[9] = 't';
 									} else {
-										transmission_data[10] = 'f';
+										transmission_data[9] = 'f';
 									}
 									transmission_data[10] = '.';										
 									bt_lres_notify(transmission_data, 1);								// send results to phone to monitor experiment
