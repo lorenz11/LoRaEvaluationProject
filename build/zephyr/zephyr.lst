@@ -9564,7 +9564,7 @@ void exec_experiment(void *a, void *b, void *c) {
     493e:	693b      	ldr	r3, [r7, #16]
     4940:	019b      	lsls	r3, r3, #6
     4942:	f043 0303 	orr.w	r3, r3, #3
-									for(int z = 0; z < exp_data[2]; z++) {
+									for(int z = 9; z < exp_data[2]; z++) {
     4946:	2600      	movs	r6, #0
 									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
     4948:	607b      	str	r3, [r7, #4]
@@ -9685,8 +9685,8 @@ void exec_experiment(void *a, void *b, void *c) {
     4a6a:	f8df 90b4 	ldr.w	r9, [pc, #180]	; 4b20 <exec_experiment+0x3b0>
 									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
     4a6e:	f01a fb35 	bl	1f0dc <log_3>
-									for(int z = 0; z < exp_data[2]; z++) {
-    4a72:	2600      	movs	r6, #0
+									for(int z = 9; z < exp_data[2]; z++) {
+    4a72:	2609      	movs	r6, #9
     4a74:	78a3      	ldrb	r3, [r4, #2]
     4a76:	429e      	cmp	r6, r3
     4a78:	db48      	blt.n	4b0c <exec_experiment+0x39c>
@@ -9753,7 +9753,7 @@ void exec_experiment(void *a, void *b, void *c) {
     4b0c:	f818 1006 	ldrb.w	r1, [r8, r6]
     4b10:	4648      	mov	r0, r9
     4b12:	f019 fecf 	bl	1e8b4 <printk>
-									for(int z = 0; z < exp_data[2]; z++) {
+									for(int z = 9; z < exp_data[2]; z++) {
     4b16:	3601      	adds	r6, #1
     4b18:	e7ac      	b.n	4a74 <exec_experiment+0x304>
     4b1a:	bf00      	nop

@@ -287,11 +287,8 @@ void exec_experiment(void *a, void *b, void *c) {
 										log_strdup(transmission_data), rssi, snr);
 
 
-									for(int z = 0; z < exp_data[2]; z++) {
+									for(int z = 9; z < exp_data[2]; z++) {
 										printk("d %d", transmission_data[z]);
-										if(p == data[2] -2) {
-											printk("\n end:\n");
-										}						
 									}
 
 									uint8_t ndata[2] = {0};
