@@ -42,7 +42,7 @@ void main(void)
 	bool sixEight = true;
 	while (1) {
 		if(sixEight) {
-			config.frequency = frequencies[0];
+			config.frequency = frequencies[7];
 			config.bandwidth = BW_125_KHZ;
 			config.datarate = SF_10;
 			config.preamble_len = 8;
@@ -72,6 +72,7 @@ void main(void)
 			return;
 		}
 
+		printk("sth\n");
 		LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 			log_strdup(data), rssi, snr);
 

@@ -24,6 +24,8 @@
 #include <bluetooth/gatt.h>
 #include <bluetooth/services/lres.h>
 
+#include <random/rand32.h>
+
 
 #define DEFAULT_RADIO_NODE DT_ALIAS(lora0)
 BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
@@ -97,12 +99,13 @@ static struct bt_conn_auth_cb auth_cb_display = {
 };
 
 
-
 void main(void)
 {
-	u32_t r = sys_rand32_get(void);
-	printk("random number: %d", r);
-	printk("random number: %d", (uint8_t) r);
+	printk("helllo\n");
+	
+	uint32_t r = sys_rand32_get();
+	printk("random number: %d\n", r);
+	printk("random number: %d\n", (uint8_t) r);
 
 	// for ble connection
     int err;

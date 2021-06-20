@@ -15,13 +15,13 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 	     "No default LoRa radio specified in DT");
 #define DEFAULT_RADIO DT_LABEL(DEFAULT_RADIO_NODE)
 
-#define MAX_DATA_LEN 14
+#define MAX_DATA_LEN 30
 
 #define LOG_LEVEL CONFIG_LOG_DEFAULT_LEVEL
 #include <logging/log.h>
 LOG_MODULE_REGISTER(lora_send);
 
-char data[MAX_DATA_LEN] = {'h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', '.'};
+char data[MAX_DATA_LEN] = {'h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', '.','h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', '.', 'h', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', '.'};
 
 void main(void)
 {
@@ -54,7 +54,7 @@ void main(void)
 			config.bandwidth = BW_125_KHZ;
 			config.datarate = SF_10;
 			config.preamble_len = 8;
-			config.coding_rate = CR_4_8;
+			config.coding_rate = CR_4_5;
 			config.tx_power = 5;
 			config.tx = true;
 
