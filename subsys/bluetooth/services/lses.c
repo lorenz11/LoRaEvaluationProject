@@ -259,7 +259,6 @@ void exec_experiment(void *a, void *b, void *c) {
 	}
 	
 
-	int no_ack = 0;
 	// reconfigure device for sending and send received data as ACK, listen for retransmission until delay counted down
 	bool experiment_ready = false;
 	while(!experiment_ready) {
@@ -278,13 +277,8 @@ void exec_experiment(void *a, void *b, void *c) {
 		config.tx = true;
 		ret = lora_config(lora_dev, &config);
 		
-
 		k_sleep(K_MSEC(200));
-		if (no_ack > 4) {
-			ret = lora_send(lora_dev, data, MAX_DATA_LEN);						// send received experiment settings back as ACK
-			
-		}
-		no_ack++;
+		ret = lora_send(lora_dev, data, MAX_DATA_LEN);						// send received experiment settings back as ACK
 
 		config.tx = false;
 		ret = lora_config(lora_dev, &config);
