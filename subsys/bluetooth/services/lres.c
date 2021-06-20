@@ -164,6 +164,13 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 /////////////////////////
 ////// for experiment ///
 /////////////////////////
+uint8_t random_d [200] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,
+					37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,
+					69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,
+					100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,
+					137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,
+					169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199};
+
 
 K_THREAD_STACK_DEFINE(stack_area1, STACK_SIZE);
 
@@ -228,11 +235,15 @@ void exec_experiment(void *a, void *b, void *c) {
 	// start experiment as receiver
 	bool first_iteration = true;								// first iteration has the delay added to its lora receive timeout							
 	uint8_t transmission_data[MAX_TRANSM_LEN] ={0};				// exp_data[2] contains msg length
+	uint8_t compare_data[MAX_TRANSM_LEN] ={0};
 	config.tx = false;
+
+	transmission_data[5] = '_';
 
 	for(uint8_t i = 0; i < 8; i++) {
 		if(((exp_data[4] >> i)  & 0x01) == 1) {					// the 4th byte of the settings byte array represents the frequencies to use
 			config.frequency = frequencies[i];					// if a bit in that byte is set, the corresponding frequency will be used;
+			compare_data[0] = (char) i + 48;
 			printk("frequency: %d\n", frequencies[i]);
 		} else {
 			continue;
@@ -241,6 +252,7 @@ void exec_experiment(void *a, void *b, void *c) {
 		for(uint8_t j = 0; j < 3; j++) {
 			if(((exp_data[5] >> j)  & 0x01) == 1) {
 				config.bandwidth =  j;
+				compare_data[1] = (char) j + 48;
 				printk("bandwidth: %d\n", j);
 			} else {
 				continue;
@@ -248,6 +260,7 @@ void exec_experiment(void *a, void *b, void *c) {
 			for(uint8_t k = 0; k < 6; k++) {
 				if(((exp_data[6] >> k)  & 0x01) == 1) {
 					config.datarate =  k + 7;
+					compare_data[2] = (char) k + 48;
 					printk("data rate: %d\n", k+7);
 				} else {
 					continue;
@@ -255,6 +268,7 @@ void exec_experiment(void *a, void *b, void *c) {
 				for(uint8_t m = 0; m < 4; m++) {
 					if(((exp_data[7] >> m)  & 0x01) == 1) {
 						config.coding_rate =  m + 1;
+						compare_data[3] = (char) l + 48;
 						printk("coding rate: %d\n", m+1);
 					} else {
 						continue;
@@ -262,6 +276,7 @@ void exec_experiment(void *a, void *b, void *c) {
 					for(uint8_t p = 0; p < 8; p++) {
 						if(((exp_data[8] >> p)  & 0x01) == 1) {
 							config.tx_power =  p + 5;
+							compare_data[4] = (char) m + 48;
 							printk("power: %d\n", p+1);
 							ret = lora_config(lora_dev, &config);
 							
@@ -287,9 +302,49 @@ void exec_experiment(void *a, void *b, void *c) {
 										log_strdup(transmission_data), rssi, snr);
 
 
-									for(int z = 9; z < exp_data[2]; z++) {
-										printk("d %d", transmission_data[z]);
+
+
+
+
+
+
+
+									char tmp[3];
+									for (int i = 0; i < 3; i++) {}
+										compare_data[i + 6] = transmission_data[i + 6];					// write msg number to compare data only after receive, because no way to know how many msgs were lost before this one
+										tmp[i] = transmission_data[i + 6];								// use the msg number (like 008) to determine which random data the transmission should contain
 									}
+									int msg_num = atoi(tmp);	
+
+
+									for(uint8_t p = 9; p < (exp_data[2] - 1); p++) {									// data[2] contains message length (length of the transmitted content)
+										compare_data[p] = random_d[(msg_num * (data[2] - 9) + (p - 9)) % 200];												// fills the message up with a's until desired message length
+									}
+									compare_data[data[2] - 1] = '.';
+
+									bool same_content = true;
+									for(int z = 0; z < exp_data[2]; z++) {
+										if(compare_data[z] != transmission_data[z]) {
+											printk("not same data\n");
+											same_content = false;
+											break;
+										}
+
+										//printk("d %d", transmission_data[z]);
+									}
+
+									/*for(int z = 9; z < exp_data[2]; z++) {
+										printk("d %d", transmission_data[z]);
+									}*/
+
+
+
+
+
+
+
+
+
 
 									uint8_t ndata[2] = {0};
 									rssi = (uint8_t) -rssi; 											// negated to fit into an unsigned int (original value is negative)
