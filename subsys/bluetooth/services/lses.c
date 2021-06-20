@@ -251,18 +251,18 @@ void exec_experiment(void *a, void *b, void *c) {
 			lora_send(lora_dev, data, 5);
 			data[0] = -1;
 			config.tx = false;
-			lora_config(lora_dev, &config);					
+			lora_config(lora_dev, &config);	
+			printk("responded to ping\n")				
 		} else {
 			experiment_started = true;
 		}
 	}
 	
 
-
+	int no_ack = 0;
 	// reconfigure device for sending and send received data as ACK, listen for retransmission until delay counted down
 	bool experiment_ready = false;
 	while(!experiment_ready) {
-		experiment_ready = true;
 		int ret;
 
 
@@ -278,18 +278,24 @@ void exec_experiment(void *a, void *b, void *c) {
 		config.tx = true;
 		ret = lora_config(lora_dev, &config);
 		
+
 		k_sleep(K_MSEC(200));
-		ret = lora_send(lora_dev, data, MAX_DATA_LEN);						// send received experiment settings back as ACK
+		if(no_ack > 8) {
+			ret = lora_send(lora_dev, data, MAX_DATA_LEN);						// send received experiment settings back as ACK
+			no_ack++;
+		}
 
 
 		config.tx = false;
 		ret = lora_config(lora_dev, &config);
 		
+		printk("delay countdown started\n")
 		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(d),			// listen for retransmission in case ACK was lost as long as the specified delay
 				&rssi, &snr);
 		if (l < 0) {
 			LOG_ERR("LoRa receive failed");
-		}
+			experiment_ready = true;
+		} 
 	}
 
 
@@ -350,16 +356,6 @@ void exec_experiment(void *a, void *b, void *c) {
 								}														
 								transmission_data[data[2] - 1] = '.';
 
-								if(n == 6 && k == 0) {
-									printk("no transmission\n");
-									k_sleep(K_MSEC(data[1] * 1000));
-									continue;
-								}
-								if(n == 3 && k == 3) {
-									printk("no transmission22\n");
-									k_sleep(K_MSEC(data[1] * 1000));
-									continue;
-								} 
 								printk("transmission data: %s\n", transmission_data);
 								ret = lora_send(lora_dev, transmission_data, data[2]);
 								

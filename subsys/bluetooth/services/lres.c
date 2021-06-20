@@ -210,9 +210,11 @@ void exec_experiment(void *a, void *b, void *c) {
 					&rssi, &snr);
 		if (l < 0) {
 			LOG_ERR("no ACK received");	
+			int8_t bt_data[1] = {-5};
+			bt_lres_notify(bt_data, 2);	
 		} else {
 			if(memcmp(exp_data, data, len * sizeof(uint8_t)) == 0) {
-				printk("ACK is okay...............\n");
+				printk("ACK is okay\n");
 				exp_started = true;									// check if received data exactly matches sent data
 			}
 		}
