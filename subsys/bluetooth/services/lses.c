@@ -252,7 +252,7 @@ void exec_experiment(void *a, void *b, void *c) {
 			data[0] = -1;
 			config.tx = false;
 			lora_config(lora_dev, &config);	
-			printk("responded to ping\n")				
+			printk("responded to ping\n");			
 		} else {
 			experiment_started = true;
 		}
@@ -280,21 +280,21 @@ void exec_experiment(void *a, void *b, void *c) {
 		
 
 		k_sleep(K_MSEC(200));
-		if(no_ack > 8) {
+		if (no_ack > 4) {
 			ret = lora_send(lora_dev, data, MAX_DATA_LEN);						// send received experiment settings back as ACK
-			no_ack++;
+			
 		}
-
+		no_ack++;
 
 		config.tx = false;
 		ret = lora_config(lora_dev, &config);
 		
-		printk("delay countdown started\n")
+		printk("delay countdown (re-)started\n");
 		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(d),			// listen for retransmission in case ACK was lost as long as the specified delay
 				&rssi, &snr);
 		if (l < 0) {
-			LOG_ERR("LoRa receive failed");
 			experiment_ready = true;
+			printk("experiment started\n");
 		} 
 	}
 

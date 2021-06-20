@@ -215,6 +215,8 @@ void exec_experiment(void *a, void *b, void *c) {
 		} else {
 			if(memcmp(exp_data, data, len * sizeof(uint8_t)) == 0) {
 				printk("ACK is okay\n");
+				int8_t bt_data[1] = {-6};
+				bt_lres_notify(bt_data, 2);	
 				exp_started = true;									// check if received data exactly matches sent data
 			}
 		}
