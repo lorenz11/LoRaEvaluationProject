@@ -228,7 +228,6 @@ void exec_experiment(void *a, void *b, void *c) {
 	// start experiment as receiver
 	bool first_iteration = true;								// first iteration has the delay added to its lora receive timeout							
 	uint8_t transmission_data[MAX_TRANSM_LEN] ={0};				// exp_data[2] contains msg length
-	printk("gggggggggggggggggggggggggg %d\n", MAX_TRANSM_LEN);
 	config.tx = false;
 
 	for(uint8_t i = 0; i < 8; i++) {
@@ -285,10 +284,10 @@ void exec_experiment(void *a, void *b, void *c) {
 								LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 										log_strdup(transmission_data), rssi, snr);
 
-								if(last_data_8 != transmission_data[8]) {	
+								if(last_data_8 != transmission_data[8]) {								// checking if lora_recv just timed out or if something was actually received
 									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 										log_strdup(transmission_data), rssi, snr);
-							// checking if lora_recv just timed out or if something was actually received
+										
 									uint8_t ndata[2] = {0};
 									rssi = (uint8_t) -rssi; 											// negated to fit into an unsigned int (original value is negative)
 									ndata[0] = rssi;
