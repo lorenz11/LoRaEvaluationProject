@@ -221,6 +221,8 @@ K_THREAD_STACK_DEFINE(stack_area1, STACK_SIZE);
 struct k_thread thread_data1;
 k_tid_t thread1_tid;
 
+
+
 // experiment send thread code
 void exec_experiment(void *a, void *b, void *c) {
 	const struct device *lora_dev;
@@ -237,7 +239,6 @@ void exec_experiment(void *a, void *b, void *c) {
 		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 					&rssi, &snr);
 		
-		printk("value at xx: %d\n", data[0]);
 		if(data[0] == 33) {					// in this case it is a ping instead of the experiment settings, which start the experiment procedure
 			config.tx = true;
 			lora_config(lora_dev, &config);	
