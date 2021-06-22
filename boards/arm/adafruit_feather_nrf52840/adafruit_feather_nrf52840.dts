@@ -101,6 +101,7 @@
 			<&gpio0 27 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>,			// D10		-> B -> DIO2
 			<&gpio0 26 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>,			// D9		-> C -> DIO3
 			<&gpio0 7 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>;				// D6		-> D -> DIO4
+		/*pa-boost-enable-gpios = <&gpio0 3 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>; // A5 -> F -> DIO5*/
 		spi-max-frequency = <1000000>;
 		power-amplifier-output = "pa-boost";
 	};

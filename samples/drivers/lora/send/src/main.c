@@ -37,17 +37,18 @@ void main(void)
 
 	
 	bool sixEight = true;
-	while (1) {
+	/*while (1) {
 		if(sixEight) {
 			config.frequency = 869500000;
 			config.bandwidth = BW_125_KHZ;
 			config.datarate = SF_10;
-			config.preamble_len = 8;
+			config.preamble_len = -60;
 			config.coding_rate = CR_4_5;
 			config.tx_power = 5;
 			config.tx = true;
 
 			lora_config(lora_dev, &config);
+			printk("aaaaaaaaaaaaa\n");
 			sixEight = false;
 		} else {
 			config.frequency = 869500000;
@@ -55,17 +56,28 @@ void main(void)
 			config.datarate = SF_10;
 			config.preamble_len = 8;
 			config.coding_rate = CR_4_5;
-			config.tx_power = 5;
+			config.tx_power = 18;
 			config.tx = true;
+			printk("bbbbbbbbbbbbbbbb\n");
 
 		lora_config(lora_dev, &config);
 		sixEight = true;
-		}
+		}*/
 
-		k_sleep(K_MSEC(3000));
+		k_sleep(K_MSEC(1000));
+
+		config.frequency = 869500000;
+			config.bandwidth = BW_125_KHZ;
+			config.datarate = SF_10;
+			config.preamble_len = 1;
+			config.coding_rate = CR_4_8;
+			config.tx_power = 5;
+			config.tx = true;
+
+			lora_config(lora_dev, &config);
 
 		lora_send(lora_dev, data, MAX_DATA_LEN);
 
 		LOG_INF("Data sent!");
-	}
+	
 }
