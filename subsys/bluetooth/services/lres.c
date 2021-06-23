@@ -376,37 +376,61 @@ struct k_thread thread_data2;
 // function for waiting for ping return on separate thread
 void wait_for_ping_return(void *a, void *b, void *c) {
 	int16_t rssi;
-		int8_t snr;
-		int l = -1;
-		char ping[5] = {'!', 'p', 'i', 'n', 'g'};
+	int8_t snr;
+	int l = -1;
+	char ping[5] = {'!', 'p', 'i', 'n', 'g'};
 
+	const struct device *lora_dev;
+	lora_dev = device_get_binding(DEFAULT_RADIO);
+	lora_send(lora_dev, ping, 5);						
+
+	config.tx = false;
+	lora_config(lora_dev, &config);						
+		
+	char resp[5] = {0};
+	l = lora_recv(lora_dev, resp, MAX_DATA_LEN, K_SECONDS(3),	
+				&rssi, &snr);
+
+	if (l < 0) {
+		LOG_ERR("no response received");	
+	} else {
+		if(memcmp(ping, resp, 5 * sizeof(uint8_t)) == 0) {
+			printk("ping is okay\n");
+			int8_t bt_data[1] = {-3};
+			bt_lres_notify(bt_data, 2);									// check if received ping exactly matches sent ping
+		} else {
+			printk("ping does not match\n");	
+			int8_t bt_data[1] = {-4};
+			bt_lres_notify(bt_data, 2);	
+		}
+	}
+
+	config.tx = true;
+	lora_config(lora_dev, &config);	
+}
+
+
+/////////////////////////////////
+////// for LoRa location ////////
+/////////////////////////////////
+
+#define STACK_SIZE2 2048
+#define TT_PRIORITY 5
+K_THREAD_STACK_DEFINE(stack_area3, STACK_SIZE3);
+
+struct k_thread thread_data3;
+
+// function for waiting for ping return on separate thread
+void wait_for_ping_return(void *a, void *b, void *c) {
+	
 		const struct device *lora_dev;
-		lora_dev = device_get_binding(DEFAULT_RADIO);
-		lora_send(lora_dev, ping, 5);						
-
-		config.tx = false;
-		lora_config(lora_dev, &config);						
+		lora_dev = device_get_binding(DEFAULT_RADIO);			
 			
-		char resp[5] = {0};
-		l = lora_recv(lora_dev, resp, MAX_DATA_LEN, K_SECONDS(3),	
+		char loc[20] = {0};
+		lora_recv(lora_dev, loc, MAX_DATA_LEN, K_FOREVER,	
 					&rssi, &snr);
 
-		if (l < 0) {
-			LOG_ERR("no response received");	
-		} else {
-			if(memcmp(ping, resp, 5 * sizeof(uint8_t)) == 0) {
-				printk("ping is okay\n");
-				int8_t bt_data[1] = {-3};
-				bt_lres_notify(bt_data, 2);									// check if received ping exactly matches sent ping
-			} else {
-				printk("ping does not match\n");	
-				int8_t bt_data[1] = {-4};
-				bt_lres_notify(bt_data, 2);	
-			}
-		}
-
-		config.tx = true;
-		lora_config(lora_dev, &config);	
+		bt_lres_notify(loc, 1);	
 }
 
 
@@ -422,7 +446,7 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 
 	uint8_t *pu = (uint8_t *) buf;
 	if(len == 5) {								// receive and change config (on connection)
-		change_config(pu, true);
+		change_config(pu, false);
 		int8_t bt_data[1] = {-2};
 		bt_lres_notify(bt_data, 2);
 		return 0;
@@ -442,6 +466,16 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 		experiment_data[i] = *pu;
 		pu++;
 	}
+
+	config.tx = true;
+
+	lora_dev = device_get_binding(DEFAULT_RADIO);
+	if (!lora_dev) {
+		LOG_ERR("%s Device not found", DEFAULT_RADIO);
+	}
+
+	int ret;
+	ret = lora_config(lora_dev, &config);
 
 	k_thread_create(&thread_data1, stack_area1,
 			K_THREAD_STACK_SIZEOF(stack_area1),
