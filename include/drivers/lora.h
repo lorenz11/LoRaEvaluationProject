@@ -94,6 +94,7 @@ struct lora_driver_api {
 	lora_api_send	send;
 	lora_api_recv	recv;
 	lora_api_test_cw test_cw;
+	lora_api_init init;
 };
 
 /**
@@ -112,6 +113,15 @@ static inline int lora_config(const struct device *dev,
 
 	return api->config(dev, config);
 }
+
+static inline int lora_init(const struct device *dev)
+{
+	const struct lora_driver_api *api =
+		(const struct lora_driver_api *)dev->api;
+
+	return api->init(dev);
+}
+
 
 /**
  * @brief Send data over LoRa
