@@ -79,6 +79,7 @@ void change_config(uint8_t* pu, bool tx) {
 	if (!lora_dev) {
 		LOG_ERR("%s Device not found", DEFAULT_RADIO);
 	}
+	lora_init(lora_dev);
 
 	int ret;
 	ret = lora_config(lora_dev, &config);

@@ -89,6 +89,14 @@ typedef int (*lora_api_recv)(const struct device *dev, uint8_t *data,
 typedef int (*lora_api_test_cw)(const struct device *dev, uint32_t frequency,
 				int8_t tx_power, uint16_t duration);
 
+/**
+ * @typedef lora_api_init()
+ * @brief Callback API for sending data over LoRa
+ *
+ * @see lora_init() for argument descriptions.
+ */
+typedef int (*lora_api_init)(const struct device *dev);
+
 struct lora_driver_api {
 	lora_api_config config;
 	lora_api_send	send;

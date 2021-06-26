@@ -1,4 +1,4 @@
-# Install script for directory: /home/lorenz/zephyrproject/zephyr/samples/drivers/lora/send
+# Install script for directory: /home/lorenz/zephyrproject/zephyr/samples/lora_eval_rcv
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
