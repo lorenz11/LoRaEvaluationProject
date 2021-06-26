@@ -644,6 +644,7 @@ static const struct lora_driver_api sx127x_lora_api = {
 	.send = sx12xx_lora_send,
 	.recv = sx12xx_lora_recv,
 	.test_cw = sx12xx_lora_test_cw,
+	.init = sx12xx_init,
 };
 
 DEVICE_DT_INST_DEFINE(0, &sx127x_lora_init, device_pm_control_nop, NULL,
