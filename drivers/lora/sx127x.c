@@ -465,13 +465,10 @@ void SX127xSetRfTxPower(int8_t power)
 		power = clamp_int8(power, 2, 20);
 
 		pa_config |= SX127X_PACONFIG_PASELECT_PABOOST;
-		printk("something here\n");
 		if (power > 17) {
-			printk("something here11111\n");
 			pa_dac |= SX127X_PADAC_20DBM_ON;
 			pa_config |= (power - 5) & SX127X_PACONFIG_OUTPUTPOWER_MASK;
 		} else {
-			printk("something here22222\n");
 			pa_dac |= SX127X_PADAC_20DBM_OFF;
 			pa_config |= (power - 2) & SX127X_PACONFIG_OUTPUTPOWER_MASK;
 		}

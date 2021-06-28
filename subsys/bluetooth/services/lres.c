@@ -115,12 +115,13 @@ void receive_lora(void *a, void *b, void *c) {
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 				&rssi, &snr);
 		
-		if(data[0] == '&') {
+		if(data[0] == '&') {		// this was a ping request
 			config.tx = true;
 			lora_config(lora_dev, &config);	
 			lora_send(lora_dev, data, len);
 			config.tx = false;
 			lora_config(lora_dev, &config);	
+			continue;
 		}
 		
 		uint8_t ndata[2] = {0};

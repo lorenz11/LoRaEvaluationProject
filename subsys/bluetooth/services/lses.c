@@ -109,7 +109,7 @@ K_THREAD_STACK_DEFINE(stack_area2, STACK_SIZE2);
 
 struct k_thread thread_data2;
 
-uint8_t ping_content[MAX_DATA_LEN];
+char ping_content[MAX_DATA_LEN];
 uint16_t ping_len;
 
 // function for waiting for ping return on separate thread
@@ -128,15 +128,18 @@ void wait_for_ping_return(void *a, void *b, void *c) {
 	l = lora_recv(lora_dev, resp, MAX_DATA_LEN, K_SECONDS(3),	
 				&rssi, &snr);
 
+	printk("content: %s\n", ping_content);
+	printk("resp %s\n", resp);
+
 	if (l < 0) {
 		LOG_ERR("no response received");	
 	} else {
 		if(memcmp(ping_content, resp, ping_len * sizeof(uint8_t)) == 0) {
 			printk("ping is okay\n");
-			bt_lres_notify(-3);									// check if received ping exactly matches sent ping
+			bt_lses_notify(-3);									// check if received ping exactly matches sent ping
 		} else {
 			printk("ping does not match\n");	
-			bt_lres_notify(bt_data, -4);	
+			bt_lses_notify(-4);	
 		}
 	}
 
@@ -152,7 +155,7 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
 	// extract LoRa message
-	char data[len];
+	char data[len + 1];
 	char *pc = (char *) buf;
 	bool isPing = false;
 	if(*pc == '&') {
@@ -160,6 +163,7 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	}
 	for(uint16_t i = 0; i < len; i++) {
 		data[i] = *pc;
+		ping_content[i] = *pc;
 		pc++;
 	}
 	data[len] = '.';
@@ -171,15 +175,11 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	// send message
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 
-	ret = lora_send(lora_dev, data, MAX_DATA_LEN);
+	ret = lora_send(lora_dev, data, len + 1);
 
 	if(isPing) {
 		ping_len = len;
-		for(int16_t i = 0; i < len; i++) {
-			ping_content[i] = *pu;
-			pu++;
-		}
-
+	
 		k_thread_create(&thread_data2, stack_area2,
 				K_THREAD_STACK_SIZEOF(stack_area2),
 				wait_for_ping_return,
