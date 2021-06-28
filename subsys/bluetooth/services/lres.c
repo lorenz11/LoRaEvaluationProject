@@ -115,6 +115,14 @@ void receive_lora(void *a, void *b, void *c) {
 		len = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 				&rssi, &snr);
 		
+		if(data[0] == '&') {
+			config.tx = true;
+			lora_config(lora_dev, &config);	
+			lora_send(lora_dev, data, len);
+			config.tx = false;
+			lora_config(lora_dev, &config);	
+		}
+		
 		uint8_t ndata[2] = {0};
 		rssi = (uint8_t) -rssi; // negated to fit into an unsigned int (original value is negative)
 		ndata[0] = rssi;

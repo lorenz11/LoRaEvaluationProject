@@ -103,6 +103,49 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 
 
 
+#define STACK_SIZE2 2048
+#define TT_PRIORITY 5
+K_THREAD_STACK_DEFINE(stack_area2, STACK_SIZE2);
+
+struct k_thread thread_data2;
+
+uint8_t ping_content[MAX_DATA_LEN];
+uint16_t ping_len;
+
+// function for waiting for ping return on separate thread
+void wait_for_ping_return(void *a, void *b, void *c) {
+	int16_t rssi;
+	int8_t snr;
+	int l = -1;
+
+	const struct device *lora_dev;
+	lora_dev = device_get_binding(DEFAULT_RADIO);				
+
+	config.tx = false;
+	lora_config(lora_dev, &config);						
+		
+	char resp[MAX_DATA_LEN] = {0};
+	l = lora_recv(lora_dev, resp, MAX_DATA_LEN, K_SECONDS(3),	
+				&rssi, &snr);
+
+	if (l < 0) {
+		LOG_ERR("no response received");	
+	} else {
+		if(memcmp(ping_content, resp, ping_len * sizeof(uint8_t)) == 0) {
+			printk("ping is okay\n");
+			bt_lres_notify(-3);									// check if received ping exactly matches sent ping
+		} else {
+			printk("ping does not match\n");	
+			bt_lres_notify(bt_data, -4);	
+		}
+	}
+
+	config.tx = true;
+	lora_config(lora_dev, &config);	
+}
+
+
+
 
 // gets a byte array containing the msg a LoRa transmission is supposed to contain for explore mode
 static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
@@ -111,6 +154,10 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	// extract LoRa message
 	char data[len];
 	char *pc = (char *) buf;
+	bool isPing = false;
+	if(*pc == '&') {
+		isPing = true;
+	}
 	for(uint16_t i = 0; i < len; i++) {
 		data[i] = *pc;
 		pc++;
@@ -125,6 +172,20 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 
 	ret = lora_send(lora_dev, data, MAX_DATA_LEN);
+
+	if(isPing) {
+		ping_len = len;
+		for(int16_t i = 0; i < len; i++) {
+			ping_content[i] = *pu;
+			pu++;
+		}
+
+		k_thread_create(&thread_data2, stack_area2,
+				K_THREAD_STACK_SIZEOF(stack_area2),
+				wait_for_ping_return,
+				NULL, NULL, NULL,
+				TT_PRIORITY, 0, K_NO_WAIT);
+	}
 	
 	return 0;
 }
