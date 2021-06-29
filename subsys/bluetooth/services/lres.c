@@ -70,7 +70,7 @@ void change_config(uint8_t* pu, bool tx) {
 	printk("cr data %d\n", *pu);
 	pu++;
 
-	config.tx_power = *pu + 5;
+	config.tx_power = *pu + 18;
 	printk("pw data %d\n", *pu);
 
 	config.tx = tx;
@@ -234,7 +234,8 @@ void exec_experiment(void *a, void *b, void *c) {
 			delay[i-9] = exp_data[i];
 		}
 	}
-	uint16_t d = atoi(delay); 
+	uint16_t d = atoi(delay);
+	printk("delay before loop: %d\n", d); 
 
 
 	
@@ -281,7 +282,7 @@ void exec_experiment(void *a, void *b, void *c) {
 					}
 					for(uint8_t p = 0; p < 8; p++) {
 						if(((exp_data[8] >> p)  & 0x01) == 1) {
-							config.tx_power =  p + 5;
+							config.tx_power =  p + 18;
 							compare_data[4] = (char) p + 48;
 							printk("power: %d\n", p+1);
 							ret = lora_config(lora_dev, &config);
@@ -289,17 +290,25 @@ void exec_experiment(void *a, void *b, void *c) {
 							int64_t time_stamp;
 							int64_t milliseconds_spent = 0;
 							time_stamp = k_uptime_get();
+							printk("expdata[0]: %d\n", exp_data[0]);
+							printk("expdata[0]: %d\n", exp_data[1]);
 							int64_t iteration_time = exp_data[0] * exp_data[1] * 1000;					// exp_data[0] * exp_data[1] = # LoRa transmissions * time between transmissions
 							
+							printk("iteration time before adding delay/pause:::::::::: %lld\n", iteration_time);
+
+
+							printk("delay in loop: %d\n", d); 
 							if(first_iteration) {
 								iteration_time += 1000 * d;												// count down delay as part of the LoRa receive timing
 								first_iteration = false;
 							} else {
 								iteration_time += 5000;													// delay between iterations as part of the LoRa receive timing
 							}
+							printk("iteration time after adding delay/pause:::::::::: %lld\n", iteration_time);
 
 							uint8_t last_data_8 = 0;
-							while(iteration_time > 0) {													// exp_data[0] contains the number of LoRa transmissions per parameter combination
+							while(iteration_time > 0) {	
+								printk("iteration time:::::::::: %lld\n", iteration_time);												// exp_data[0] contains the number of LoRa transmissions per parameter combination
 								l = lora_recv(lora_dev, transmission_data, MAX_TRANSM_LEN, K_MSEC(iteration_time),
 										&rssi, &snr);
 								

@@ -67,7 +67,7 @@ void change_config(uint8_t* pu, bool tx) {
 	printk("cr data %d\n", *pu);
 	pu++;
 
-	config.tx_power = *pu + 5;
+	config.tx_power = *pu + 18;
 	printk("pw data %d\n", *pu);
 
 	config.tx = tx;
@@ -390,7 +390,7 @@ void exec_experiment(void *a, void *b, void *c) {
 					}
 					for(uint8_t m = 0; m < 8; m++) {
 						if(((data[8] >> m)  & 0x01) == 1) {
-							config.tx_power =  m + 1;
+							config.tx_power =  m + 18;
 							transmission_data[4] = (char) m + 48;
 							
 							ret = lora_config(lora_dev, &config);
@@ -401,6 +401,11 @@ void exec_experiment(void *a, void *b, void *c) {
 								transmission_data[8] = (char) n % 10 + 48;
 
 								for(uint8_t p = 9; p < (data[2] - 1); p++) {								// data[2] contains message length (length of the transmitted content)
+									if(n == 8 || n == 9) {
+										int x = (n * (data[2] - 9) + (p - 9)) % 200;
+										printk("x %d\n", x);
+										printk("r %d\n", random_d[x]);
+									}
 									transmission_data[p] = random_d[(n * (data[2] - 9) + (p - 9)) % 200];	// fills the message up with with random payload data until desired message length
 								}														
 								transmission_data[data[2] - 1] = '.';
