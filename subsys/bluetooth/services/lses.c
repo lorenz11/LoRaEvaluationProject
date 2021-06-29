@@ -290,7 +290,7 @@ k_tid_t thread1_tid;
 					161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,
 					188,189,190,191,192,193,194,195,196,197,198,199};*/
 
-uint8_t random_d [200];					
+uint8_t random_d [200] = {0};					
 
 // experiment send thread code
 void exec_experiment(void *a, void *b, void *c) {
@@ -441,17 +441,30 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
 	char *pc = (char *) buf;
+	printk("in cb\n");
 	if(len == 20) {
-		random_d[payload_index] = *pc;
-		payload_index++;
-		pc++;
-		return;
+		//uint8_t segment [20] = buf;
+		printk("in len = 20  pi: %d\n", payload_index);
+		for(uint8_t i = 0; i < 20;i++) {
+			random_d[payload_index] = *pc;
+			printk("x: %d", *pc);
+			payload_index++;
+			pc++;
+		}
+		//memcpy(&random_d[payload_index], buf, 20 * sizeof(uint8_t));
+		//payload_index += 20;
+		return 0;
+
 	}
 	payload_index = 0;
-	for(int16_t i = 0; i < 200; i++) {
+	for(int16_t i = 0; i < 5; i++) {
+		printk(", %d", random_d[i]);
+	}
+	for(int16_t i = 190; i < 196; i++) {
 		printk(", %d", random_d[i]);
 	}
 
+	
 	const struct device *lora_dev;
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 
