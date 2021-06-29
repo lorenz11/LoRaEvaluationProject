@@ -440,19 +440,18 @@ uint16_t payload_index = 0;
 static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
-	char *pc = (char *) buf;
 	printk("in cb\n");
 	if(len == 20) {
 		//uint8_t segment [20] = buf;
 		printk("in len = 20  pi: %d\n", payload_index);
-		for(uint8_t i = 0; i < 20;i++) {
+		/*for(uint8_t i = 0; i < 20;i++) {
 			random_d[payload_index] = *pc;
 			printk("x: %d", *pc);
 			payload_index++;
 			pc++;
-		}
-		//memcpy(&random_d[payload_index], buf, 20 * sizeof(uint8_t));
-		//payload_index += 20;
+		}*/
+		memcpy(&random_d[payload_index], buf, 20 * sizeof(uint8_t));
+		payload_index += 20;
 		return 0;
 
 	}
@@ -460,11 +459,17 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 	for(int16_t i = 0; i < 5; i++) {
 		printk(", %d", random_d[i]);
 	}
-	for(int16_t i = 190; i < 196; i++) {
+
+	for(int16_t i = 100; i < 106; i++) {
 		printk(", %d", random_d[i]);
 	}
 
-	
+	for(int16_t i = 195; i < 200; i++) {
+		printk(", %d", random_d[i]);
+		random_d[i] = 0;
+	}
+
+	char *pc = (char *) buf;
 	const struct device *lora_dev;
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 
