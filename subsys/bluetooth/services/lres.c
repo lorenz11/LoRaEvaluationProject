@@ -125,8 +125,11 @@ void receive_lora(void *a, void *b, void *c) {
 		}
 		
 		uint8_t ndata[2] = {0};
+		printk("before negation: %d\n", rssi);
 		rssi = (uint8_t) -rssi; // negated to fit into an unsigned int (original value is negative)
+		printk("after negation: %d\n", rssi);
 		ndata[0] = rssi;
+		printk("after + negation: %d\n", ndata[0]);
 		ndata[1] = snr;
 
 		// notfiy phone with sent LoRa message and other data
@@ -228,9 +231,12 @@ void exec_experiment(void *a, void *b, void *c) {
 
 
 	// get experiment start delay
-	char delay[5];													
+	printk("len copied to exp_data_length in thread code: %d\n", exp_data_length);
+	char delay[5];	
+	printk("l before loop: %d\n", l);													
 	for(int16_t i = 0; i < l; i++) {
-		if(i > 8) {			
+		if(i > 8) {		
+			printk("at delay gen: %d\n", exp_data[i]);	
 			delay[i-9] = exp_data[i];
 		}
 	}
@@ -291,7 +297,7 @@ void exec_experiment(void *a, void *b, void *c) {
 							int64_t milliseconds_spent = 0;
 							time_stamp = k_uptime_get();
 							printk("expdata[0]: %d\n", exp_data[0]);
-							printk("expdata[0]: %d\n", exp_data[1]);
+							printk("expdata[1]: %d\n", exp_data[1]);
 							int64_t iteration_time = exp_data[0] * exp_data[1] * 1000;					// exp_data[0] * exp_data[1] = # LoRa transmissions * time between transmissions
 							
 							printk("iteration time before adding delay/pause:::::::::: %lld\n", iteration_time);
@@ -463,6 +469,7 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 		experiment_data[i] = *pu;
 		pu++;
 	}
+	printk("len at bt cb: %d\n", len);
 
 	k_thread_create(&thread_data1, stack_area1,
 			K_THREAD_STACK_SIZEOF(stack_area1),

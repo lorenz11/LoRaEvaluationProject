@@ -320,6 +320,7 @@ void exec_experiment(void *a, void *b, void *c) {
 		int ret;
 
 
+		printk("l is: %d\n", l);
 		char delay[l-9];
 		for(int16_t i = 0; i < l; i++) {
 			if(i > 8) {														// get experiment start delay
@@ -327,6 +328,7 @@ void exec_experiment(void *a, void *b, void *c) {
 			}
 		}
 		uint16_t d = atoi(delay); 
+		printk("delay at sender: %d\n", d);
 
 
 		config.tx = true;
