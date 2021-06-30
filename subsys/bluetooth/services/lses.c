@@ -67,7 +67,7 @@ void change_config(uint8_t* pu, bool tx) {
 	printk("cr data %d\n", *pu);
 	pu++;
 
-	config.tx_power = *pu + 18;
+	config.tx_power = 18 - (*pu * 2);
 	printk("pw data %d\n", *pu);
 
 	config.tx = tx;
@@ -390,7 +390,7 @@ void exec_experiment(void *a, void *b, void *c) {
 					}
 					for(uint8_t m = 0; m < 8; m++) {
 						if(((data[8] >> m)  & 0x01) == 1) {
-							config.tx_power =  m + 18;
+							config.tx_power =  18 - (m * 2);
 							transmission_data[4] = (char) m + 48;
 							
 							ret = lora_config(lora_dev, &config);
