@@ -79,7 +79,7 @@ void change_config(uint8_t* pu, bool tx) {
 	if (!lora_dev) {
 		LOG_ERR("%s Device not found", DEFAULT_RADIO);
 	}
-	lora_init(lora_dev);
+	//lora_init(lora_dev);
 
 	int ret;
 	ret = lora_config(lora_dev, &config);
@@ -138,17 +138,20 @@ void receive_lora(void *a, void *b, void *c) {
 	}
 }
 
+bool reconnect = false;
 // gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic) and starts receiving thread
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
+	if(reconnect) {			// reconnection after loosing connection in experiment
+		return 0;
+	}
 	if(thread0_tid != NULL) {
 		k_thread_abort(thread0_tid);
 	}
 
 	uint8_t *pu = (uint8_t *) buf;		
 	change_config(pu, false);
-	printk("frequency value after change config: %d\n", config.frequency);
 
 	int8_t bt_data[1] = {-2};
 	bt_lres_notify(bt_data, 2);
@@ -367,6 +370,7 @@ void exec_experiment(void *a, void *b, void *c) {
 			}
 		}
 	}
+	reconnect = false;
 	printk("end of experiment...........\n");
 
 	return;
@@ -432,6 +436,8 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 
 	uint8_t *pu = (uint8_t *) buf;
 	if(len == 5) {								// receive and change config (on connection)
+		printk("sth here.............................\n");
+		reconnect = true;
 		change_config(pu, true);
 		int8_t bt_data[1] = {-2};
 		bt_lres_notify(bt_data, 2);
