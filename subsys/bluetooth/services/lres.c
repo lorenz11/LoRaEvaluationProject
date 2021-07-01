@@ -125,11 +125,8 @@ void receive_lora(void *a, void *b, void *c) {
 		}
 		
 		uint8_t ndata[2] = {0};
-		printk("before negation: %d\n", rssi);
 		rssi = (uint8_t) -rssi; // negated to fit into an unsigned int (original value is negative)
-		printk("after negation: %d\n", rssi);
 		ndata[0] = rssi;
-		printk("after + negation: %d\n", ndata[0]);
 		ndata[1] = snr;
 
 		// notfiy phone with sent LoRa message and other data
@@ -174,7 +171,14 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 /////////////////////////
 ////// for experiment ///
 /////////////////////////
-uint8_t random_d [200] = {0};	// random payload data
+uint8_t random_d [200] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,
+					37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,
+					73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,
+					107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,
+					134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,
+					161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,
+					188,189,190,191,192,193,194,195,196,197,198,199};
+
 
 K_THREAD_STACK_DEFINE(stack_area1, STACK_SIZE);
 
@@ -231,17 +235,13 @@ void exec_experiment(void *a, void *b, void *c) {
 
 
 	// get experiment start delay
-	printk("len copied to exp_data_length in thread code: %d\n", exp_data_length);
-	char delay[5];	
-	printk("l before loop: %d\n", l);													
+	char delay[5];													
 	for(int16_t i = 0; i < l; i++) {
-		if(i > 8) {		
-			printk("at delay gen: %d\n", exp_data[i]);	
+		if(i > 8) {			
 			delay[i-9] = exp_data[i];
 		}
 	}
-	uint16_t d = atoi(delay);
-	printk("delay before loop: %d\n", d); 
+	uint16_t d = atoi(delay); 
 
 
 	
@@ -296,25 +296,17 @@ void exec_experiment(void *a, void *b, void *c) {
 							int64_t time_stamp;
 							int64_t milliseconds_spent = 0;
 							time_stamp = k_uptime_get();
-							printk("expdata[0]: %d\n", exp_data[0]);
-							printk("expdata[1]: %d\n", exp_data[1]);
 							int64_t iteration_time = exp_data[0] * exp_data[1] * 1000;					// exp_data[0] * exp_data[1] = # LoRa transmissions * time between transmissions
 							
-							printk("iteration time before adding delay/pause:::::::::: %lld\n", iteration_time);
-
-
-							printk("delay in loop: %d\n", d); 
 							if(first_iteration) {
 								iteration_time += 1000 * d;												// count down delay as part of the LoRa receive timing
 								first_iteration = false;
 							} else {
 								iteration_time += 5000;													// delay between iterations as part of the LoRa receive timing
 							}
-							printk("iteration time after adding delay/pause:::::::::: %lld\n", iteration_time);
 
 							uint8_t last_data_8 = 0;
-							while(iteration_time > 0) {	
-								printk("iteration time:::::::::: %lld\n", iteration_time);												// exp_data[0] contains the number of LoRa transmissions per parameter combination
+							while(iteration_time > 0) {													// exp_data[0] contains the number of LoRa transmissions per parameter combination
 								l = lora_recv(lora_dev, transmission_data, MAX_TRANSM_LEN, K_MSEC(iteration_time),
 										&rssi, &snr);
 								
@@ -427,22 +419,13 @@ void wait_for_ping_return(void *a, void *b, void *c) {
 		lora_config(lora_dev, &config);	
 }
 
-uint16_t payload_index = 0;
+
 // receives and changes the initial lora config for pre experiment lora communication OR
 // receives the experiment settings via BLE and starts the receiving side of the experiment on a new thread OR
 // receives a ping command and pings the sender device
 static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
-
-	if(len == 20) {
-		printk("in len = 20  pi: %d\n", payload_index);
-		memcpy(&random_d[payload_index], buf, 20 * sizeof(uint8_t));
-		payload_index += 20;
-		return 0;
-	}
-	payload_index = 0;
-
 	if(thread0_tid != NULL) {
 		k_thread_abort(thread0_tid);			// if still receiving on an explore mode thread, cancel this thread
 	}
@@ -469,7 +452,6 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 		experiment_data[i] = *pu;
 		pu++;
 	}
-	printk("len at bt cb: %d\n", len);
 
 	k_thread_create(&thread_data1, stack_area1,
 			K_THREAD_STACK_SIZEOF(stack_area1),
