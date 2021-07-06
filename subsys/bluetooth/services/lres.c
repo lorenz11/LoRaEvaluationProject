@@ -145,9 +145,6 @@ bool reconnect = false;
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
-	if(reconnect) {			// reconnection after loosing connection in experiment
-		return 0;
-	}
 	if(thread0_tid != NULL) {
 		k_thread_abort(thread0_tid);
 	}
@@ -439,9 +436,10 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 
 	uint8_t *pu = (uint8_t *) buf;
 	if(len == 5) {								// receive and change config (on connection)
-		printk("sth here.............................\n");
+		if(!reconnect) {						// in case of a pre experiment communication over 10 dBm
+			change_config(pu, true);
+		}
 		reconnect = true;
-		change_config(pu, true);
 		int8_t bt_data[1] = {-2};
 		bt_lres_notify(bt_data, 2);
 		return 0;
@@ -534,8 +532,8 @@ int bt_lres_notify(const void *data, uint8_t type_of_notification)
 	return rc == -ENOTCONN ? 0 : rc;
 }
 
-void set_connected(bool bt_lses_conn) {
-	bt_lres_connected = bt_lses_conn;
+void set_connected(bool bt_lres_conn) {
+	bt_lres_connected = bt_lres_conn;
 }
 
 SYS_INIT(lres_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
