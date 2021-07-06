@@ -35,6 +35,20 @@ static uint8_t lses_blsc;
 static struct lora_modem_config config;
 int frequencies[8] =  {869500000 ,868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000};
 
+static void connected(struct bt_conn *conn, uint8_t err)
+{
+	if (err) {
+		printk("Connection failed (err 0x%02x)\n", err);
+	} else {
+		printk("Connnnnnnnnwwected\n");
+	}
+}
+
+// triggered when disconnected from phone
+static void disconnected(struct bt_conn *conn, uint8_t reason)
+{
+	printk("Disconnected (reason 0x%02x)\n", reason);
+}
 
 // when descriptor changed at phone (for enableing notifications)
 static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)

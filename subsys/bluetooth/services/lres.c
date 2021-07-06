@@ -222,7 +222,7 @@ void exec_experiment(void *a, void *b, void *c) {
 		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(2),	// wait for ACK
 					&rssi, &snr);
 		if (l < 0) {
-			LOG_ERR("no ACK received");	
+			LOG_ERR("no ACK received.");	
 			int8_t bt_data[1] = {-5};
 			bt_lres_notify(bt_data, 2);	
 		} else {
@@ -240,7 +240,8 @@ void exec_experiment(void *a, void *b, void *c) {
 	// get experiment start delay
 	char delay[5];													
 	for(int16_t i = 0; i < l; i++) {
-		if(i > 8) {			
+		if(i > 8) {
+			printk("delay index%c\n", delay[i - 9]);		
 			delay[i-9] = exp_data[i];
 		}
 	}
@@ -455,9 +456,11 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 
 	exp_data_length = len;						// start experiment
 	for(int16_t i = 0; i < len; i++) {
+		printk("exp data index%c\n", *pu);
 		experiment_data[i] = *pu;
 		pu++;
 	}
+	
 
 	k_thread_create(&thread_data1, stack_area1,
 			K_THREAD_STACK_SIZEOF(stack_area1),
