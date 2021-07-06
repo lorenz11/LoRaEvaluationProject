@@ -24,13 +24,11 @@ extern "C" {
  *
  *  @return Zero in case of success and error code in case of error.
  */
-int bt_lses_notify_obs(uint16_t commstat);
+int set_connected(bool connected);
 
 #ifdef __cplusplus
 }
 #endif
-
-bool bt_lses_connectedddd;
 
 /**
  * @}

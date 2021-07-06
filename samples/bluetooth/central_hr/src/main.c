@@ -244,7 +244,6 @@ static struct bt_conn_cb conn_callbacks = {
 
 void main(void)
 {
-	printk("helloohhhhooo");
 	int err;
 	err = bt_enable(NULL);
 
