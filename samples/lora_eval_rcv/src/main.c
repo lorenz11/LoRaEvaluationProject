@@ -52,7 +52,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
 	if (err) {
 		printk("Connection failed (err 0x%02x)\n", err);
 	} else {
-		connected = true;
+		bt_lses_connected = true;
 		printk("Connected\n");
 	}
 }
@@ -60,7 +60,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
 // triggered when disconnected from phone
 static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
-	connected = false;
+	bt_lses_connected = false;
 	printk("Disconnected (reason 0x%02x)\n", reason);
 }
 

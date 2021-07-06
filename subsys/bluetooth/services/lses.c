@@ -64,7 +64,7 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 }
 
 void change_config(uint8_t* pu, bool tx) {
-	if(connected) {
+	if(bt_lses_connected) {
 		printk("connection visible in lses!!!\n");
 	}
 	const struct device *lora_dev;
