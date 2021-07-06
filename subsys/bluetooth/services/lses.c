@@ -19,8 +19,6 @@
 #include <bluetooth/uuid.h>
 #include <bluetooth/gatt.h>
 
-#include <bluetooth/services/lses.h>
-
 #define MAX_DATA_LEN 20
 
 #define LOG_LEVEL CONFIG_BT_LSES_LOG_LEVEL
@@ -64,7 +62,7 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 }
 
 void change_config(uint8_t* pu, bool tx) {
-	if(bt_lses_connected) {
+	if(bt_lses_connectedddd) {
 		printk("connection visible in lses!!!\n");
 	}
 	const struct device *lora_dev;
