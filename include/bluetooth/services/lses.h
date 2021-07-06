@@ -30,6 +30,8 @@ int bt_lses_notify(uint16_t commstat);
 }
 #endif
 
+bool connected;
+
 /**
  * @}
  */
