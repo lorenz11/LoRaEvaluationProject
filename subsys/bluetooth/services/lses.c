@@ -132,8 +132,18 @@ void wait_for_ping_return(void *a, void *b, void *c) {
 	l = lora_recv(lora_dev, resp, MAX_DATA_LEN, K_SECONDS(3),	
 				&rssi, &snr);
 
+	if(config.tx_power > 10) {
+		k_sleep(K_MSEC(5000));
+		while(!bt_lses_connected) {
+			printk("waiting 300 ms\n");
+			k_sleep(K_MSEC(300));
+		}
+		k_sleep(K_MSEC(5000));
+	}
+
 	if (l < 0) {
-		LOG_ERR("no response received");	
+		LOG_ERR("no response received");
+		bt_lses_notify(-5);	
 	} else {
 		if(memcmp(ping_content, resp, ping_len * sizeof(uint8_t))) {
 			printk("ping is okay\n");
