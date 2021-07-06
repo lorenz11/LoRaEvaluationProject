@@ -246,6 +246,12 @@ void exec_experiment(void *a, void *b, void *c) {
 	}
 	uint16_t d = atoi(delay); 
 
+	if(config.tx_power > 10) {									// wait for reconnection after disconnect when sending with over 10 dbm
+		d -= 14;
+		k_sleep(K_MSEC(14000));
+		bt_lres_notify(bt_data, 2);
+	}
+
 
 	
 	// start experiment as receiver
