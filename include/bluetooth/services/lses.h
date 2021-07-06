@@ -18,13 +18,13 @@ extern "C" {
 
 /** @brief Notify LoRa communication events.
  *
- * This will send a GATT notification to all current subscribers.
+ * This sets a global indicator for the ble connection
  *
- *  @param commstat indicator for successful send/receive.
+ *  @param connected indicator.
  *
  *  @return Zero in case of success and error code in case of error.
  */
-int set_connected(bool connected);
+void set_connected(bool connected);
 
 #ifdef __cplusplus
 }
