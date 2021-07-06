@@ -16,15 +16,13 @@
 extern "C" {
 #endif
 
-/** @brief Notify LoRa communication events.
+/** @brief Set a global indicator for the ble connection
  *
- * This will send a GATT notification to all current subscribers.
+ * This sets a global indicator for the ble connection
  *
- *  @param data indicator for successful send/receive.
- *
- *  @return Zero in case of success and error code in case of error.
+ *  @param connected indicator.
  */
-int bt_lres_notify(const void *data, uint8_t type_of_notification);
+void set_connected(bool connected);
 
 #ifdef __cplusplus
 }

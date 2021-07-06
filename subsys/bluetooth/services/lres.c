@@ -35,6 +35,8 @@ static uint8_t lres_blsc;
 static struct lora_modem_config config;
 int frequencies[8] =  {869500000 ,868100000, 868300000, 868500000, 867100000, 867300000, 867500000, 867700000};
 
+bool bt_lres_connected;
+
 // when descriptor changed at phone (for enableing notifications)
 static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 {
@@ -530,6 +532,10 @@ int bt_lres_notify(const void *data, uint8_t type_of_notification)
 	
 
 	return rc == -ENOTCONN ? 0 : rc;
+}
+
+void set_connected(bool bt_lses_conn) {
+	bt_lres_connected = bt_lses_conn;
 }
 
 SYS_INIT(lres_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);

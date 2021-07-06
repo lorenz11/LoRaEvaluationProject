@@ -16,13 +16,11 @@
 extern "C" {
 #endif
 
-/** @brief Notify LoRa communication events.
+/** @brief Set a global indicator for the ble connection
  *
  * This sets a global indicator for the ble connection
  *
  *  @param connected indicator.
- *
- *  @return Zero in case of success and error code in case of error.
  */
 void set_connected(bool connected);
 
