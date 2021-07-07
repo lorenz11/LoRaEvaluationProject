@@ -415,16 +415,17 @@ void wait_for_ping_return(void *a, void *b, void *c) {
 
 	if(config.tx_power > 10) {
 		k_sleep(K_MSEC(5000));
-		while(!bt_lses_connected) {
+		while(!bt_lres_connected) {
 			printk("waiting 300 ms\n");
 			k_sleep(K_MSEC(300));
 		}
 		k_sleep(K_MSEC(5000));
 	}
 
-
 	if (l < 0) {
 		LOG_ERR("no response received");	
+		int8_t bt_data[1] = {-7};
+			bt_lres_notify(bt_data, 2);	
 	} else {
 		if(memcmp(ping, resp, 5 * sizeof(uint8_t)) == 0) {
 			printk("ping is okay\n");
