@@ -126,7 +126,7 @@ void receive_lora(void *a, void *b, void *c) {
 			continue;
 		}
 		
-		uint8_t ndata[2] = {0};
+		uint8_t ndata[3] = {0};
 		rssi = (uint8_t) -rssi; // negated to fit into an unsigned int (original value is negative)
 		ndata[0] = rssi;
 		ndata[1] = snr;
@@ -174,7 +174,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 /////////////////////////
 ////// for experiment ///
 /////////////////////////
-uint8_t random_d [200] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,
+uint8_t random_d [200] = {0,1,2,3,4,55,6,57,8,9,101,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,
 					37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,
 					73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,
 					107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,
@@ -340,7 +340,7 @@ void exec_experiment(void *a, void *b, void *c) {
 									compare_data[exp_data[2] - 1] = '.';
 
 									bool same_content = true;
-									uint8_t bit_error_count;
+									uint8_t bit_error_count = 0;
 									for(int z = 0; z < exp_data[2]; z++) {
 										if(compare_data[z] != transmission_data[z]) {
 											same_content = false;
@@ -349,11 +349,11 @@ void exec_experiment(void *a, void *b, void *c) {
 									}
 
 
-									uint8_t ndata[2] = {0};
+									uint8_t ndata[3] = {0};
 									rssi = (uint8_t) -rssi; 											// negated to fit into an unsigned int (original value is negative)
 									ndata[0] = rssi;
 									ndata[1] = snr;
-									ndata[2] = bit_error_count
+									ndata[2] = bit_error_count;
 
 									bt_lres_notify(ndata, 0);
 									if(same_content) {
