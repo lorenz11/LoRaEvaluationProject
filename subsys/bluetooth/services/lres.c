@@ -130,6 +130,7 @@ void receive_lora(void *a, void *b, void *c) {
 		rssi = (uint8_t) -rssi; // negated to fit into an unsigned int (original value is negative)
 		ndata[0] = rssi;
 		ndata[1] = snr;
+		ndata[2] = -1; 			// array index for bit errors in experiments (probably unnecessary to assign)
 
 		// notfiy phone with sent LoRa message and other data
 		bt_lres_notify(ndata, 0);
@@ -352,6 +353,7 @@ void exec_experiment(void *a, void *b, void *c) {
 									rssi = (uint8_t) -rssi; 											// negated to fit into an unsigned int (original value is negative)
 									ndata[0] = rssi;
 									ndata[1] = snr;
+									ndata[2] = bit_error_count
 
 									bt_lres_notify(ndata, 0);
 									if(same_content) {
@@ -517,16 +519,18 @@ int bt_lres_notify(const void *data, uint8_t type_of_notification)
 {
 	int rc;
 
-	if(type_of_notification == 0) {		// RSSI/SNR notification
+	if(type_of_notification == 0) {		// RSSI/SNR notification + number of bit errors in experiment
 		uint8_t *pu = (uint8_t *) data;
 
-		static uint8_t stats[3];
+		static uint8_t stats[4];
 
 		// put -1 at index 0 to distinguish from msg notification
 		stats[0] = -1;
 		stats[1] = *pu;
 		pu++;
 		stats[2] = *pu;
+		pu++;
+		stats[3] = *pu;
 
 		rc = bt_gatt_notify(NULL, &lres_svc.attrs[1], &stats, sizeof(stats));
 	} else if(type_of_notification == 1){							// msg notification
