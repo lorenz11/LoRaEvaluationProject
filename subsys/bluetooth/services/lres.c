@@ -397,37 +397,47 @@ struct k_thread thread_data2;
 // function for waiting for ping return on separate thread
 void wait_for_ping_return(void *a, void *b, void *c) {
 	int16_t rssi;
-		int8_t snr;
-		int l = -1;
-		char ping[5] = {'!', 'p', 'i', 'n', 'g'};
+	int8_t snr;
+	int l = -1;
+	char ping[5] = {'!', 'p', 'i', 'n', 'g'};
 
-		const struct device *lora_dev;
-		lora_dev = device_get_binding(DEFAULT_RADIO);
-		lora_send(lora_dev, ping, 5);						
+	const struct device *lora_dev;
+	lora_dev = device_get_binding(DEFAULT_RADIO);
+	lora_send(lora_dev, ping, 5);						
 
-		config.tx = false;
-		lora_config(lora_dev, &config);						
-			
-		char resp[5] = {0};
-		l = lora_recv(lora_dev, resp, MAX_DATA_LEN, K_SECONDS(3),	
-					&rssi, &snr);
+	config.tx = false;
+	lora_config(lora_dev, &config);						
+		
+	char resp[5] = {0};
+	l = lora_recv(lora_dev, resp, MAX_DATA_LEN, K_SECONDS(3),	
+				&rssi, &snr);
 
-		if (l < 0) {
-			LOG_ERR("no response received");	
-		} else {
-			if(memcmp(ping, resp, 5 * sizeof(uint8_t)) == 0) {
-				printk("ping is okay\n");
-				int8_t bt_data[1] = {-3};
-				bt_lres_notify(bt_data, 2);									// check if received ping exactly matches sent ping
-			} else {
-				printk("ping does not match\n");	
-				int8_t bt_data[1] = {-4};
-				bt_lres_notify(bt_data, 2);	
-			}
+	if(config.tx_power > 10) {
+		k_sleep(K_MSEC(5000));
+		while(!bt_lses_connected) {
+			printk("waiting 300 ms\n");
+			k_sleep(K_MSEC(300));
 		}
+		k_sleep(K_MSEC(5000));
+	}
 
-		config.tx = true;
-		lora_config(lora_dev, &config);	
+
+	if (l < 0) {
+		LOG_ERR("no response received");	
+	} else {
+		if(memcmp(ping, resp, 5 * sizeof(uint8_t)) == 0) {
+			printk("ping is okay\n");
+			int8_t bt_data[1] = {-3};
+			bt_lres_notify(bt_data, 2);									// check if received ping exactly matches sent ping
+		} else {
+			printk("ping does not match\n");	
+			int8_t bt_data[1] = {-4};
+			bt_lres_notify(bt_data, 2);	
+		}
+	}
+
+	config.tx = true;
+	lora_config(lora_dev, &config);	
 }
 
 

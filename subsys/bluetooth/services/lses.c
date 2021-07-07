@@ -145,7 +145,7 @@ void wait_for_ping_return(void *a, void *b, void *c) {
 		LOG_ERR("no response received");
 		bt_lses_notify(-5);	
 	} else {
-		if(memcmp(ping_content, resp, ping_len * sizeof(uint8_t))) {
+		if(memcmp(ping_content, resp, ping_len * sizeof(uint8_t)) == 0) {
 			printk("ping is okay\n");
 			bt_lses_notify(-3);									// check if received ping exactly matches sent ping
 		} else {
