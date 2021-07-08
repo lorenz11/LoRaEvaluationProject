@@ -419,7 +419,11 @@ void exec_experiment(void *a, void *b, void *c) {
 							
 							ret = lora_config(lora_dev, &config);
 							
+							int64_t time_stamp;
+							int64_t milliseconds_spent = 0;
 							for(uint8_t n = 0; n < data[0]; n++) {											// data[0] contains the number of LoRa transmissions per parameter combination
+								time_stamp = k_uptime_get();
+
 								transmission_data[6] = (char) n / 100 + 48;									// include numbering into transmission content (as String (3 bytes) not as byte (1 byte))
 								transmission_data[7] = (char) n / 10 + 48;									// this line needs to be changed if max number of transmissions per combination is changed (it is 100 now)
 								transmission_data[8] = (char) n % 10 + 48;
@@ -432,7 +436,12 @@ void exec_experiment(void *a, void *b, void *c) {
 								printk("transmission data: %s\n", transmission_data);
 								ret = lora_send(lora_dev, transmission_data, data[2]);
 								
-								k_sleep(K_MSEC(data[1] * 1000 - sf_times_on_air[config.datarate]));			// data[1] contains the number of seconds between transmissions, time needed for transmission must be subtracted
+								//printk("sf_times... %d\n", sf_times_on_air[co])
+								k_sleep(K_MSEC(data[1] * 1000 ));			// data[1] contains the number of seconds between transmissions, time needed for transmission must be subtracted
+
+								milliseconds_spent = k_uptime_delta(&time_stamp);
+								printk("millis spent: %lld\n", milliseconds_spent);	
+								
 							}
 
 							k_sleep(K_MSEC(5000));															// wait 5 seconds between combinations
