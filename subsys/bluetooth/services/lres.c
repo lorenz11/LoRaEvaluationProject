@@ -371,6 +371,7 @@ void exec_experiment(void *a, void *b, void *c) {
 								}
 
 								milliseconds_spent = k_uptime_delta(&time_stamp);
+								printk("millissec: %lld\n", milliseconds_spent);
 								time_stamp = k_uptime_get();	
 								iteration_time = iteration_time - milliseconds_spent;						
 							}

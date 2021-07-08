@@ -435,8 +435,7 @@ void exec_experiment(void *a, void *b, void *c) {
 								ret = lora_send(lora_dev, transmission_data, data[2]);
 
 								milliseconds_spent = k_uptime_delta(&time_stamp);
-								time_stamp = k_uptime_get();
-								printk("millis spent: %lld\n", milliseconds_spent);
+								printk("millisec spent: %lld\n", milliseconds_spent);
 								
 								k_sleep(K_MSEC(data[1] * 1000 - milliseconds_spent));											// data[1] contains the number of seconds between transmissions
 							}
