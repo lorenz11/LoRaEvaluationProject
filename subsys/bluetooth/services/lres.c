@@ -323,6 +323,7 @@ void exec_experiment(void *a, void *b, void *c) {
 							while(iteration_time > 0) {													// exp_data[0] contains the number of LoRa transmissions per parameter combination
 								l = lora_recv(lora_dev, transmission_data, MAX_TRANSM_LEN, K_MSEC(iteration_time),
 										&rssi, &snr);
+								printk("remaining iteration time: %lld\n", iteration_time);
 								
 								if(last_data_8 != transmission_data[8]) {								// checking if lora_recv just timed out or if something was actually received
 									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
