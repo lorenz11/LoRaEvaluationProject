@@ -12,6 +12,7 @@
 #include <drivers/lora.h>
 
 #include <stdlib.h>
+#include <math.h>
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
@@ -306,8 +307,6 @@ uint8_t random_d [200] = {96, -76, 32, -69, 56, 81, -39, -44, 122, -53, -109, 61
 				124, 68, 48, 32, -34, 28, -83, 9, -65, -42, 56, 31, -5, -108, -38, -81, -69, 
 				-112, -60, -19, -111, -96, 97, 58, -47, -36, 75, 71, 3};
 
-uint16_t sf_times_on_air[6] = {82,0,0,510,0,0};
-
 // experiment send thread code
 void exec_experiment(void *a, void *b, void *c) {
 	const struct device *lora_dev;
@@ -436,8 +435,19 @@ void exec_experiment(void *a, void *b, void *c) {
 								printk("transmission data: %s\n", transmission_data);
 								ret = lora_send(lora_dev, transmission_data, data[2]);
 								
-								//printk("sf_times... %d\n", sf_times_on_air[co])
-								k_sleep(K_MSEC(data[1] * 1000 ));			// data[1] contains the number of seconds between transmissions, time needed for transmission must be subtracted
+								
+								float time_on_air = 8.f * (float) data[2] - 4.f * (float) config.datarate + 28.f + 16.f;
+								time_on_air /= 4.f * (config.datarate >=11 && config.bandwidth == 0 ? config.datarate - 2.f : config.datarate);
+								time_on_air = ceil(time_on_air);
+								time_on_air = time_on_air * (config.coding_rate + 4) + 8;
+
+								float symbol_duration = ((float) (1 << config.datarate)) / 125.f;
+								time_on_air *= symbol_duration;
+								time_on_air += 12.25f * symbol_duration;
+
+
+
+								k_sleep(K_MSEC(data[1] * 1000 - (int) time_on_air));			// data[1] contains the number of seconds between transmissions, time needed for transmission must be subtracted
 
 								milliseconds_spent = k_uptime_delta(&time_stamp);
 								printk("millis spent: %lld\n", milliseconds_spent);	

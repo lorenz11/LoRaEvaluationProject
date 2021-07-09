@@ -12,7 +12,6 @@
 #include <drivers/lora.h>
 
 #include <stdlib.h>
-#include <stdio.h>
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
@@ -150,9 +149,6 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	if(thread0_tid != NULL) {
 		k_thread_abort(thread0_tid);
 	}
-
-	float r = 10.f/3.f;
-	printk("resultt: %f\n", r);
 
 	uint8_t *pu = (uint8_t *) buf;		
 	change_config(pu, false);
