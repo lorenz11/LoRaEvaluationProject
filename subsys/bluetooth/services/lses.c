@@ -427,7 +427,7 @@ void exec_experiment(void *a, void *b, void *c) {
 							time_on_air *= symbol_duration;
 							time_on_air += 12.25f * symbol_duration;
 
-							k_sleep(K_MSEC(3000 - (int) time_on_air));
+							k_sleep(K_MSEC(5000 - (int) time_on_air));										// wait 5 seconds between combinations
 							
 							int64_t time_stamp;
 							int64_t milliseconds_spent = 0;
@@ -452,8 +452,6 @@ void exec_experiment(void *a, void *b, void *c) {
 
 								k_sleep(K_MSEC(data[1] * 1000 - (int) time_on_air - (int) milliseconds_spent));			// data[1] contains the number of seconds between transmissions, time needed for transmission must be subtracted								
 							}
-
-							k_sleep(K_MSEC(5000));															// wait 5 seconds between combinations
 						} else {
 							continue;
 						}
