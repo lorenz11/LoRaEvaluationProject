@@ -441,17 +441,15 @@ void exec_experiment(void *a, void *b, void *c) {
 								time_on_air = ceil(time_on_air);
 								time_on_air = time_on_air * (config.coding_rate + 4) + 8;
 
-								float symbol_duration = ((float) (1 << config.datarate)) / 125.f;
+								float symbol_duration = ((float) (1 << config.datarate)) / (((float) (config.bandwidth + 1)) * 125.f);
 								time_on_air *= symbol_duration;
 								time_on_air += 12.25f * symbol_duration;
 
-
-
-								k_sleep(K_MSEC(data[1] * 1000 - (int) time_on_air));			// data[1] contains the number of seconds between transmissions, time needed for transmission must be subtracted
-
+								printk("time on air: %d\n", (int) time_on_air);
 								milliseconds_spent = k_uptime_delta(&time_stamp);
 								printk("millis spent: %lld\n", milliseconds_spent);	
-								
+
+								k_sleep(K_MSEC(data[1] * 1000 - (int) time_on_air - (int) milliseconds_spent));			// data[1] contains the number of seconds between transmissions, time needed for transmission must be subtracted								
 							}
 
 							k_sleep(K_MSEC(5000));															// wait 5 seconds between combinations
