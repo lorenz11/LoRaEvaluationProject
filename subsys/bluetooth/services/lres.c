@@ -318,6 +318,7 @@ void exec_experiment(void *a, void *b, void *c) {
 							} else {
 								iteration_time += 5000;													// delay between iterations as part of the LoRa receive timing
 							}
+							iteration_time += 3000;														// time to compensate for time on air in first iteration
 
 							uint8_t last_data_8 = 0;
 							while(iteration_time > 0) {													// exp_data[0] contains the number of LoRa transmissions per parameter combination
