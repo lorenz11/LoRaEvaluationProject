@@ -11,6 +11,9 @@
 #include <sys/util.h>
 #include <zephyr.h>
 
+#include <stdio.h>
+#include <math.h>
+
 // ble
 #include <zephyr/types.h>
 #include <stddef.h>
@@ -102,6 +105,10 @@ static struct bt_conn_auth_cb auth_cb_display = {
 void main(void)
 {
 
+	float r = 10.f/3.f;
+	printk("resultt: %f\n", r);
+	r = ceil(r);
+	printk("resultt: %f\n", r);
 	// for ble connection
     int err;
 
