@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "payloaddepot.h"
+
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/conn.h>
@@ -49,9 +51,6 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 }
 
 void change_config(uint8_t* pu, bool tx) {
-	if(bt_lses_connected) {
-		printk("connection visible in lses!!!\n");
-	}
 	const struct device *lora_dev;
 
 	config.frequency = frequencies[*pu];
@@ -294,21 +293,11 @@ K_THREAD_STACK_DEFINE(stack_area1, STACK_SIZE);
 struct k_thread thread_data1;
 k_tid_t thread1_tid;
 
-uint8_t random_d [200] = {96, -76, 32, -69, 56, 81, -39, -44, 122, -53, -109, 61, -66, 112, 57, -101,
-				-10, -55, 45, -93, 58, -16, 29, 79, -73, 112, -23, -116, 3, 37, -12, 29, 62,
-				-70, -8, -104, 109, -89, 18, -56, 43, -51, 77, 85, 75, -16, -75, 64, 35, -62,
-				-101, 98, 77, -23, -17, -100, 47, -109, 30, -4, 88, 15, -102, -5, 8, 27, 18, 
-				-31, 7, -79, -24, 5, -14, -76, -11, -16, -15, -48, 12, 45, 15, 98, 99, 70, 112, 
-				-110, 28, 80, 88, 103, -1, 32, -10, -88, 51, 94, -104, -81, -121, 37, 56, 85, 
-				-122, -76, 31, -17, -14, 5, -76, -32, 90, 0, 8, 35, -9, -117, 95, -113, 92, 2, 
-				67, -100, -24, -10, 122, 120, 29, -112, -53, -26, -65, 26, -25, -14, -68, 64, 
-				-92, -105, 9, -96, 108, 14, 49, 73, -101, -16, 41, 105, -54, 66, -46, 3, -27, 
-				102, -68, -58, -106, -34, 8, -6, 1, 2, -96, -3, 46, 35, 48, -80, -106, 74, -69, 
-				124, 68, 48, 32, -34, 28, -83, 9, -65, -42, 56, 31, -5, -108, -38, -81, -69, 
-				-112, -60, -19, -111, -96, 97, 58, -47, -36, 75, 71, 3};
+uint8_t random_d [200];
 
 // experiment send thread code
 void exec_experiment(void *a, void *b, void *c) {
+	printk("random number in exec: %d\n", random_d[5])
 	const struct device *lora_dev;
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 
@@ -488,6 +477,8 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 	}
 
 	char *pc = (char *) buf;
+	random_d = random_d_arrays[*pc]:
+	pc++;
 
 	// configure and prepare experiment mode
 	change_config(pc, false);
