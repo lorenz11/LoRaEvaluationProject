@@ -220,24 +220,24 @@ void exec_loop(void *a, void *b, void *c) {
 	uint16_t len = loop_data_length;
 	char data[len];
 	
-		for(uint16_t i = 0; i < len; i++) {
-			data[i] = loop_data[i];
-		}
-		data[len] = '.';
+	for(uint16_t i = 0; i < len; i++) {
+		data[i] = loop_data[i];
+	}
+	data[len] = '.';
 
-		const struct device *lora_dev;
+	const struct device *lora_dev;
 
-		// send message
-		lora_dev = device_get_binding(DEFAULT_RADIO);
+	// send message
+	lora_dev = device_get_binding(DEFAULT_RADIO);
 
-		uint16_t i = 0;
-		while (i < number_of_messages) {
-			lora_send(lora_dev, data, MAX_DATA_LEN);
-			
-			LOG_INF("Data sent!");
-			k_sleep(K_SECONDS(time_between_msgs));
-			i++;
-		}
+	uint16_t i = 0;
+	while (i < number_of_messages) {
+		lora_send(lora_dev, data, MAX_DATA_LEN);
+		
+		LOG_INF("Data sent!");
+		k_sleep(K_SECONDS(time_between_msgs));
+		i++;
+	}
 
 	return;
 }
@@ -301,13 +301,15 @@ void exec_experiment(void *a, void *b, void *c) {
 	// wait for experiment started notification or a ping
 	int16_t rssi;
 	int8_t snr;
-	int l = 9;;
+	int l = 9;
 	uint8_t data[MAX_DATA_LEN] = {0};
 	bool experiment_started = false;
+	printk("helllllllo\n");
 
 	while(!experiment_started) {
 		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 					&rssi, &snr);
+		printk("helll333333333333333llllo\n");
 		
 		if(data[0] == 33) {					// in this case it is a ping instead of the experiment settings, which start the experiment procedure
 			config.tx = true;
