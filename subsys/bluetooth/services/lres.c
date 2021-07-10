@@ -337,9 +337,16 @@ void exec_experiment(void *a, void *b, void *c) {
 									bool same_content = true;
 									uint8_t bit_error_count = 0;
 									for(int z = 0; z < exp_data[2]; z++) {
+										for(int i = 0; i < 8; i++) {
+											if(((compare_data[z] >> i) & 0x01) != ((transmission_data[z] >> i) & 0x01)) {
+												//printk("xbit: %d, ybit: %d, error at bit: %d\n", (x >> i) & 0x01, (y >> i) & 0x01, i);
+												bit_error_count++;
+											}
+										}
+										printk("byte %d, errorcount: %d\n", z, bit_error_count);
 										if(compare_data[z] != transmission_data[z]) {
 											same_content = false;
-											bit_error_count++;
+											//bit_error_count++;
 										}
 									}
 
