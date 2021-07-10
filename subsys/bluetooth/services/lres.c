@@ -293,6 +293,7 @@ void exec_experiment(void *a, void *b, void *c) {
 							config.tx_power =  18 - (p * 2);
 							compare_data[4] = (char) p + 48;
 							printk("power: %d dBm\n", 18 - (p * 2));
+
 							ret = lora_config(lora_dev, &config);
 							
 							int64_t time_stamp;
@@ -307,27 +308,26 @@ void exec_experiment(void *a, void *b, void *c) {
 							iteration_time += 5000 ;													// delay between iterations as part of the LoRa receive timing
 							printk("time for this iteration: %lld\n", iteration_time);						
 
-							uint8_t last_data_8 = 0;
-							while(iteration_time > 0) {													// exp_data[0] contains the number of LoRa transmissions per parameter combination
+							uint16_t msg_number = 0;
+							int64_t time_stamp_msg = k_uptime_get();
+
+							while(iteration_time > 0) {												
 								l = lora_recv(lora_dev, transmission_data, MAX_TRANSM_LEN, K_MSEC(iteration_time),
 										&rssi, &snr);
 								printk("remaining iteration time: %lld\n", iteration_time);
+								msg_number = k_uptime_delta(&time_stamp_msg) / (exp_data[1] * 1000);
 								
-								if(last_data_8 != transmission_data[8]) {								// checking if lora_recv just timed out or if something was actually received
+								if(l >= 0) {															// checking if lora_recv just timed out or if something was actually received
 									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 										log_strdup(transmission_data), rssi, snr);
 
-
-									char tmp[3];
-									for (int i = 0; i < 3; i++) {
-										compare_data[i + 6] = transmission_data[i + 6];					// write msg number to compare data only after receive, because no way to know how many msgs were lost before this one
-										tmp[i] = transmission_data[i + 6];								// use the msg number (like 005) to determine which random data the transmission should contain
-									}
-									int msg_num = atoi(tmp);	
-
+									compare_data[6] = (char) msg_number / 100 + 48;						// write msg number to compare data here, because we know how many msgs were lost before this one only here			
+									compare_data[7] = (char) msg_number / 10 + 48;						
+									compare_data[8] = (char) msg_number % 10 + 48;
 
 									for(uint8_t p = 9; p < (exp_data[2] - 1); p++) {					// exp_data[2] contains message length (length of the transmitted content)
-										compare_data[p] = random_d[(msg_num * (exp_data[2] - 9) + (p - 9)) % 200];			
+										compare_data[p] = random_d[(msg_number 
+											* (exp_data[2] - 9) + (p - 9)) % 200];						// use the msg number (like 005) to determine which random data the transmission should contain		
 									}																	// fills the message up with with random payload data until desired message length
 									compare_data[exp_data[2] - 1] = '.';								// msg delimiter
 
@@ -358,9 +358,9 @@ void exec_experiment(void *a, void *b, void *c) {
 									} else {
 										transmission_data[9] = 'f';
 									}
-									transmission_data[10] = '.';										
+									transmission_data[10] = '.';	
+
 									bt_lres_notify(transmission_data, 1);								// send results to phone to monitor experiment
-									last_data_8 = transmission_data[8];
 								}
 
 								milliseconds_spent = k_uptime_delta(&time_stamp);
