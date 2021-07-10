@@ -418,7 +418,14 @@ void exec_experiment(void *a, void *b, void *c) {
 							
 							int64_t time_stamp;
 							int64_t milliseconds_spent = 0;
-							for(uint8_t n = 0; n < data[0]; n++) {											// data[0] contains the number of LoRa transmissions per parameter combination
+							for(uint8_t n = 0; n < data[0]; n++) {										// data[0] contains the number of LoRa transmissions per parameter combination
+								if(n==2 || n==3 || n == 7) {
+									k_sleep(K_MSEC(data[1] * 1000));
+									continue;
+								}
+
+
+
 								time_stamp = k_uptime_get();
 
 								transmission_data[6] = (char) n / 100 + 48;									// include numbering into transmission content (as String (3 bytes) not as byte (1 byte))

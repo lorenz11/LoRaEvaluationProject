@@ -298,24 +298,37 @@ void exec_experiment(void *a, void *b, void *c) {
 							
 							int64_t time_stamp;
 							int64_t milliseconds_spent = 0;
+							int64_t millis_total = 0;
 							time_stamp = k_uptime_get();
 							int64_t iteration_time = exp_data[0] * exp_data[1] * 1000;					// exp_data[0] * exp_data[1] = # LoRa transmissions * time between transmissions
 							
 							if(first_iteration) {
 								iteration_time += (1000 * d);											// count down delay as part of the LoRa receive timing
-								first_iteration = false;
 							}
 							iteration_time += 5000 ;													// delay between iterations as part of the LoRa receive timing
 							printk("time for this iteration: %lld\n", iteration_time);						
 
 							uint16_t msg_number = 0;
-							int64_t time_stamp_msg = k_uptime_get();
 
 							while(iteration_time > 0) {												
 								l = lora_recv(lora_dev, transmission_data, MAX_TRANSM_LEN, K_MSEC(iteration_time),
 										&rssi, &snr);
+								milliseconds_spent = k_uptime_delta(&time_stamp);
+								time_stamp = k_uptime_get();	
+								iteration_time = iteration_time - milliseconds_spent;					// control iteration time to know when to switch LoRa parameters for next iteration	
 								printk("remaining iteration time: %lld\n", iteration_time);
-								msg_number = k_uptime_delta(&time_stamp_msg) / (exp_data[1] * 1000);
+			
+								millis_total += milliseconds_spent;
+								printk("millissec: %lld\n", milliseconds_spent);
+								
+								
+								msg_number = (first_iteration ? 										// determine the message number condsidering the time
+										(millis_total - (1000 * d) - 5000) 
+										: (millis_total - 5000))
+											/ (exp_data[1] * 1000);
+								printk("msg_number: %d\n", msg_number);
+								printk("millis total: %lld\n", millis_total);
+								first_iteration = false;
 								
 								if(l >= 0) {															// checking if lora_recv just timed out or if something was actually received
 									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
@@ -324,6 +337,7 @@ void exec_experiment(void *a, void *b, void *c) {
 									compare_data[6] = (char) msg_number / 100 + 48;						// write msg number to compare data here, because we know how many msgs were lost before this one only here			
 									compare_data[7] = (char) msg_number / 10 + 48;						
 									compare_data[8] = (char) msg_number % 10 + 48;
+									printk("comp: %d %d %d\n", compare_data[6], compare_data[7], compare_data[8]);
 
 									for(uint8_t p = 9; p < (exp_data[2] - 1); p++) {					// exp_data[2] contains message length (length of the transmitted content)
 										compare_data[p] = random_d[(msg_number 
@@ -361,12 +375,7 @@ void exec_experiment(void *a, void *b, void *c) {
 									transmission_data[10] = '.';	
 
 									bt_lres_notify(transmission_data, 1);								// send results to phone to monitor experiment
-								}
-
-								milliseconds_spent = k_uptime_delta(&time_stamp);
-								printk("millissec: %lld\n", milliseconds_spent);
-								time_stamp = k_uptime_get();	
-								iteration_time = iteration_time - milliseconds_spent;					// control iteration time to know when to switch LoRa parameters for next iteration						
+								}					
 							}
 
 							printk("end of iteration\n");
@@ -472,7 +481,6 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 
 	exp_data_length = len;						// start experiment
 	for(int16_t i = 0; i < len; i++) {
-		printk("exp data index%c\n", *pu);
 		experiment_data[i] = *pu;
 		pu++;
 	}
