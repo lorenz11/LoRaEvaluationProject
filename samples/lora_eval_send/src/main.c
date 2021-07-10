@@ -35,7 +35,7 @@ BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_RADIO_NODE, okay),
 #define LOG_LEVEL CONFIG_LOG_DEFAULT_LEVEL
 
 #include <logging/log.h>
-LOG_MODULE_REGISTER(lora_receive);			// needs to register lora_receive?
+LOG_MODULE_REGISTER(lora_receive);
 
 
 // ble service to be advertised
@@ -97,17 +97,10 @@ static struct bt_conn_auth_cb auth_cb_display = {
 	.cancel = auth_cancel,
 };
 
-// for future notifications
-/*static void lses_notify(void)
-{
-	static uint8_t rec = 1U;
-	bt_lses_notify(rec);
-}*/
-
-
 
 void main(void)
 {
+	// for ble connection
     int err;
 
 	err = bt_enable(NULL);

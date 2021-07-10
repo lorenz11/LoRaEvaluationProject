@@ -1,5 +1,5 @@
 /** @file
- *  @brief LSES Service sample
+ *  @brief LSES Service
  */
 
 #include <zephyr/types.h>
@@ -54,25 +54,25 @@ void change_config(uint8_t* pu, bool tx) {
 	const struct device *lora_dev;
 
 	config.frequency = frequencies[*pu];
-	printk("fr data %d\n", *pu);
+	printk("frequency: %d, ", *pu);
 	pu++;
 
 	config.bandwidth = *pu;
-	printk("bw data %d\n", *pu);
+	printk("bandwidth: %d, ", *pu);
 	pu++;
 
 	config.datarate = *pu + 7;
-	printk("sf data %d\n", *pu);
+	printk("spreading factor: %d, ", *pu);
 	pu++;
 
 	config.preamble_len = 8;
 
 	config.coding_rate = *pu + 1;
-	printk("cr data %d\n", *pu);
+	printk("coding rate %d, ", *pu);
 	pu++;
 
 	config.tx_power = 18 - (*pu * 2);
-	printk("pw data %d\n", *pu);
+	printk("power: %d dBm\n", *pu);
 
 	config.tx = tx;
 
@@ -85,16 +85,17 @@ void change_config(uint8_t* pu, bool tx) {
 	}
 }
 
-// implemented at bottom of file (declared here for use in nexxt function)
+// implemented at bottom of file (declared here for use in next function)
 int bt_lses_notify(int8_t type_of_notification);
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////			callbacks and thread definitions for Explore mode			/////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////
+// contains code to 1. change LoRa configuration, 2. to send a LoRa message, 3. to send in a loop, 4. to ping and wait for response
 
 
-// gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic)
+// gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding ble characteristic)
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
@@ -129,13 +130,12 @@ void wait_for_ping_return(void *a, void *b, void *c) {
 	lora_config(lora_dev, &config);						
 		
 	char resp[MAX_DATA_LEN] = {0};
-	l = lora_recv(lora_dev, resp, MAX_DATA_LEN, K_SECONDS(3),	
+	l = lora_recv(lora_dev, resp, MAX_DATA_LEN, K_SECONDS(3),				// wait 3 seconds for ping return 
 				&rssi, &snr);
 
 	if(config.tx_power > 10) {
 		k_sleep(K_MSEC(5000));
 		while(!bt_lses_connected) {
-			printk("waiting 300 ms\n");
 			k_sleep(K_MSEC(300));
 		}
 		k_sleep(K_MSEC(5000));
@@ -145,9 +145,9 @@ void wait_for_ping_return(void *a, void *b, void *c) {
 		LOG_ERR("no response received");
 		bt_lses_notify(-5);	
 	} else {
-		if(memcmp(ping_content, resp, ping_len * sizeof(uint8_t)) == 0) {
+		if(memcmp(ping_content, resp, ping_len * sizeof(uint8_t)) == 0) {	// check if received ping exactly matches sent ping
 			printk("ping is okay\n");
-			bt_lses_notify(-3);									// check if received ping exactly matches sent ping
+			bt_lses_notify(-3);									
 		} else {
 			printk("ping does not match\n");	
 			bt_lses_notify(-4);	
@@ -187,6 +187,7 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 
 	ret = lora_send(lora_dev, data, MAX_DATA_LEN);
 
+	// start waiting for ping return on separate thread (see function above)
 	if(isPing) {
 		ping_len = len;
 		memcpy(ping_content, data, len * sizeof(uint8_t));
@@ -216,6 +217,7 @@ uint16_t loop_data_length = 0;
 static uint16_t number_of_messages = 0;
 static uint8_t time_between_msgs = 0;
 
+// for transmitting in a loop on separate thread
 void exec_loop(void *a, void *b, void *c) {
 	uint16_t len = loop_data_length;
 	char data[len];
@@ -223,7 +225,7 @@ void exec_loop(void *a, void *b, void *c) {
 	for(uint16_t i = 0; i < len; i++) {
 		data[i] = loop_data[i];
 	}
-	data[len] = '.';
+	data[len] = '.';	// msg delimiter
 
 	const struct device *lora_dev;
 
@@ -233,8 +235,6 @@ void exec_loop(void *a, void *b, void *c) {
 	uint16_t i = 0;
 	while (i < number_of_messages) {
 		lora_send(lora_dev, data, MAX_DATA_LEN);
-		
-		LOG_INF("Data sent!");
 		k_sleep(K_SECONDS(time_between_msgs));
 		i++;
 	}
@@ -242,12 +242,10 @@ void exec_loop(void *a, void *b, void *c) {
 	return;
 }
 
-// prepare or start a LoRa message sending loop ()
+// prepare, start or cancel a LoRa message sending loop ()
 static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {	
-	printk("at loop c callback...\n");
-
 	char *pc = (char *) buf;
 	if(*pc == '!') {						// set number of loops in explore mode
 		pc++;
@@ -257,12 +255,12 @@ static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		pc++;				
 		uint16_t i = atoi(pc);
 		time_between_msgs = i;
-	} else if(*pc == '$') {
+	} else if(*pc == '$') {					// cancel the loop
 		if(thread0_tid != NULL) {
 			k_thread_abort(thread0_tid);
 			printk("loop thread canceled\n");
 		}
-	} else {								// start the loop
+	} else {								// start the loop on separate thread
 		loop_data_length = len;
 		for(uint16_t i = 0; i < len; i++) {
 			loop_data[i] = *pc;
@@ -298,20 +296,18 @@ void exec_experiment(void *a, void *b, void *c) {
 	const struct device *lora_dev;
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 
-	// wait for experiment started notification or a ping
+	// wait for 'experiment started' notification or a ping
 	int16_t rssi;
 	int8_t snr;
 	int l = 9;
 	uint8_t data[MAX_DATA_LEN] = {0};
 	bool experiment_started = false;
-	printk("helllllllo\n");
 
 	while(!experiment_started) {
 		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_FOREVER,
 					&rssi, &snr);
-		printk("helll333333333333333llllo\n");
 		
-		if(data[0] == 33) {					// in this case it is a ping instead of the experiment settings, which start the experiment procedure
+		if(data[0] == 33) {					// in this case the received content is a ping 
 			config.tx = true;
 			lora_config(lora_dev, &config);	
 			lora_send(lora_dev, data, 5);
@@ -320,12 +316,13 @@ void exec_experiment(void *a, void *b, void *c) {
 			lora_config(lora_dev, &config);	
 			printk("responded to ping\n");			
 		} else {
-			experiment_started = true;
+			experiment_started = true;		// in this case the received content is the experiment settings, which start the experiment procedure
 		}
 	}
 	
 
-	// reconfigure device for sending and send received data as ACK, listen for retransmission until delay counted down
+	// reconfigure device for sending and send received data as ACK, listen for 
+	// retransmission (in case ACK didn't arrive at receiver) until delay counted down
 	bool experiment_ready = false;
 	while(!experiment_ready) {
 		int ret;
@@ -350,7 +347,7 @@ void exec_experiment(void *a, void *b, void *c) {
 		ret = lora_config(lora_dev, &config);
 		
 		printk("delay countdown (re-)started\n");
-		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(d),			// listen for retransmission in case ACK was lost as long as the specified delay
+		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(d),			// listen for retransmission as long as the specified delay, in case ACK was lost 
 				&rssi, &snr);
 		if (l < 0) {
 			experiment_ready = true;
@@ -368,18 +365,17 @@ void exec_experiment(void *a, void *b, void *c) {
 	int ret;
 	for(uint8_t i = 0; i < 8; i++) {
 		if(((data[4] >> i)  & 0x01) == 1) {					// the 4th byte of the settings byte array represents the frequencies to use
-			config.frequency = frequencies[i];				// if a bit in that byte is set, the corresponding frequency will be used;
-			transmission_data[0] = (char) i + 48;
-			printk("frequency: %d\n", frequencies[i]);
+			config.frequency = frequencies[i];				// if a bit in that byte is set, the corresponding frequency will be used
+			transmission_data[0] = (char) i + 48;			// same for all other LoRa parameters
+			printk("frequency: %d, ", frequencies[i]);
 		} else {
 			continue;
 		}
-
 		for(uint8_t j = 0; j < 3; j++) {
 			if(((data[5] >> j)  & 0x01) == 1) {
 				config.bandwidth =  j;
 				transmission_data[1] = (char) j + 48;
-				printk("bandwidth: %d\n", j);
+				printk("bandwidth: %d, ", j);
 			} else {
 				continue;
 			}
@@ -387,7 +383,7 @@ void exec_experiment(void *a, void *b, void *c) {
 				if(((data[6] >> k)  & 0x01) == 1) {
 					config.datarate =  k + 7;
 					transmission_data[2] = (char) k + 48;
-					printk("data rate: %d\n", k+7);
+					printk("data rate: %d, ", k+7);
 				} else {
 					continue;
 				}
@@ -395,7 +391,7 @@ void exec_experiment(void *a, void *b, void *c) {
 					if(((data[7] >> l)  & 0x01) == 1) {
 						config.coding_rate =  l + 1;
 						transmission_data[3] = (char) l + 48;
-						printk("coding rate: %d\n", l+1);
+						printk("coding rate: %d, ", l+1);
 					} else {
 						continue;
 					}
@@ -403,19 +399,22 @@ void exec_experiment(void *a, void *b, void *c) {
 						if(((data[8] >> m)  & 0x01) == 1) {
 							config.tx_power =  18 - (m * 2);
 							transmission_data[4] = (char) m + 48;
+							printk("power: %d dBm\n", 18 - (m * 2));
 							
 							ret = lora_config(lora_dev, &config);
 
-							float time_on_air = 8.f * (float) data[2] - 4.f * (float) config.datarate + 28.f + 16.f;
-							time_on_air /= 4.f * (config.datarate >=11 && config.bandwidth == 0 ? config.datarate - 2.f : config.datarate);
-							time_on_air = ceil(time_on_air);
-							time_on_air = time_on_air * (config.coding_rate + 4) + 8;
+							// calculate LoRa time on air in !msec!: 
+							float time_on_air = 8.f * (float) data[2] - 4.f * (float) config.datarate + 28.f + 16.f;							// 8 * payload - 4 * Spreading factor + 28 + 16 * CRC(is always 1 here) - 20 * H(is always 0-> explicit header)
+							time_on_air /= 4.f * (config.datarate >=11 && config.bandwidth == 0 ? config.datarate - 2.f : config.datarate);		// ANS / 4 * (Spreading factor - 2 * OPT)  		(OPT = low datarate optimization -> 1 only if bandwidth = 125kHz AND Spreading factor >=11)
+							time_on_air = (time_on_air > 0 ? ceil(time_on_air) : 0);															// ceil(max(ANS))
+							time_on_air = time_on_air * (config.coding_rate + 4) + 8;															// ANS * (coding rate + 4) + 8
 
-							float symbol_duration = ((float) (1 << config.datarate)) / (((float) (config.bandwidth + 1)) * 125.f);
-							time_on_air *= symbol_duration;
-							time_on_air += 12.25f * symbol_duration;
+							float symbol_duration = ((float) (1 << config.datarate)) / (((float) (config.bandwidth + 1)) * 125.f);				// symbol duration = 2^spreading factor / bandwidth in kHz(125 or 250) 
+							time_on_air *= symbol_duration;																						// packet's time on air = time_on_air * symbol_duration
+							time_on_air += 12.25f * symbol_duration;																			// add preamble time on air: (preamble length(here 8) + 4.25) * symbol duration
+							printk("time on air per transmission in this iteration: %d\n", (int) time_on_air);
 
-							k_sleep(K_MSEC(5000 - time_on_air));										// wait 5 seconds between combinations
+							k_sleep(K_MSEC(5000 - time_on_air));											// wait 5 seconds between combinations
 							
 							int64_t time_stamp;
 							int64_t milliseconds_spent = 0;
@@ -434,13 +433,11 @@ void exec_experiment(void *a, void *b, void *c) {
 								printk("transmission data: %s\n", transmission_data);
 								ret = lora_send(lora_dev, transmission_data, data[2]);
 
-								printk("time on air: %d\n", (int) time_on_air);
 								milliseconds_spent = k_uptime_delta(&time_stamp);
-								printk("millis spent: %lld\n", milliseconds_spent);	
 
-								k_sleep(K_MSEC(data[1] * 1000 
-										- (n < (data[0] - 1) ? (int) time_on_air : 0)
-										- (int) milliseconds_spent));			// data[1] contains the number of seconds between transmissions, time needed for transmission must be subtracted								
+								k_sleep(K_MSEC(data[1] * 1000 												// data[1] contains the number of seconds between transmissions, 	
+										- (n < (data[0] - 1) ? (int) time_on_air : 0)						// time needed for transmission must be subtracted
+										- (int) milliseconds_spent));										// as well as otherwise elapsed time
 							}
 						} else {
 							continue;
@@ -518,7 +515,7 @@ static int lses_init(const struct device *dev)
 	return 0;
 }
 
-// notify phone about anything (currently only distinguishable in type of message (and only used for -2 = config changed))
+// notify phone about anything (currently only distinguishable in type of message
 int bt_lses_notify(int8_t type_of_notification)
 {
 	int rc;

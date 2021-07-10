@@ -49,33 +49,31 @@ static void lec_ccc_cfg_changed(const struct bt_gatt_attr *attr, uint16_t value)
 	LOG_INF("LRES notifications %s", notif_enabled ? "enabled" : "disabled");
 }
 
-// implemented at bottom of file (declared here for use in next function)
-int bt_lres_notify(const void *data, uint8_t type_of_notification);
 
 // for convenience: change LoRa parameter configuration according to arguments
 void change_config(uint8_t* pu, bool tx) {
 	const struct device *lora_dev;
 	
 	config.frequency = frequencies[*pu];
-	printk("fr data %d\n", *pu);
+	printk("frequency: %d, ", *pu);
 	pu++;
 
 	config.bandwidth = *pu;
-	printk("bw data %d\n", *pu);
+	printk("bandwidth: %d, ", *pu);
 	pu++;
 
 	config.datarate = *pu + 7;
-	printk("sf data %d\n", *pu);
+	printk("spreading factor: %d, ", *pu);
 	pu++;
 
 	config.preamble_len = 8;
 
 	config.coding_rate = *pu + 1;
-	printk("cr data %d\n", *pu);
+	printk("coding rate %d, ", *pu);
 	pu++;
 
 	config.tx_power = 18 - (*pu * 2);
-	printk("pw data %d\n", *pu);
+	printk("power: %d dBm\n", *pu);
 
 	config.tx = tx;
 
@@ -92,6 +90,8 @@ void change_config(uint8_t* pu, bool tx) {
 	}
 }
 
+// implemented at bottom of file (declared here for use in next function)
+int bt_lres_notify(const void *data, uint8_t type_of_notification);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////			callback and thread definition for Explore mode			/////////////////////////
@@ -122,14 +122,14 @@ void receive_lora(void *a, void *b, void *c) {
 		if(data[0] == '&') {		// this was a ping request
 			config.tx = true;
 			lora_config(lora_dev, &config);	
-			lora_send(lora_dev, data, len);
+			lora_send(lora_dev, data, len);		// respond to ping
 			config.tx = false;
 			lora_config(lora_dev, &config);	
 			continue;
 		}
 		
 		uint8_t ndata[3] = {0};
-		rssi = (uint8_t) -rssi; // negated to fit into an unsigned int (original value is negative)
+		rssi = (uint8_t) -rssi; // negated to fit into an unsigned byte for phone notification (original value is negative)
 		ndata[0] = rssi;
 		ndata[1] = snr;
 		ndata[2] = -1; 			// array index for bit errors in experiments (probably unnecessary to assign)
@@ -143,7 +143,6 @@ void receive_lora(void *a, void *b, void *c) {
 	}
 }
 
-bool reconnect = false;
 // gets 5 bytes from phone indicating LoRa configuration settings (callback for the corresponding characteristic) and starts receiving thread
 static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
@@ -173,17 +172,15 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-/////////////////////////
-////// for experiment ///
-/////////////////////////
-
-
 K_THREAD_STACK_DEFINE(stack_area1, STACK_SIZE);
 
 struct k_thread thread_data1;
 
 uint8_t experiment_data[18];
 uint16_t exp_data_length = 0;
+
+// for handling the high dBm LoRa/ble connection loss problem
+bool reconnect = false;
 
 // experiment receive thread code
 void exec_experiment(void *a, void *b, void *c) {
@@ -209,23 +206,23 @@ void exec_experiment(void *a, void *b, void *c) {
 
 	// sends experiment settings and waits for 2 seconds in a loop until ACK arrives
 	while(!exp_started) {
-		ret = lora_send(lora_dev, exp_data, len);					// send experiment settings to other board
+		ret = lora_send(lora_dev, exp_data, len);						// send experiment settings to other board
 
 		config.tx = false;
-		ret = lora_config(lora_dev, &config);						// configure as receiver, wait 2 seconds for ACK
+		ret = lora_config(lora_dev, &config);							// configure as receiver
 			
-		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(2),	// wait for ACK
+		l = lora_recv(lora_dev, data, MAX_DATA_LEN, K_SECONDS(2),		// wait 2 seconds for ACK
 					&rssi, &snr);
 		if (l < 0) {
 			LOG_ERR("no ACK received.");	
 			int8_t bt_data[1] = {-5};
 			bt_lres_notify(bt_data, 2);	
 		} else {
-			if(memcmp(exp_data, data, len * sizeof(uint8_t)) == 0) {
+			if(memcmp(exp_data, data, len * sizeof(uint8_t)) == 0) {	// check if received ACK exactly matches sent data (experiment parameters)
 				printk("ACK is okay\n");
 				int8_t bt_data[1] = {-6};
 				bt_lres_notify(bt_data, 2);	
-				exp_started = true;									// check if received data exactly matches sent data
+				exp_started = true;									
 			}
 		}
 	}
@@ -261,8 +258,8 @@ void exec_experiment(void *a, void *b, void *c) {
 	for(uint8_t i = 0; i < 8; i++) {
 		if(((exp_data[4] >> i)  & 0x01) == 1) {					// the 4th byte of the settings byte array represents the frequencies to use
 			config.frequency = frequencies[i];					// if a bit in that byte is set, the corresponding frequency will be used;
-			compare_data[0] = (char) i + 48;
-			printk("frequency: %d\n", frequencies[i]);
+			compare_data[0] = (char) i + 48;					// same for all other LoRa parameters
+			printk("frequency: %d, ", frequencies[i]);
 		} else {
 			continue;
 		}
@@ -271,7 +268,7 @@ void exec_experiment(void *a, void *b, void *c) {
 			if(((exp_data[5] >> j)  & 0x01) == 1) {
 				config.bandwidth =  j;
 				compare_data[1] = (char) j + 48;
-				printk("bandwidth: %d\n", j);
+				printk("bandwidth: %d, ", j);
 			} else {
 				continue;
 			}
@@ -279,7 +276,7 @@ void exec_experiment(void *a, void *b, void *c) {
 				if(((exp_data[6] >> k)  & 0x01) == 1) {
 					config.datarate =  k + 7;
 					compare_data[2] = (char) k + 48;
-					printk("data rate: %d\n", k+7);
+					printk("data rate: %d, ", k+7);
 				} else {
 					continue;
 				}
@@ -287,7 +284,7 @@ void exec_experiment(void *a, void *b, void *c) {
 					if(((exp_data[7] >> m)  & 0x01) == 1) {
 						config.coding_rate =  m + 1;
 						compare_data[3] = (char) m + 48;
-						printk("coding rate: %d\n", m+1);
+						printk("coding rate: %d, ", m+1);
 					} else {
 						continue;
 					}
@@ -295,7 +292,7 @@ void exec_experiment(void *a, void *b, void *c) {
 						if(((exp_data[8] >> p)  & 0x01) == 1) {
 							config.tx_power =  18 - (p * 2);
 							compare_data[4] = (char) p + 48;
-							printk("power: %d\n", p+1);
+							printk("power: %d dBm\n", 18 - (p * 2));
 							ret = lora_config(lora_dev, &config);
 							
 							int64_t time_stamp;
@@ -304,11 +301,11 @@ void exec_experiment(void *a, void *b, void *c) {
 							int64_t iteration_time = exp_data[0] * exp_data[1] * 1000;					// exp_data[0] * exp_data[1] = # LoRa transmissions * time between transmissions
 							
 							if(first_iteration) {
-								iteration_time += (1000 * d);												// count down delay as part of the LoRa receive timing
+								iteration_time += (1000 * d);											// count down delay as part of the LoRa receive timing
 								first_iteration = false;
 							}
 							iteration_time += 5000 ;													// delay between iterations as part of the LoRa receive timing
-							printk("iteration time calc: %lld\n", iteration_time);														// time to compensate for time on air in first iteration
+							printk("time for this iteration: %lld\n", iteration_time);						
 
 							uint8_t last_data_8 = 0;
 							while(iteration_time > 0) {													// exp_data[0] contains the number of LoRa transmissions per parameter combination
@@ -324,7 +321,7 @@ void exec_experiment(void *a, void *b, void *c) {
 									char tmp[3];
 									for (int i = 0; i < 3; i++) {
 										compare_data[i + 6] = transmission_data[i + 6];					// write msg number to compare data only after receive, because no way to know how many msgs were lost before this one
-										tmp[i] = transmission_data[i + 6];								// use the msg number (like 008) to determine which random data the transmission should contain
+										tmp[i] = transmission_data[i + 6];								// use the msg number (like 005) to determine which random data the transmission should contain
 									}
 									int msg_num = atoi(tmp);	
 
@@ -332,7 +329,7 @@ void exec_experiment(void *a, void *b, void *c) {
 									for(uint8_t p = 9; p < (exp_data[2] - 1); p++) {					// exp_data[2] contains message length (length of the transmitted content)
 										compare_data[p] = random_d[(msg_num * (exp_data[2] - 9) + (p - 9)) % 200];			
 									}																	// fills the message up with with random payload data until desired message length
-									compare_data[exp_data[2] - 1] = '.';
+									compare_data[exp_data[2] - 1] = '.';								// msg delimiter
 
 									bool same_content = true;
 									uint8_t bit_error_count = 0;
@@ -340,7 +337,7 @@ void exec_experiment(void *a, void *b, void *c) {
 										bit_error_count = 0;
 										if(compare_data[z] != transmission_data[z]) {
 											same_content = false;
-											for(int i = 0; i < 8; i++) {
+											for(int i = 0; i < 8; i++) {								// calculate the bit error rate
 												if(((compare_data[z] >> i) & 0x01) != ((transmission_data[z] >> i) & 0x01)) {
 													bit_error_count++;
 												}
@@ -357,7 +354,7 @@ void exec_experiment(void *a, void *b, void *c) {
 
 									bt_lres_notify(ndata, 0);
 									if(same_content) {
-										transmission_data[9] = 't';
+										transmission_data[9] = 't';										// indicating to phone if received content was correct ( by adding a t or f to the header)
 									} else {
 										transmission_data[9] = 'f';
 									}
@@ -369,7 +366,7 @@ void exec_experiment(void *a, void *b, void *c) {
 								milliseconds_spent = k_uptime_delta(&time_stamp);
 								printk("millissec: %lld\n", milliseconds_spent);
 								time_stamp = k_uptime_get();	
-								iteration_time = iteration_time - milliseconds_spent;						
+								iteration_time = iteration_time - milliseconds_spent;					// control iteration time to know when to switch LoRa parameters for next iteration						
 							}
 
 							printk("end of iteration\n");
@@ -388,10 +385,8 @@ void exec_experiment(void *a, void *b, void *c) {
 }
 
 
-/////////////////////////
-////// for pings ////////
-/////////////////////////
 
+// for pings previous to experiment start
 #define STACK_SIZE2 2048
 #define TT_PRIORITY 5
 K_THREAD_STACK_DEFINE(stack_area2, STACK_SIZE2);
@@ -403,23 +398,22 @@ void wait_for_ping_return(void *a, void *b, void *c) {
 	int16_t rssi;
 	int8_t snr;
 	int l = -1;
-	char ping[5] = {'!', 'p', 'i', 'n', 'g'};
+	char ping[5] = {'!', 'p', 'i', 'n', 'g'};							// ping content
 
 	const struct device *lora_dev;
 	lora_dev = device_get_binding(DEFAULT_RADIO);
-	lora_send(lora_dev, ping, 5);						
+	lora_send(lora_dev, ping, 5);										// send ping					
 
 	config.tx = false;
 	lora_config(lora_dev, &config);						
 		
 	char resp[5] = {0};
-	l = lora_recv(lora_dev, resp, MAX_DATA_LEN, K_SECONDS(3),	
+	l = lora_recv(lora_dev, resp, MAX_DATA_LEN, K_SECONDS(3),			// wait 3 seconds for response
 				&rssi, &snr);
 
-	if(config.tx_power > 10) {
+	if(config.tx_power > 10) {											// waiting for reconnection to phone for notification after disconnect (only necessary for high dbm lora pings)
 		k_sleep(K_MSEC(5000));
 		while(!bt_lres_connected) {
-			printk("waiting 300 ms\n");
 			k_sleep(K_MSEC(300));
 		}
 		k_sleep(K_MSEC(5000));
