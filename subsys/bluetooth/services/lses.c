@@ -293,11 +293,8 @@ K_THREAD_STACK_DEFINE(stack_area1, STACK_SIZE);
 struct k_thread thread_data1;
 k_tid_t thread1_tid;
 
-uint8_t random_d [200];
-
 // experiment send thread code
 void exec_experiment(void *a, void *b, void *c) {
-	printk("random number in exec: %d\n", random_d[5])
 	const struct device *lora_dev;
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 
@@ -477,8 +474,6 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 	}
 
 	char *pc = (char *) buf;
-	random_d_arrays[1];
-	pc++;
 
 	// configure and prepare experiment mode
 	change_config(pc, false);
