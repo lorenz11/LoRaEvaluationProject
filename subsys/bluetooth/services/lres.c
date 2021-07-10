@@ -327,7 +327,7 @@ void exec_experiment(void *a, void *b, void *c) {
 
 									for(uint8_t p = 9; p < (exp_data[2] - 1); p++) {					// exp_data[2] contains message length (length of the transmitted content)
 										compare_data[p] = random_d[(msg_number 
-											* (exp_data[2] - 9) + (p - 9)) % 200];						// use the msg number (like 005) to determine which random data the transmission should contain		
+											* (exp_data[2] - 9) + (p - 9)) % 200];						// use the msg number to determine which random data the transmission should contain		
 									}																	// fills the message up with with random payload data until desired message length
 									compare_data[exp_data[2] - 1] = '.';								// msg delimiter
 
