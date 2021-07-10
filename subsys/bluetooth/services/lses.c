@@ -477,7 +477,7 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 	}
 
 	char *pc = (char *) buf;
-	random_d = random_d_arrays[*pc]:
+	random_d_arrays[1][2];
 	pc++;
 
 	// configure and prepare experiment mode
