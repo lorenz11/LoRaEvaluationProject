@@ -423,6 +423,7 @@ void exec_experiment(void *a, void *b, void *c) {
 								
 								
 								/*if(n==3 || n==4 || n == 14 || n == 22 || n == 37) {
+									printk("skipping message\n");
 									k_sleep(K_MSEC(data[1] * 1000));
 									continue;
 								}*/
@@ -442,17 +443,17 @@ void exec_experiment(void *a, void *b, void *c) {
 
 
 
-								/*if(n == 7 || n == 27 || n == 31) {
-									printk("transmission_data[17] original: \n", transmission_data[17]);
+								if(n == 7 || n == 27 || n == 31) {
+									printk("transmission_data[17] original:: %d\n", transmission_data[17]);
 									transmission_data[17] = 40;
 									transmission_data[22] = 39;
 									transmission_data[25] = 78;
 									transmission_data[29] = 107;
 									if(n == 27) {
-										printk("transmission_data[8] original: \n", transmission_data[8]);
+										printk("transmission_data[8] original: %d\n", transmission_data[8]);
 										transmission_data[8] = '4';
 									}
-								}*/
+								}
 
 
 

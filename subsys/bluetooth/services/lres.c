@@ -185,6 +185,7 @@ bool reconnect = false;
 // experiment receive thread code
 void exec_experiment(void *a, void *b, void *c) {
 	// initialize stuff
+	uint8_t iteration = 0;
 	uint8_t exp_data[exp_data_length];
 	uint16_t len = exp_data_length;
 
@@ -308,7 +309,7 @@ void exec_experiment(void *a, void *b, void *c) {
 								iteration_time += (1000 * d);											// count down delay as part of the LoRa receive timing
 							}
 							iteration_time += 5000 ;													// delay between iterations as part of the LoRa receive timing
-							printk("time for this iteration: %lld\n", iteration_time);						
+							printk("time for this iteration: %lld\n", iteration_time);					
 
 
 							// time-subtracting-down-to-zero-every-time-something-was-received-loop
@@ -332,8 +333,7 @@ void exec_experiment(void *a, void *b, void *c) {
 
 									// determine the message number condsidering the time
 									uint16_t msg_number = (first_iteration ? 										
-											(millis_total - (1000 * d) - 5000) 
-											: (millis_total - 5000))
+											(millis_total - (1000 * d) - 5000) : (millis_total - 5000))
 												/ (exp_data[1] * 1000);
 									printk("msg_number: %d\n", msg_number);
 									printk("millis total: %lld\n", millis_total);
@@ -382,15 +382,18 @@ void exec_experiment(void *a, void *b, void *c) {
 									} else {
 										transmission_data[9] = 'f';
 									}
-
-									transmission_data[10] = msg_number;									// send correct message number to phone as byte (rest as char[])
-									transmission_data[11] = '.';	
+									
+									transmission_data[10] = iteration;
+									printk("iteration %d\n", iteration);
+									transmission_data[11] = msg_number; 								// send correct message number to phone as byte (rest as char[])
+									transmission_data[12] = '.';	
 
 									bt_lres_notify(transmission_data, 1);								// send results to phone to monitor experiment
 								}					
 							}
 							if(first_iteration)
 								first_iteration = false;
+							iteration++;
 							printk("end of iteration\n");
 						} else {
 							continue;
