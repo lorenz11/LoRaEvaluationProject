@@ -357,7 +357,6 @@ void exec_experiment(void *a, void *b, void *c) {
 									bool same_content = true;
 									uint8_t bit_error_count = 0;
 									for(int z = 0; z < exp_data[2]; z++) {
-										bit_error_count = 0;
 										if(compare_data[z] != transmission_data[z]) {
 											same_content = false;
 											for(int i = 0; i < 8; i++) {	
@@ -454,7 +453,7 @@ void wait_for_ping_return(void *a, void *b, void *c) {
 			int8_t bt_data[1] = {-3};
 			bt_lres_notify(bt_data, 2);									// check if received ping exactly matches sent ping
 		} else {
-			printk("ping does not match\n");	
+			printk("ping does not match: %s\n", resp);	
 			int8_t bt_data[1] = {-4};
 			bt_lres_notify(bt_data, 2);	
 		}
