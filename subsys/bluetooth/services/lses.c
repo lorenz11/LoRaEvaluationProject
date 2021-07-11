@@ -419,17 +419,6 @@ void exec_experiment(void *a, void *b, void *c) {
 							int64_t time_stamp;
 							int64_t milliseconds_spent = 0;
 							for(uint8_t n = 0; n < data[0]; n++) {										// data[0] contains the number of LoRa transmissions per parameter combination
-								
-								
-								
-								if(n==3 || n==4 || n == 14 || n == 22 || n == 37) {
-									printk("skipping message\n");
-									k_sleep(K_MSEC(data[1] * 1000));
-									continue;
-								}
-
-
-
 								time_stamp = k_uptime_get();
 
 								transmission_data[6] = (char) n / 100 + 48;									// include numbering into transmission content (as String (3 bytes) not as byte (1 byte))
@@ -440,22 +429,6 @@ void exec_experiment(void *a, void *b, void *c) {
 									transmission_data[p] = random_d[(n * (data[2] - 9) + (p - 9)) % 200];	// fills the message up with with random payload data until desired message length
 								}														
 								transmission_data[data[2] - 1] = '.';
-
-
-
-								if(n == 7 || n == 27 || n == 31) {
-									transmission_data[17] = 40;									
-									transmission_data[22] = 39;									
-									transmission_data[25] = 78;								
-									transmission_data[29] = 107;
-									if(n == 27) {
-										printk("transmission_data[8] original: %d\n", transmission_data[8]);
-										transmission_data[8] = '4';
-									}
-								}
-
-
-
 
 								printk("transmission data: %s\n", transmission_data);
 								ret = lora_send(lora_dev, transmission_data, data[2]);
@@ -482,7 +455,7 @@ void exec_experiment(void *a, void *b, void *c) {
 
 
 
-// prepare sender for experiment and start sending thread or cancel prepared sender
+// prepare sender for experiment and start sending thread or cancel prepared sender (is a callback for a characteristic)
 static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
