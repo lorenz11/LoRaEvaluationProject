@@ -294,6 +294,8 @@ void exec_experiment(void *a, void *b, void *c) {
 							compare_data[4] = (char) p + 48;
 							printk("power: %d dBm\n", 18 - (p * 2));
 
+
+							// start of an iteration: configure LoRa parameters and initialize timing
 							ret = lora_config(lora_dev, &config);
 							
 							int64_t time_stamp;
@@ -308,21 +310,23 @@ void exec_experiment(void *a, void *b, void *c) {
 							iteration_time += 5000 ;													// delay between iterations as part of the LoRa receive timing
 							printk("time for this iteration: %lld\n", iteration_time);						
 
-							uint16_t msg_number = 0;
 
+							// time-subtracting-down-to-zero-every-time-something-was-received-loop
 							while(iteration_time > 0) {												
 								l = lora_recv(lora_dev, transmission_data, MAX_TRANSM_LEN, K_MSEC(iteration_time),
 										&rssi, &snr);
+
+								// handling timing after message
 								milliseconds_spent = k_uptime_delta(&time_stamp);
 								time_stamp = k_uptime_get();	
 								iteration_time = iteration_time - milliseconds_spent;					// control iteration time to know when to switch LoRa parameters for next iteration	
 								printk("remaining iteration time: %lld\n", iteration_time);
-			
 								millis_total += milliseconds_spent;
 								printk("millissec: %lld\n", milliseconds_spent);
 								
 								
-								msg_number = (first_iteration ? 										// determine the message number condsidering the time
+								// determine the message number condsidering the time
+								uint16_t msg_number = (first_iteration ? 										
 										(millis_total - (1000 * d) - 5000) 
 										: (millis_total - 5000))
 											/ (exp_data[1] * 1000);
@@ -330,28 +334,35 @@ void exec_experiment(void *a, void *b, void *c) {
 								printk("millis total: %lld\n", millis_total);
 								first_iteration = false;
 								
-								if(l >= 0) {															// checking if lora_recv just timed out or if something was actually received
+
+								// if something was actually received (and not lora_recv just timed out)
+								if(l >= 0) {
 									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 										log_strdup(transmission_data), rssi, snr);
 
-									compare_data[6] = (char) msg_number / 100 + 48;						// write msg number to compare data here, because we know how many msgs were lost before this one only here			
+
+									// determine what the received message SHOULD contain (from the 7th byte, rest was done before)
+									// message number part of content
+									compare_data[6] = (char) msg_number / 100 + 48;				
 									compare_data[7] = (char) msg_number / 10 + 48;						
 									compare_data[8] = (char) msg_number % 10 + 48;
-									printk("comp: %d %d %d\n", compare_data[6], compare_data[7], compare_data[8]);
 
+									// payload part of the content
 									for(uint8_t p = 9; p < (exp_data[2] - 1); p++) {					// exp_data[2] contains message length (length of the transmitted content)
 										compare_data[p] = random_d[(msg_number 
 											* (exp_data[2] - 9) + (p - 9)) % 200];						// use the msg number to determine which random data the transmission should contain		
 									}																	// fills the message up with with random payload data until desired message length
 									compare_data[exp_data[2] - 1] = '.';								// msg delimiter
 
+
+									// check the content of received message and calculate bit error rate
 									bool same_content = true;
 									uint8_t bit_error_count = 0;
 									for(int z = 0; z < exp_data[2]; z++) {
 										bit_error_count = 0;
 										if(compare_data[z] != transmission_data[z]) {
 											same_content = false;
-											for(int i = 0; i < 8; i++) {								// calculate the bit error rate
+											for(int i = 0; i < 8; i++) {	
 												if(((compare_data[z] >> i) & 0x01) != ((transmission_data[z] >> i) & 0x01)) {
 													bit_error_count++;
 												}
@@ -360,6 +371,7 @@ void exec_experiment(void *a, void *b, void *c) {
 									}
 
 
+									// notify phone about the results
 									uint8_t ndata[3] = {0};
 									rssi = (uint8_t) -rssi; 											// negated to fit into an unsigned int (original value is negative)
 									ndata[0] = rssi;
