@@ -300,7 +300,7 @@ void exec_experiment(void *a, void *b, void *c) {
 							
 							int64_t time_stamp;
 							int64_t milliseconds_spent = 0;
-							int64_t millis_total = 0;
+							int64_t millis_total = 10;
 							time_stamp = k_uptime_get();
 							int64_t iteration_time = exp_data[0] * exp_data[1] * 1000;					// exp_data[0] * exp_data[1] = # LoRa transmissions * time between transmissions
 							
@@ -320,25 +320,23 @@ void exec_experiment(void *a, void *b, void *c) {
 								milliseconds_spent = k_uptime_delta(&time_stamp);
 								time_stamp = k_uptime_get();	
 								iteration_time = iteration_time - milliseconds_spent;					// control iteration time to know when to switch LoRa parameters for next iteration	
-								printk("remaining iteration time: %lld\n", iteration_time);
-								millis_total += milliseconds_spent;
+								printk("!new round!\nremaining iteration time: %lld\n", iteration_time);
 								printk("millissec: %lld\n", milliseconds_spent);
-								
-								
-								// determine the message number condsidering the time
-								uint16_t msg_number = (first_iteration ? 										
-										(millis_total - (1000 * d) - 5000) 
-										: (millis_total - 5000))
-											/ (exp_data[1] * 1000);
-								printk("msg_number: %d\n", msg_number);
-								printk("millis total: %lld\n", millis_total);
-								first_iteration = false;
+								millis_total += milliseconds_spent;
 								
 
 								// if something was actually received (and not lora_recv just timed out)
 								if(l >= 0) {
 									LOG_INF("Received data: %s (RSSI:%ddBm, SNR:%ddBm)",
 										log_strdup(transmission_data), rssi, snr);
+
+									// determine the message number condsidering the time
+									uint16_t msg_number = (first_iteration ? 										
+											(millis_total - (1000 * d) - 5000) 
+											: (millis_total - 5000))
+												/ (exp_data[1] * 1000);
+									printk("msg_number: %d\n", msg_number);
+									printk("millis total: %lld\n", millis_total);
 
 
 									// determine what the received message SHOULD contain (from the 7th byte, rest was done before)
@@ -384,12 +382,15 @@ void exec_experiment(void *a, void *b, void *c) {
 									} else {
 										transmission_data[9] = 'f';
 									}
-									transmission_data[10] = '.';	
+
+									transmission_data[10] = msg_number;									// send correct message number to phone as byte (rest as char[])
+									transmission_data[11] = '.';	
 
 									bt_lres_notify(transmission_data, 1);								// send results to phone to monitor experiment
 								}					
 							}
-
+							if(first_iteration)
+								first_iteration = false;
 							printk("end of iteration\n");
 						} else {
 							continue;
