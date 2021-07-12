@@ -81,7 +81,7 @@ void change_config(uint8_t* pu, bool tx) {
 	if (!lora_dev) {
 		LOG_ERR("%s Device not found", DEFAULT_RADIO);
 	}
-	//lora_init(lora_dev);
+	lora_init(lora_dev);
 
 	int ret;
 	ret = lora_config(lora_dev, &config);
@@ -257,10 +257,11 @@ void exec_experiment(void *a, void *b, void *c) {
 	compare_data[5] = '_';
 
 	for(uint8_t i = 0; i < 8; i++) {
-		if(((exp_data[4] >> i)  & 0x01) == 1) {					// the 4th byte of the settings byte array represents the frequencies to use
-			config.frequency = frequencies[i];					// if a bit in that byte is set, the corresponding frequency will be used;
-			compare_data[0] = (char) i + 48;					// same for all other LoRa parameters
-			printk("frequency: %d, ", frequencies[i]);
+		if(((exp_data[4] >> i)  & 0x01) == 1) {					
+			lora_init(lora_dev);
+			config.frequency = frequencies[i];					// the 4th byte of the settings byte array represents the frequencies to use
+			compare_data[0] = (char) i + 48;					// if a bit in that byte is set, the corresponding frequency will be used;
+			printk("frequency: %d, ", frequencies[i]);			// same for all other LoRa parameters
 		} else {
 			continue;
 		}
@@ -301,7 +302,7 @@ void exec_experiment(void *a, void *b, void *c) {
 							
 							int64_t time_stamp;
 							int64_t milliseconds_spent = 0;
-							int64_t millis_total = 10;
+							int64_t millis_total = 200;
 							time_stamp = k_uptime_get();
 							int64_t iteration_time = exp_data[0] * exp_data[1] * 1000;					// exp_data[0] * exp_data[1] = # LoRa transmissions * time between transmissions
 							
