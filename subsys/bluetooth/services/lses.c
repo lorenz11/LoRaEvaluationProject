@@ -457,6 +457,7 @@ void exec_experiment(void *a, void *b, void *c) {
 
 	printk("end of experiment...........\n");
 	
+	// automatic preparation for another experiment
 	change_config(config_vals, false);
 	if(stack_number == 0) {
 		stack_number = 1;
@@ -490,10 +491,10 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
 	if(thread3_tid != NULL) {
-		k_thread_abort(thread3_tid);			// if still on earlier experiment thread, cancel this thread
+		k_thread_abort(thread3_tid);			// if still on earlier experiment thread (from automatic preparation), cancel this thread
 	}
 	if(thread1_tid != NULL) {
-		k_thread_abort(thread1_tid);			// if still on earlier experiment thread, cancel this thread
+		k_thread_abort(thread1_tid);			// if still on earlier experiment thread (from automatic preparation), cancel this thread
 	}
 
 	const struct device *lora_dev;
