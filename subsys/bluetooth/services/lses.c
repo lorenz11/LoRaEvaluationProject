@@ -287,9 +287,16 @@ static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 
 #define TT_PRIORITY 5
 K_THREAD_STACK_DEFINE(stack_area1, STACK_SIZE);
+K_THREAD_STACK_DEFINE(stack_area3, STACK_SIZE);
 
 struct k_thread thread_data1;
+struct k_thread thread_data3;
+
 k_tid_t thread1_tid;
+k_tid_t thread3_tid;
+
+char config_vals[5] = {0};
+uint8_t stack_number;
 
 // experiment send thread code
 void exec_experiment(void *a, void *b, void *c) {
@@ -449,6 +456,29 @@ void exec_experiment(void *a, void *b, void *c) {
 	}
 
 	printk("end of experiment...........\n");
+	
+	change_config(config_vals, false);
+	if(stack_number == 0) {
+		stack_number = 1;
+		if(thread3_tid != NULL) {
+			k_thread_abort(thread3_tid);
+		}
+		thread3_tid = k_thread_create(&thread_data3, stack_area3,
+		K_THREAD_STACK_SIZEOF(stack_area3),
+		exec_experiment,
+		NULL, NULL, NULL,
+		TT_PRIORITY, 0, K_NO_WAIT);
+	} else {
+		stack_number = 0;
+		if(thread1_tid != NULL) {
+			k_thread_abort(thread1_tid);
+		}
+		thread1_tid = k_thread_create(&thread_data1, stack_area1,
+		K_THREAD_STACK_SIZEOF(stack_area1),
+		exec_experiment,
+		NULL, NULL, NULL,
+		TT_PRIORITY, 0, K_NO_WAIT);
+	}
 
 	return;
 }
@@ -459,6 +489,13 @@ void exec_experiment(void *a, void *b, void *c) {
 static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 			 const void *buf, uint16_t len, uint16_t offset, uint8_t sth)
 {
+	if(thread3_tid != NULL) {
+		k_thread_abort(thread3_tid);			// if still on earlier experiment thread, cancel this thread
+	}
+	if(thread1_tid != NULL) {
+		k_thread_abort(thread1_tid);			// if still on earlier experiment thread, cancel this thread
+	}
+
 	const struct device *lora_dev;
 	lora_dev = device_get_binding(DEFAULT_RADIO);
 
@@ -472,10 +509,11 @@ static ssize_t prepare_sender_cb(struct bt_conn *conn, const struct bt_gatt_attr
 		return 0;
 	}
 
-	char *pc = (char *) buf;
+	//char *pc = (char *) buf;
+	memcpy(config_vals, buf, len * sizeof(char));
 
 	// configure and prepare experiment mode
-	change_config(pc, false);
+	change_config(config_vals, false);
 	bt_lses_notify(-2);
 
 	thread1_tid = k_thread_create(&thread_data1, stack_area1,
