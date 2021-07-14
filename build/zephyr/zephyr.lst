@@ -10915,6 +10915,7 @@ void exec_experiment(void *a, void *b, void *c) {
     561e:	484c      	ldr	r0, [pc, #304]	; (5750 <exec_experiment+0x258>)
     5620:	f01a f916 	bl	1f850 <printk>
 	
+	// automatic preparation for another experiment
 	change_config(config_vals, false);
     5624:	484b      	ldr	r0, [pc, #300]	; (5754 <exec_experiment+0x25c>)
     5626:	2100      	movs	r1, #0
