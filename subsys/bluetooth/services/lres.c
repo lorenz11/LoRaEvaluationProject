@@ -158,6 +158,11 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 	bt_lres_notify(bt_data, 2);
 
 	// (re-) start the LoRa receiving thread after changing config
+	
+	if(thread0_tid != NULL) {
+		k_thread_abort(thread0_tid);
+	}
+
 	thread0_tid = k_thread_create(&thread_data0, stack_area0,
 			K_THREAD_STACK_SIZEOF(stack_area0),
 			receive_lora,
@@ -175,6 +180,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 K_THREAD_STACK_DEFINE(stack_area1, STACK_SIZE);
 
 struct k_thread thread_data1;
+k_tid_t thread1_tid;
 
 uint8_t experiment_data[18];
 uint16_t exp_data_length = 0;
@@ -417,6 +423,7 @@ void exec_experiment(void *a, void *b, void *c) {
 K_THREAD_STACK_DEFINE(stack_area2, STACK_SIZE2);
 
 struct k_thread thread_data2;
+k_tid_t thread2_tid;
 
 // function for waiting for ping return on separate thread
 void wait_for_ping_return(void *a, void *b, void *c) {
@@ -487,7 +494,11 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 	}
 
 	if(len == 1) {								// it is a ping
-		k_thread_create(&thread_data2, stack_area2,
+		if(thread2_tid != NULL) {
+			k_thread_abort(thread2_tid);
+		}
+
+		thread2_tid = k_thread_create(&thread_data2, stack_area2,
 			K_THREAD_STACK_SIZEOF(stack_area2),
 			wait_for_ping_return,
 			NULL, NULL, NULL,
@@ -502,7 +513,11 @@ static ssize_t experiment_settings_cb(struct bt_conn *conn, const struct bt_gatt
 	}
 	
 
-	k_thread_create(&thread_data1, stack_area1,
+	if(thread1_tid != NULL) {
+		k_thread_abort(thread1_tid);
+	}
+
+	thread1_tid = k_thread_create(&thread_data1, stack_area1,
 			K_THREAD_STACK_SIZEOF(stack_area1),
 			exec_experiment,
 			NULL, NULL, NULL,

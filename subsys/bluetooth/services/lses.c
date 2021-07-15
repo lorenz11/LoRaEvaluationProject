@@ -113,6 +113,7 @@ static ssize_t change_config_cb(struct bt_conn *conn, const struct bt_gatt_attr 
 K_THREAD_STACK_DEFINE(stack_area2, STACK_SIZE2);
 
 struct k_thread thread_data2;
+k_tid_t thread2_tid;
 
 uint8_t ping_content[MAX_DATA_LEN];
 uint16_t ping_len;
@@ -192,7 +193,10 @@ static ssize_t send_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 		ping_len = len;
 		memcpy(ping_content, data, len * sizeof(uint8_t));
 		
-		k_thread_create(&thread_data2, stack_area2,
+		if(thread2_tid != NULL) {
+			k_thread_abort(thread2_tid);
+		}
+		thread2_tid = k_thread_create(&thread_data2, stack_area2,
 				K_THREAD_STACK_SIZEOF(stack_area2),
 				wait_for_ping_return,
 				NULL, NULL, NULL,
@@ -269,6 +273,10 @@ static ssize_t loop_command_cb(struct bt_conn *conn, const struct bt_gatt_attr *
 
 		loop_data_length = len;
 
+		if(thread0_tid != NULL) {
+			k_thread_abort(thread0_tid);
+		}
+		
 		thread0_tid = k_thread_create(&thread_data0, stack_area0,
 			K_THREAD_STACK_SIZEOF(stack_area0),
 			exec_loop,
