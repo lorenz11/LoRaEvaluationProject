@@ -308,7 +308,7 @@ void exec_experiment(void *a, void *b, void *c) {
 							
 							int64_t time_stamp;
 							int64_t milliseconds_spent = 0;
-							int64_t millis_total = 200;
+							int64_t millis_total = 1000;
 							time_stamp = k_uptime_get();
 							int64_t iteration_time = exp_data[0] * exp_data[1] * 1000;					// exp_data[0] * exp_data[1] = # LoRa transmissions * time between transmissions
 							
