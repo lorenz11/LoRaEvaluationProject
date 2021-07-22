@@ -449,6 +449,9 @@ void exec_experiment(void *a, void *b, void *c) {
 								ret = lora_send(lora_dev, transmission_data, data[2]);
 
 								milliseconds_spent = k_uptime_delta(&time_stamp);
+								if(milliseconds_spent > 5) {
+									milliseconds_spent = 2;
+								}
 
 								k_sleep(K_MSEC(data[1] * 1000 												// data[1] contains the number of seconds between transmissions, 	
 										- (n < (data[0] - 1) ? (int) time_on_air : 0)						// time needed for transmission must be subtracted
