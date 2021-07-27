@@ -420,7 +420,8 @@ void exec_experiment(void *a, void *b, void *c) {
 
 							// calculate LoRa time on air in !msec!: 
 							float time_on_air = 8.f * (float) data[2] - 4.f * (float) config.datarate + 28.f + 16.f;							// 8 * payload - 4 * Spreading factor + 28 + 16 * CRC(is always 1 here) - 20 * H(is always 0-> explicit header)
-							time_on_air /= 4.f * (config.datarate >=11 && config.bandwidth == 0 ? config.datarate - 2.f : config.datarate);		// ANS / 4 * (Spreading factor - 2 * OPT)  		(OPT = low datarate optimization -> 1 only if bandwidth = 125kHz AND Spreading factor >=11)
+							bool ldr_opt = (config.datarate == 11 && config.bandwidth == 0) || (config.datarate == 12); 	
+							time_on_air /= 4.f * (ldr_opt ? config.datarate - 2.f : config.datarate);											// ANS / 4 * (Spreading factor - 2 * OPT)  		(OPT = low datarate optimization -> 1 only if (bandwidth = 125kHz AND Spreading factor == 11) or if (SF == 12))
 							time_on_air = (time_on_air > 0 ? ceil(time_on_air) : 0);															// ceil(max(ANS))
 							time_on_air = time_on_air * (config.coding_rate + 4) + 8;															// ANS * (coding rate + 4) + 8
 
@@ -431,10 +432,10 @@ void exec_experiment(void *a, void *b, void *c) {
 
 							k_sleep(K_MSEC(5000 - time_on_air));											// wait 5 seconds between combinations
 							
-							int64_t time_stamp;
-							int64_t milliseconds_spent = 0;
+							//int64_t time_stamp;
+							//int64_t milliseconds_spent = 0;
 							for(uint8_t n = 0; n < data[0]; n++) {										// data[0] contains the number of LoRa transmissions per parameter combination
-								time_stamp = k_uptime_get();
+								//time_stamp = k_uptime_get();
 
 								transmission_data[6] = (char) n / 100 + 48;									// include numbering into transmission content (as String (3 bytes) not as byte (1 byte))
 								transmission_data[7] = (char) n / 10 + 48;									// this line needs to be changed if max number of transmissions per combination is changed (it is 100 now)
@@ -448,14 +449,14 @@ void exec_experiment(void *a, void *b, void *c) {
 								printk("transmission data: %s\n", transmission_data);
 								ret = lora_send(lora_dev, transmission_data, data[2]);
 
-								milliseconds_spent = k_uptime_delta(&time_stamp);
+								/*milliseconds_spent = k_uptime_delta(&time_stamp);
 								if(milliseconds_spent > 5) {
 									milliseconds_spent = 2;
-								}
+								}*/
 
 								k_sleep(K_MSEC(data[1] * 1000 												// data[1] contains the number of seconds between transmissions, 	
 										- (n < (data[0] - 1) ? (int) time_on_air : 0)						// time needed for transmission must be subtracted
-										- (int) milliseconds_spent));										// as well as otherwise elapsed time
+										- 2));										// as well as otherwise elapsed time
 							}
 						} else {
 							continue;
