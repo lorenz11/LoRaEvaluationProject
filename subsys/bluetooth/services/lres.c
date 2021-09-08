@@ -206,7 +206,7 @@ void exec_experiment(void *a, void *b, void *c) {
 	int16_t rssi;
 	int8_t snr;
 	int l = -1;
-	uint8_t data[MAX_DATA_LEN] = {0};					// data array for ACK from sender device
+	uint8_t data[MAX_DATA_LEN] = {0};					// data array for receiving ACK from sender device
 	bool exp_started = false;
 
 
@@ -341,7 +341,7 @@ void exec_experiment(void *a, void *b, void *c) {
 									// determine the message number condsidering the time
 									uint16_t msg_number = (first_iteration ? 										
 											(millis_total - (1000 * d) - 5000) : (millis_total - 5000))
-												/ (exp_data[1] * 1000);
+												/ (exp_data[1] * 1000);									// exp_data[1] = seconds between transmissions
 									printk("msg_number: %d\n", msg_number);
 									printk("millis total: %lld\n", millis_total);
 
