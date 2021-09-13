@@ -29,9 +29,9 @@ CMakeLists for BLE sercices:
 ### Source code for sender device
 The directory [samples/lora_eval_send](./samples/lora_eval_send) contains the main c file [samples/lora_eval_send/src/main.c](./samples/lora_eval_send/src/main.c) as well as some configuration and build code ([samples/lora_eval_send/CMakeLists.txt](./samples/lora_eval_send/CMakeLists.txt), [samples/lora_eval_send/prj.conf](./samples/lora_eval_send/prj.conf), [samples/lora_eval_send/sample.yaml](./samples/lora_eval_send/sample.yaml))  
 
-The code that defines the BLE characteristics for the sender device and the threads we initiate in their callbacks:
+The code that defines the BLE characteristics for the sender device and the threads we initiate in their callbacks:  
 [subsys/bluetooth/services/lses.c](./subsys/bluetooth/services/lses.c)  
-Configuration file for the sender's BLE service:
+Configuration file for the sender's BLE service:  
 [subsys/bluetooth/services/Kconfig.lses](./subsys/bluetooth/services/Kconfig.lses)  
 Header file for the BLE service c code:  
 [include/bluetooth/services/lses.h](./include/bluetooth/services/lses.h)  
