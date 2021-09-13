@@ -21,4 +21,6 @@ We support the Adafruit nRF52840 Feather with the LoRa module on an Adafruit Fea
 ### Shared between sender and receiver device
 Modified devicetree to encorporate Radio FeatherWing (with its LoRa module):  
 [boards/arm/adafruit_feather_nrf52840/adafruit_feather_nrf52840.dts](./boards/arm/adafruit_feather_nrf52840/adafruit_feather_nrf52840.dts)
+UUIDs to identify BLE services (lines 326 - 346) and their characteristics (lines 822 - 922):
+[include/bluetooth/uuid.h](./include/bluetooth/uuid.h)
 
