@@ -37,11 +37,11 @@ Header file for the BLE service c code:
 [include/bluetooth/services/lses.h](./include/bluetooth/services/lses.h)  
 
 ### Source code for receiver device
-The directory [samples/lora_eval_rcv](./samples/lora_eval_rcv) contains the main c file [samples/lora_eval_rcv/src/main.c](./samples/lora_eval_rcv/src/main.c) as well as some configuration and build code ([samples/lora_eval_send/CMakeLists.txt](./samples/lora_eval_send/CMakeLists.txt), [samples/lora_eval_send/prj.conf](./samples/lora_eval_send/prj.conf), [samples/lora_eval_send/sample.yaml](./samples/lora_eval_send/sample.yaml))  
+The directory [samples/lora_eval_rcv](./samples/lora_eval_rcv) contains the main c file [samples/lora_eval_rcv/src/main.c](./samples/lora_eval_rcv/src/main.c) as well as some configuration and build code ([samples/lora_eval_rcv/CMakeLists.txt](./samples/lora_eval_rcv/CMakeLists.txt), [samples/lora_eval_rcv/prj.conf](./samples/lora_eval_rcv/prj.conf), [samples/lora_eval_rcv/sample.yaml](./samples/lora_eval_rcv/sample.yaml))  
 
-The code that defines the BLE characteristics for the sender device and the threads we initiate in their callbacks:  
-[subsys/bluetooth/services/lses.c](./subsys/bluetooth/services/lses.c)  
-Configuration file for the sender's BLE service:  
-[subsys/bluetooth/services/Kconfig.lses](./subsys/bluetooth/services/Kconfig.lses)  
+The code that defines the BLE characteristics for the receiver device and the threads we initiate in their callbacks:  
+[subsys/bluetooth/services/lres.c](./subsys/bluetooth/services/lres.c)  
+Configuration file for the receiver's BLE service:  
+[subsys/bluetooth/services/Kconfig.lres](./subsys/bluetooth/services/Kconfig.lres)  
 Header file for the BLE service c code:  
-[include/bluetooth/services/lses.h](./include/bluetooth/services/lses.h)  
+[include/bluetooth/services/lres.h](./include/bluetooth/services/lres.h)  
