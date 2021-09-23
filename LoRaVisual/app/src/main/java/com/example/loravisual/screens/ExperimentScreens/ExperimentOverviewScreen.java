@@ -76,15 +76,12 @@ public class ExperimentOverviewScreen extends AppCompatActivity {
         listView.setOnItemClickListener((adapterView, view, i, l) -> {
             Intent intent;
             int id = Integer.parseInt(absoluteIds.get(i));
-
-
-
-            if(id == 1 || id == 54) {     //if(id == 1 || id ==2)
+            
+            // use the next two lines to reuse an experiment configuration
+            /*if(id == 1) {
                 databaseHandler.setValueInExpInfo(DatabaseHandler.READY, "state", id);
-            }
-
-
-
+            }*/
+            
             if(databaseHandler.getSingleExperimentInfoValue(id, DatabaseHandler.STATE).equals(DatabaseHandler.READY)) {
                 intent = new Intent(this, PrepareSenderScreen.class);
                 intent.putExtra("absolutePos", id);
