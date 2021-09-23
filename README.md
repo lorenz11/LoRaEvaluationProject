@@ -12,13 +12,7 @@ and control of the LoRa devices, and a Python script, for data visualisation.
 ### Implementation
 
 We implement LoRa Visual in C for the RTOS Zephyr.
-We support the Adafruit nRF52840 Feather with the LoRa module on an Adafruit FeatherWing.  
-To make the app work, you need to open a Firebase account, generate a key and include
-an appropriate configuration file in the code. More information can be found at the Firebase
-webpage.  
-You also need to get an API key for openweathermap. You need to include this key in
-[this file](./LoRaVisual/app/src/main/java/com/example/loravisual/screens/ExperimentScreens/StartExperimentScreen.java)
-in line 529.
+We support the Adafruit nRF52840 Feather with the LoRa module on an Adafruit FeatherWing.
 
 ### Shared between sender and receiver device
 Modified devicetree to encorporate Radio FeatherWing (with its LoRa module):  
@@ -54,7 +48,13 @@ Header file for the BLE service c code:
 We implement this part mostly in Java. Screen content is defined in XML.
 The app supports Android version 6.0. 
 You can find all relevant code at [LoRaVisual/app/src/main](./LoRaVisual/app/src/main).
-All code files contain extensive comments.
+All code files contain extensive comments.  
+To make the app work, you need to open a Firebase account, generate a key and include
+an appropriate configuration file in the code. More information can be found at the Firebase
+webpage.  
+You also need to get an API key for openweathermap. You need to include this key in
+[this file](./LoRaVisual/app/src/main/java/com/example/loravisual/screens/ExperimentScreens/StartExperimentScreen.java)
+in line 529.
 
 
 ### Java code
