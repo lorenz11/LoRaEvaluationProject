@@ -9,7 +9,6 @@ You can find the other two parts if you follow these links:
 - source code for Android app:
 
 - source code visualiser and experiment data:
-## Abstract
 
 ## Implementation
 
