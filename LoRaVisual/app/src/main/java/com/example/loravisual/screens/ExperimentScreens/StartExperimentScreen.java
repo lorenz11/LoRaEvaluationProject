@@ -526,7 +526,7 @@ public class StartExperimentScreen extends AppCompatActivity {
         url += databaseHandler.getSingleExperimentInfoValue(experimentNumber, DatabaseHandler.SENDER_LATITUDE);
         url += "&lon=" + databaseHandler.getSingleExperimentInfoValue(experimentNumber, DatabaseHandler.SENDER_LONGITUDE);
         url += "&dt=" + databaseHandler.getSingleExperimentInfoValue(experimentNumber, DatabaseHandler.START_TIME).substring(0, 10);
-        url += "&appid=your openweathermap id";
+        url += "&appid=your openweathermap API key";
         new ClientThread(ClientThread.GET_WEATHER, new String[]{url, Integer.toString(experimentNumber)}, this).start();
     }
 
