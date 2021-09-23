@@ -42,6 +42,17 @@ Configuration file for the receiver's BLE service:
 Header file for the BLE service c code:  
 [include/bluetooth/services/lres.h](./include/bluetooth/services/lres.h) 
 
+### Build and flash
+We use west to build and flash.  
+Build the sender application:  
+west build -p auto -b adafruit_feather_nrf52840 samples/lora_eval_send  
+Build the receiver application:  
+west build -p auto -b adafruit_feather_nrf52840 samples/lora_eval_rcv  
+  
+Flash the devices:
+west flash
+
+
 ## LoRaVisual (Android app)
 ### Implementation
 
