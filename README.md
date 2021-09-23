@@ -2,14 +2,12 @@
 
 ## Intro
 
-This repo hosts the source code for the embedded part of the evaluation system.
-You can find the other two parts if you follow these links:
-- source code for Android app:
-
-- source code visualiser and experiment data:
+This repository hosts the source code for a mobile evaluation system for LoRa.
+It contains code for two LoRa devices, code for an Android app for monitoring 
+and control of the LoRa devices, and a Python script, for data visualisation.
 
 ## Code structure
-## Embedded code
+## Code for the LoRa devices
 
 ### Implementation
 
