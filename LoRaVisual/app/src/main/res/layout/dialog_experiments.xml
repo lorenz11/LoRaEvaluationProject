@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:text="Preconfigured Experiment"
+        android:background="@color/colorPrimaryDark"
+        android:textColor="@color/colorPrimary" />
+
+    <Button
+        android:id="@+id/all"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="20dp"
+        android:text="Customized Experiment"
+        android:onClick="toCustomize"
+        android:background="@color/colorPrimaryDark"
+        android:textColor="@color/colorPrimary" />
+</LinearLayout>

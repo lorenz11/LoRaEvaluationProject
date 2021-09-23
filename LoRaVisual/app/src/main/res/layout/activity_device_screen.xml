@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context=".screens.ExploreScreens.DeviceScreen">
+
+    <Button
+        android:id="@+id/senderbutton"
+        android:layout_width="210dp"
+        android:layout_height="210dp"
+        android:layout_marginStart="0dp"
+        android:background="@drawable/round_corners_dark"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:text="SENDER"
+        android:textSize="28dp"
+        android:textColor="@color/colorPrimary"
+        android:onClick="setForSenderDevice"/>
+
+    <Button
+        android:id="@+id/receiverbutton"
+        android:layout_width="210dp"
+        android:layout_height="210dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="0dp"
+        android:background="@drawable/round_corners_dark"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:text="RECEIVER"
+        android:textSize="28dp"
+        android:textColor="@color/colorPrimary"
+        android:onClick="setForReceiverDevice"></Button>
+
+</LinearLayout>

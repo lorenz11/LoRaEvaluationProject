@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/fr_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:adjustViewBounds="true"
+            android:text="@string/frequency"
+            android:layout_marginLeft="5dp"
+            android:textSize="22dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/row_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fr_textview" >
+
+            <CheckBox
+                android:id="@+id/f8695"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="869.5 MHz" />
+
+            <CheckBox
+                android:id="@+id/f8681"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:text="868.1 MHz" />
+
+            <CheckBox
+                android:id="@+id/f8683"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="868.3 MHz" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/row_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/row_1" >
+
+            <CheckBox
+                android:id="@+id/f8685"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="868.5 MHz" />
+
+            <CheckBox
+                android:id="@+id/f8671"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:text="867.1 MHz" />
+
+            <CheckBox
+                android:id="@+id/f8673"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="867.3 MHz" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/row_2" >
+
+            <CheckBox
+                android:id="@+id/f8675"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="867.5 MHz" />
+
+            <CheckBox
+                android:id="@+id/f8677"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:text="867.7 MHz" />
+        </LinearLayout>
+
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

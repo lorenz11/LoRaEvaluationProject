@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context=".screens.StartScreen">
+
+    <Button
+        android:id="@+id/explore_button"
+        android:layout_width="210dp"
+        android:layout_height="210dp"
+        android:layout_marginStart="0dp"
+        android:background="@drawable/round_corners"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:onClick="toExplore"
+        android:text="EXPLORE"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="28dp"
+        tools:ignore="OnClick" />
+
+    <Button
+        android:id="@+id/experiments_button"
+        android:layout_width="210dp"
+        android:layout_height="210dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="0dp"
+        android:background="@drawable/round_corners"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:onClick="toExperiment"
+        android:text="EXPERIMENT"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="28dp"
+        tools:ignore="OnClick"></Button>
+
+</LinearLayout>

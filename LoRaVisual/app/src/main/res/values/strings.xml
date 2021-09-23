@@ -1,0 +1,130 @@
+<resources>
+    <string name="app_name">Lora Visual</string>
+
+    <!-- Sender UUIDs -->
+    <string name="Sender_Service_UUID">0000180e-0000-1000-8000-00805f9b34fb</string>
+
+    <string name="Notification_Sender_Characteristic_UUID">00002a3a-0000-1000-8000-00805f9b34fb</string>
+
+    <string name="Config_Change_Sender_Characteristic_UUID">00002a3b-0000-1000-8000-00805f9b34fb</string>
+    <string name="Send_Command_Characteristic_UUID">00002a3c-0000-1000-8000-00805f9b34fb</string>
+    <string name="Loop_Command_Characteristic_UUID">00002a3d-0000-1000-8000-00805f9b34fb</string>
+    <string name="Prepare_Sender_Characteristic_UUID">00002a3e-0000-1000-8000-00805f9b34fb</string>
+
+    <!-- Receiver UUIDs -->
+    <string name="Receiver_Service_UUID">00001811-0000-1000-8000-00805f9b34fb</string>
+
+    <string name="Notification_Receiver_Characteristic_UUID">00002a3f-0000-1000-8000-00805f9b34fb</string>
+
+    <string name="Config_Change_Receive_Characteristic_UUID">00002a40-0000-1000-8000-00805f9b34fb</string>
+    <string name="Experiment_Settings_To_Receiver_Characteristic_UUID">00002a41-0000-1000-8000-00805f9b34fb</string>
+
+    <!-- Sender/Receiver descriptor UUID -->
+    <string name="Descriptor_UUID">00002902-0000-1000-8000-00805f9b34fb</string>
+
+    <!-- GUI strings -->
+    <string name="frequency">frequency</string>
+    <string name="bandwidth">bandwidth</string>
+    <string name="spreading_factor">spreading factor</string>
+    <string name="coding_rate">coding rate</string>
+    <string name="power">power</string>
+    <string name="default_lora_msg">hello</string>
+    <string name="set_msg_hint">set message</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="connected">connected</string>
+    <string name="default_rssi_display">RSSI: 0 dBm</string>
+    <string name="default_dist_string">tag location for distance</string>
+    <string name="latitude">latitude</string>
+    <string name="longitude">longitude</string>
+    <string name="received_message">received message</string>
+    <string name="target_distance">Target distance</string>
+    <string name="number_of_messages">Number of messages</string>
+    <string name="lora_settings">LoRa Settings</string>
+    <string name="transmission_settings">Transmission Settings</string>
+    <string name="environment">environment</string>
+    <string name="environment_header">Environment</string>
+    <string name="in_meters">in meters</string>
+    <string name="start">Start</string>
+    <string name="message">Message</string>
+    <string name="auto_increment_message">auto increment message</string>
+    <string name="message_lower_case">message</string>
+    <string name="new_experiment">new experiment</string>
+    <string name="save">save</string>
+    <string name="message_length">Message length</string>
+    <string name="ready">ready</string>
+    <string name="optional">optional</string>
+    <string name="description">Description</string>
+    <string name="height_of_sender">Height of Sender</string>
+    <string name="height_of_receiver">Height of Receiver</string>
+    <string name="environment_settings">Environment Settings</string>
+    <string name="experiment">Experiment</string>
+    <string name="change_configuration">change configuration</string>
+    <string name="change_communication_configuration">Change Communication Configuration</string>
+    <string name="send_location">Send Location</string>
+    <string name="next">next</string>
+    <string name="nothing_received_yet">Nothing received yet</string>
+    <string name="timing_default_string">00 : 00 : 00</string>
+    <string name="experiment_finished">Experiment finished</string>
+    <string name="default_snr_display">SNR: 0 dBm</string>
+    <string name="altitude">altitude</string>
+    <string name="quality_indicator">quality indicator</string>
+    <string name="payload_initialization">payload initialization</string>
+    <string name="seed">Seed</string>
+
+    <!-- spinner strings -->
+    <string-array name="frequency_array">
+        <item>869.5 MHz</item>
+        <item>868.1 MHz</item>
+        <item>868.3 MHz</item>
+        <item>868.5 MHz</item>
+        <item>867.1 MHz</item>
+        <item>867.3 MHz</item>
+        <item>867.5 MHz</item>
+        <item>867.7 MHz</item>
+    </string-array>
+
+    <string-array name="bandwidth_array">
+        <item>125 kHz</item>
+        <item>250 kHz</item>
+        <item>500 kHz</item>
+    </string-array>
+
+    <string-array name="SF_array">
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+
+    </string-array>
+
+    <string-array name="CR_array">
+        <item>4/5</item>
+        <item>4/6</item>
+        <item>4/7</item>
+        <item>4/8</item>
+
+    </string-array>
+
+    <string-array name="power_array">
+        <item>18</item>
+        <item>16</item>
+        <item>14</item>
+        <item>12</item>
+        <item>10</item>
+        <item>8</item>
+        <item>6</item>
+        <item>4</item>
+    </string-array>
+
+    <string-array name="db_location_identifiers">
+        <item>sender_latitude</item>
+        <item>sender_longitude</item>
+        <item>sender_altitude</item>
+        <item>receiver_latitude</item>
+        <item>receiver_longitude</item>
+        <item>receiver_altitude</item>
+    </string-array>
+
+</resources>

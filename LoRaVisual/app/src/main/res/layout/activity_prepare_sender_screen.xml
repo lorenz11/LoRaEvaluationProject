@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".screens.ExperimentScreens.PrepareSenderScreen">
+
+    <include
+        android:id="@+id/config_layout"
+        layout="@layout/config_picker_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/send_location_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        app:cardBackgroundColor="@color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/config_layout">
+
+        <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="113dp"
+            android:background="@color/colorPrimaryDark"
+            tools:context=".screens.ExploreScreens.SenderExploreScreen">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:orientation="vertical"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/latitude"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:background="@color/colorPrimaryDark"
+                    android:text="@string/latitude"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:id="@+id/longitude"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:background="@color/colorPrimaryDark"
+                    android:text="@string/longitude"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:id="@+id/altitude"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:background="@color/colorPrimaryDark"
+                    android:text="@string/altitude"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:id="@+id/accelerate_indicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:background="@color/colorPrimaryDark"
+                    android:text="@string/quality_indicator"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/tag_location"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:layout_margin="5dp"
+                android:background="@color/colorPrimary"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:src="@drawable/ic_baseline_location_on_24"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </androidx.cardview.widget.CardView>
+
+
+    <Button
+        android:id="@+id/prep_sender_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="20dp"
+        android:background="@color/colorPrimaryDark"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:onClick="prepareSender"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:text="Prepare Sender"
+        android:textColor="@color/colorPrimary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/send_location_card" />
+
+
+    <Button
+        android:id="@+id/cancel_prep_button"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/circle_cancel"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:onClick="cancelPreparation"
+        android:visibility="gone"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/send_location_card" />
+
+    <Button
+        android:id="@+id/next_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="7dp"
+        android:layout_marginBottom="12dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:onClick="toStartExperiment"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:text="@string/next"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
