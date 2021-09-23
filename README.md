@@ -49,10 +49,10 @@ We implement this part mostly in Java. Screen content is defined in XML.
 The app supports Android version 6.0. 
 You can find all relevant code at [LoRaVisual/app/src/main](./LoRaVisual/app/src/main).
 All code files contain extensive comments.  
-To make the app work, you need to open a Firebase account, generate a key and include
-an appropriate configuration file in the code. More information can be found at the Firebase
+To make the app work (automatic upload of experiment results to Firebase), you need to open a Firebase account, generate a key and include
+the appropriate configuration file in the code. More information can be found at the Firebase
 webpage.  
-You also need to get an API key for openweathermap. You need to include this key in
+You also need to get an API key for openweathermap (to automatically download weather data for the time of the experiment). You need to include the key in
 [this file](./LoRaVisual/app/src/main/java/com/example/loravisual/screens/ExperimentScreens/StartExperimentScreen.java)
 in line 529.
 
@@ -87,10 +87,10 @@ The files at [LoRaVisual/app/src/main/res/layout](./LoRaVisual/app/src/main/res/
 
 ### Implementation
 
-This is a Python script.
+This is a Python script. To automatically download new experiment data, include the configuration file for your Firebase account, and change the lines 17 - 26 as instructed in [this file](./LoRaVisualGraphs/main.py). Otherwise the script won't start.
 
 ### The script
-[LoRaVisualGraphs/main.py](./LoRaVisualGraphs/main.py ) contains code that starts a GUI from which a user can choose between different graphs and charts for the experiments it automatically gets from Firebase on start.
+[LoRaVisualGraphs/main.py](./LoRaVisualGraphs/main.py) contains code that starts a GUI from which a user can choose between different graphs and charts for the experiments it automatically gets from Firebase on start.
 
 ### Experiment results
 [LoRaVisualGraphs/](./LoRaVisualGraphs/experiment_data) contains all raw experiment information and results.
