@@ -390,7 +390,6 @@
                 android:id="@+id/env_edit"
                 android:layout_marginLeft="5dp"
                 android:hint="@string/environment"
-                android:text="city"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>
