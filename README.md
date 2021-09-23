@@ -49,7 +49,7 @@ Header file for the BLE service c code:
 
 We implement this part mostly in Java. Screen content is defined in XML.
 The app supports Android version 6.0. 
-You can find all relevant code at [app/src/main](./app/src/main).
+You can find all relevant code at [LoRaVisual/app/src/main](./LoRaVisual/app/src/main).
 All code files contain extensive comments.
 
 
