@@ -83,9 +83,9 @@ The files at [LoRaVisual/app/src/main/res/layout](./LoRaVisual/app/src/main/res/
 
 This is a Python script.
 
-## The script
+### The script
 [LoRaVisualGraphs/main.py](./LoRaVisualGraphs/main.py ) contains code that starts a GUI from which a user can choose between different graphs and charts for the experiments it automatically gets from Firebase on start.
 
-## Experiment results
+### Experiment results
 [LoRaVisualGraphs/](./LoRaVisualGraphs/experiment_data) contains all raw experiment information and results.
 
