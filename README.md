@@ -93,5 +93,5 @@ This is a Python script. To automatically download new experiment data, include 
 [LoRaVisualGraphs/main.py](./LoRaVisualGraphs/main.py) contains code that starts a GUI from which a user can choose between different graphs and charts for the experiments it automatically gets from Firebase on start.
 
 ### Experiment results
-[LoRaVisualGraphs/](./LoRaVisualGraphs/experiment_data) contains all raw experiment information and results.
+[LoRaVisualGraphs/experiment_data](./LoRaVisualGraphs/experiment_data) contains all raw experiment information and results.
 
