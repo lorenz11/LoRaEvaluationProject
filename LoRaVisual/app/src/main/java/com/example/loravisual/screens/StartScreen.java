@@ -43,7 +43,6 @@ public class StartScreen extends AppCompatActivity {
         ActivityCompat.requestPermissions(StartScreen.this,
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 1);
-        // LVUtil.getDistance(54.315162878483534, 10.12268272228539, 54.33651841711253, 10.156580731272697);
     }
 
     /**
