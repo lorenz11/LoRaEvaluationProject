@@ -44,7 +44,7 @@ Configuration file for the receiver's BLE service:
 Header file for the BLE service c code:  
 [include/bluetooth/services/lres.h](./include/bluetooth/services/lres.h) 
 
-## Android app code
+## LoRaVisual (Android app)
 ### Implementation
 
 We implement this part mostly in Java. Screen content is defined in XML.
@@ -78,3 +78,16 @@ This package contains two more packages. It defines the interaction between user
 
 ### XML code
 The files at [LoRaVisual/app/src/main/res/layout](./LoRaVisual/app/src/main/res/layout) define the screen composition.
+
+## LoraVisualGraphs (Python script for data evaluation)
+
+### Implementation
+
+This is a Python script.
+
+## The script
+[LoRaVisualGraphs/main.py](./LoRaVisualGraphs/main.py ) contains code that starts a GUI from which a user can choose between different graphs and charts for the experiments it automatically gets from Firebase on start.
+
+## Experiment results
+[LoRaVisualGraphs/](./LoRaVisualGraphs/experiment_data) contains all raw experiment information and results.
+
